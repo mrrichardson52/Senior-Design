@@ -8,20 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		0C8014621DADAE740086AF43 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C8014611DADAE740086AF43 /* AppDelegate.swift */; };
-		0C8014641DADAE740086AF43 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C8014631DADAE740086AF43 /* ViewController.swift */; };
 		0C8014671DADAE740086AF43 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0C8014651DADAE740086AF43 /* Main.storyboard */; };
 		0C8014691DADAE740086AF43 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0C8014681DADAE740086AF43 /* Assets.xcassets */; };
 		0C80146C1DADAE740086AF43 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0C80146A1DADAE740086AF43 /* LaunchScreen.storyboard */; };
+		0C80149D1DAEA8710086AF43 /* BreathingExerciseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C80149C1DAEA8710086AF43 /* BreathingExerciseViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0C80145E1DADAE740086AF43 /* BreathingInterventionCoach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BreathingInterventionCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0C8014611DADAE740086AF43 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0C8014631DADAE740086AF43 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		0C8014661DADAE740086AF43 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0C8014681DADAE740086AF43 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0C80146B1DADAE740086AF43 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0C80146D1DADAE740086AF43 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0C80149C1DAEA8710086AF43 /* BreathingExerciseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreathingExerciseViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,14 +54,54 @@
 		0C8014601DADAE740086AF43 /* BreathingInterventionCoach */ = {
 			isa = PBXGroup;
 			children = (
+				0C80149B1DAEA41B0086AF43 /* Xibs */,
+				0C8014981DAEA35D0086AF43 /* View Controllers */,
+				0C80149A1DAEA3A70086AF43 /* Views */,
+				0C8014991DAEA3910086AF43 /* Models */,
+				0C8014951DADBC100086AF43 /* Sounds */,
 				0C8014611DADAE740086AF43 /* AppDelegate.swift */,
-				0C8014631DADAE740086AF43 /* ViewController.swift */,
 				0C8014651DADAE740086AF43 /* Main.storyboard */,
 				0C8014681DADAE740086AF43 /* Assets.xcassets */,
 				0C80146A1DADAE740086AF43 /* LaunchScreen.storyboard */,
 				0C80146D1DADAE740086AF43 /* Info.plist */,
 			);
 			path = BreathingInterventionCoach;
+			sourceTree = "<group>";
+		};
+		0C8014951DADBC100086AF43 /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Sounds;
+			sourceTree = "<group>";
+		};
+		0C8014981DAEA35D0086AF43 /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				0C80149C1DAEA8710086AF43 /* BreathingExerciseViewController.swift */,
+			);
+			name = "View Controllers";
+			sourceTree = "<group>";
+		};
+		0C8014991DAEA3910086AF43 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		0C80149A1DAEA3A70086AF43 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		0C80149B1DAEA41B0086AF43 /* Xibs */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Xibs;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -137,8 +177,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0C8014641DADAE740086AF43 /* ViewController.swift in Sources */,
 				0C8014621DADAE740086AF43 /* AppDelegate.swift in Sources */,
+				0C80149D1DAEA8710086AF43 /* BreathingExerciseViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,6 +340,7 @@
 				0C8014721DADAE740086AF43 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
