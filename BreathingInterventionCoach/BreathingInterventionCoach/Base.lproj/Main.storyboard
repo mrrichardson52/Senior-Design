@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11201" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="fpG-Fg-L6C">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11201" systemVersion="15G1108" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="fpG-Fg-L6C">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11161"/>
@@ -9,7 +9,7 @@
         <!--Breathing Exercise View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="BreathingExerciseViewController" customModule="BreathingInterventionCoach" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="MRRBreathingExerciseViewController" customModule="BreathingInterventionCoach" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
                         <viewControllerLayoutGuide type="bottom" id="wfy-db-euE"/>
@@ -68,9 +68,9 @@
                     </view>
                     <navigationItem key="navigationItem" id="EFC-NO-qfG"/>
                     <connections>
-                        <outlet property="barView" destination="Vw8-2P-JjP" id="AjH-aF-Sno"/>
-                        <outlet property="slidingButton" destination="2Ta-Q7-azn" id="svy-o2-vMm"/>
-                        <outlet property="slidingButtonBarPositionConstraint" destination="GX9-6Q-VQD" id="m6R-ww-Wbx"/>
+                        <outlet property="barView" destination="Vw8-2P-JjP" id="UuE-lp-v6X"/>
+                        <outlet property="slidingButton" destination="2Ta-Q7-azn" id="mCG-rM-ZJT"/>
+                        <outlet property="slidingButtonBarPositionConstraint" destination="GX9-6Q-VQD" id="Ble-VA-QiN"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

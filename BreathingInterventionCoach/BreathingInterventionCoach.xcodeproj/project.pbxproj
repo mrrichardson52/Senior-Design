@@ -11,7 +11,8 @@
 		0C8014671DADAE740086AF43 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0C8014651DADAE740086AF43 /* Main.storyboard */; };
 		0C8014691DADAE740086AF43 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0C8014681DADAE740086AF43 /* Assets.xcassets */; };
 		0C80146C1DADAE740086AF43 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0C80146A1DADAE740086AF43 /* LaunchScreen.storyboard */; };
-		0C80149D1DAEA8710086AF43 /* BreathingExerciseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C80149C1DAEA8710086AF43 /* BreathingExerciseViewController.swift */; };
+		0C80149D1DAEA8710086AF43 /* MRRBreathingExerciseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C80149C1DAEA8710086AF43 /* MRRBreathingExerciseViewController.swift */; };
+		34E4E4011DB55CB800E3D208 /* MRRImmediatePanGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E4E4001DB55CB800E3D208 /* MRRImmediatePanGestureRecognizer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,7 +22,9 @@
 		0C8014681DADAE740086AF43 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0C80146B1DADAE740086AF43 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0C80146D1DADAE740086AF43 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		0C80149C1DAEA8710086AF43 /* BreathingExerciseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreathingExerciseViewController.swift; sourceTree = "<group>"; };
+		0C80149C1DAEA8710086AF43 /* MRRBreathingExerciseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MRRBreathingExerciseViewController.swift; sourceTree = "<group>"; };
+		34E4E4001DB55CB800E3D208 /* MRRImmediatePanGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MRRImmediatePanGestureRecognizer.swift; sourceTree = "<group>"; };
+		34E4E4021DB561BE00E3D208 /* BreathingInterventionCoach-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BreathingInterventionCoach-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +57,7 @@
 		0C8014601DADAE740086AF43 /* BreathingInterventionCoach */ = {
 			isa = PBXGroup;
 			children = (
+				34E4E3FE1DB55C6100E3D208 /* Helpers */,
 				0C80149B1DAEA41B0086AF43 /* Xibs */,
 				0C8014981DAEA35D0086AF43 /* View Controllers */,
 				0C80149A1DAEA3A70086AF43 /* Views */,
@@ -64,6 +68,7 @@
 				0C8014681DADAE740086AF43 /* Assets.xcassets */,
 				0C80146A1DADAE740086AF43 /* LaunchScreen.storyboard */,
 				0C80146D1DADAE740086AF43 /* Info.plist */,
+				34E4E4021DB561BE00E3D208 /* BreathingInterventionCoach-Bridging-Header.h */,
 			);
 			path = BreathingInterventionCoach;
 			sourceTree = "<group>";
@@ -78,7 +83,7 @@
 		0C8014981DAEA35D0086AF43 /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				0C80149C1DAEA8710086AF43 /* BreathingExerciseViewController.swift */,
+				0C80149C1DAEA8710086AF43 /* MRRBreathingExerciseViewController.swift */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -102,6 +107,14 @@
 			children = (
 			);
 			name = Xibs;
+			sourceTree = "<group>";
+		};
+		34E4E3FE1DB55C6100E3D208 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				34E4E4001DB55CB800E3D208 /* MRRImmediatePanGestureRecognizer.swift */,
+			);
+			name = Helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -178,7 +191,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				0C8014621DADAE740086AF43 /* AppDelegate.swift in Sources */,
-				0C80149D1DAEA8710086AF43 /* BreathingExerciseViewController.swift in Sources */,
+				0C80149D1DAEA8710086AF43 /* MRRBreathingExerciseViewController.swift in Sources */,
+				34E4E4011DB55CB800E3D208 /* MRRImmediatePanGestureRecognizer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,6 +318,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mattyrich.BreathingInterventionCoach;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "BreathingInterventionCoach/BreathingInterventionCoach-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -317,6 +332,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.mattyrich.BreathingInterventionCoach;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "BreathingInterventionCoach/BreathingInterventionCoach-Bridging-Header.h";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
