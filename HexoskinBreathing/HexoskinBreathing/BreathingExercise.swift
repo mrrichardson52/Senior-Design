@@ -8,21 +8,39 @@
 
 import UIKit
 
-enum BreathingInstruction {
-    case Inhale
-    case Exhale
-    case Pause
-}
+//enum BreathingInstruction {
+//    case Inhale
+//    case Exhale
+//    case Pause
+//    case NotAnInstruction
+//}
 
 class BreathingExercise: NSObject {
     
     var instructionCount: Int!
-    var instructions: [BreathingInstruction : Float]!
+    var currentInstruction: Int!
+    var instructions: [Int : (instruction: String, duration: Float)]!
     
-    func BreathingExercise() {
+    override init() {
+        print("BreathingExercise"); 
         // create a blank breathing exercise here 
-        instructions = [.Inhale : 4, .Pause : 2, .Exhale : 4, .Pause : 2, .Inhale : 6, .Pause : 2, .Exhale : 6];
+        instructions = [0 : ("Inhale", 4), 1 : ("Pause", 2), 2 : ("Exhale", 4), 3 : ("Pause", 2), 4 : ("Inhale", 6), 5 : ("Pause", 2), 6 : ("Exhale", 6)];
         instructionCount = instructions.count;
+        currentInstruction = -1;
+    }
+    
+    func next() -> (complete: Bool, instruction: String, duration: Float){
+        currentInstruction = currentInstruction + 1;
+        if self.currentInstruction >= instructionCount {
+            return (true, "Not an instruction", 0.0);
+        } else {
+            let next = instructions[currentInstruction];
+            return (false, (next?.instruction)!, (next?.duration)!);
+        }
+    }
+    
+    func reset() {
+        currentInstruction = -1; 
     }
 
 }

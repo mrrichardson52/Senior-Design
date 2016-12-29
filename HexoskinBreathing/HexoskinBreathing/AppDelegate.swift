@@ -18,6 +18,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         return true
     }
+    
+    func application(_ app: UIApplication, open url: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
+        
+        // verify this scheme follows mrrbreathingcoach
+        if url.scheme == "mrrbreathingcoach" {
+            let fragment = url.fragment;
+            
+            // extract the components from the fragment (should contain access_token and token_type)
+            var fragmentItems: [String : String] = [:];
+            var itemPair: [String]!;
+            for param in (fragment?.components(separatedBy: "&"))! {
+                itemPair = param.components(separatedBy: "=");
+                if itemPair.count != 2 {
+                    continue;
+                }
+                fragmentItems.updateValue(itemPair.last!, forKey: itemPair.first!);
+            }
+            
+            // post the notification
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: "token received"), object: nil, userInfo: fragmentItems);
+            return true;
+        } else {
+            print("incorrect scheme"); 
+            return false;
+        }
+    }
 
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.

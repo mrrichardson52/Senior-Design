@@ -99,20 +99,24 @@ class ApiHelper: NSObject {
         
         // construct the url
         let url = "https://api.hexoskin.com/api/connect/oauth2/auth/?" + parameterString;
-        print(url);
         
         // open the url in safari
         UIApplication.shared.open(URL(string: url)!);
         
     }
     
-    static func generateRequest(url: String, parameters: [String : String] = [:], httpMethod: String = "GET", headers: [String : String] = [:]) -> URLRequest {
-        
-        print("generate request");
-        
+    static func generateRequest(url: String, parameters: [String : String] = [:], query: [String : String] = [:], httpMethod: String = "GET", headers: [String : String] = [:]) -> URLRequest {
+                
         // create the request
-        var request = URLRequest(url: URL(string: url)!);
+
+        var urlString = url;
+        if !query.isEmpty {
+            urlString.append("?");
+            urlString.append(query.stringFromHttpParameters());
+        }
+        var request = URLRequest(url: URL(string: urlString)!);
         request.httpMethod = httpMethod;
+        
         if !parameters.isEmpty {
             let parameterString = parameters.stringFromHttpParameters();
             request.httpBody = parameterString.data(using: .utf8);
@@ -123,6 +127,8 @@ class ApiHelper: NSObject {
         for (headerLabel, value) in headers {
             request.setValue(value, forHTTPHeaderField: headerLabel);
         }
+        
+        print(request.description); 
         
         return request;
     }
@@ -144,7 +150,7 @@ extension String {
         
         return self.addingPercentEncoding(withAllowedCharacters: allowedCharacters)
     }
-    
+
 }
 
 extension Dictionary {

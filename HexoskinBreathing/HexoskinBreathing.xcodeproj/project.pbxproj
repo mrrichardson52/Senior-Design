@@ -18,10 +18,9 @@
 		347502191DCE2E58002E6465 /* MRRImmediatePanGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347502181DCE2E58002E6465 /* MRRImmediatePanGestureRecognizer.swift */; };
 		3475021B1DCE2E7B002E6465 /* TestingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3475021A1DCE2E7B002E6465 /* TestingViewController.swift */; };
 		3475021F1DCFFDB8002E6465 /* BreathingExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3475021E1DCFFDB8002E6465 /* BreathingExercise.swift */; };
-		347502211DD0401C002E6465 /* RotationTestingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347502201DD0401C002E6465 /* RotationTestingViewController.swift */; };
-		347502241DD04127002E6465 /* ccw_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 347502231DD04127002E6465 /* ccw_wheel.png */; };
-		347502261DD04439002E6465 /* cw_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 347502251DD04439002E6465 /* cw_wheel.png */; };
-		347502281DD04442002E6465 /* no_arrow_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 347502271DD04442002E6465 /* no_arrow_wheel.png */; };
+		3475022C1DD04FE6002E6465 /* ccw_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 347502291DD04FE6002E6465 /* ccw_wheel.png */; };
+		3475022D1DD04FE6002E6465 /* cw_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 3475022A1DD04FE6002E6465 /* cw_wheel.png */; };
+		3475022E1DD04FE6002E6465 /* pause_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 3475022B1DD04FE6002E6465 /* pause_wheel.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,10 +38,9 @@
 		347502181DCE2E58002E6465 /* MRRImmediatePanGestureRecognizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MRRImmediatePanGestureRecognizer.swift; sourceTree = "<group>"; };
 		3475021A1DCE2E7B002E6465 /* TestingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestingViewController.swift; sourceTree = "<group>"; };
 		3475021E1DCFFDB8002E6465 /* BreathingExercise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreathingExercise.swift; sourceTree = "<group>"; };
-		347502201DD0401C002E6465 /* RotationTestingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RotationTestingViewController.swift; sourceTree = "<group>"; };
-		347502231DD04127002E6465 /* ccw_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ccw_wheel.png; path = ../../../../ccw_wheel.png; sourceTree = "<group>"; };
-		347502251DD04439002E6465 /* cw_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = cw_wheel.png; path = ../../../../cw_wheel.png; sourceTree = "<group>"; };
-		347502271DD04442002E6465 /* no_arrow_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = no_arrow_wheel.png; path = ../../../../no_arrow_wheel.png; sourceTree = "<group>"; };
+		347502291DD04FE6002E6465 /* ccw_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ccw_wheel.png; path = ../../../../ccw_wheel.png; sourceTree = "<group>"; };
+		3475022A1DD04FE6002E6465 /* cw_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = cw_wheel.png; path = ../../../../cw_wheel.png; sourceTree = "<group>"; };
+		3475022B1DD04FE6002E6465 /* pause_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pause_wheel.png; path = ../../../../pause_wheel.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,7 +87,6 @@
 				347502181DCE2E58002E6465 /* MRRImmediatePanGestureRecognizer.swift */,
 				3475021A1DCE2E7B002E6465 /* TestingViewController.swift */,
 				3475021E1DCFFDB8002E6465 /* BreathingExercise.swift */,
-				347502201DD0401C002E6465 /* RotationTestingViewController.swift */,
 			);
 			path = HexoskinBreathing;
 			sourceTree = "<group>";
@@ -97,9 +94,9 @@
 		347502221DD040FC002E6465 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				347502271DD04442002E6465 /* no_arrow_wheel.png */,
-				347502251DD04439002E6465 /* cw_wheel.png */,
-				347502231DD04127002E6465 /* ccw_wheel.png */,
+				347502291DD04FE6002E6465 /* ccw_wheel.png */,
+				3475022A1DD04FE6002E6465 /* cw_wheel.png */,
+				3475022B1DD04FE6002E6465 /* pause_wheel.png */,
 			);
 			name = Images;
 			sourceTree = "<group>";
@@ -164,10 +161,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				347502281DD04442002E6465 /* no_arrow_wheel.png in Resources */,
+				3475022E1DD04FE6002E6465 /* pause_wheel.png in Resources */,
 				347502081DCE2C4D002E6465 /* LaunchScreen.storyboard in Resources */,
-				347502241DD04127002E6465 /* ccw_wheel.png in Resources */,
-				347502261DD04439002E6465 /* cw_wheel.png in Resources */,
+				3475022C1DD04FE6002E6465 /* ccw_wheel.png in Resources */,
+				3475022D1DD04FE6002E6465 /* cw_wheel.png in Resources */,
 				347502051DCE2C4D002E6465 /* Assets.xcassets in Resources */,
 				347502031DCE2C4D002E6465 /* Main.storyboard in Resources */,
 			);
@@ -187,7 +184,6 @@
 				347501FE1DCE2C4D002E6465 /* AppDelegate.swift in Sources */,
 				347502151DCE2E17002E6465 /* HomeViewController.swift in Sources */,
 				3475021F1DCFFDB8002E6465 /* BreathingExercise.swift in Sources */,
-				347502211DD0401C002E6465 /* RotationTestingViewController.swift in Sources */,
 				347502191DCE2E58002E6465 /* MRRImmediatePanGestureRecognizer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

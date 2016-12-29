@@ -16,19 +16,19 @@ class TestingViewController: UIViewController {
     var clientIdNumber: String!
     
     @IBOutlet weak var sendRequestButton: UIButton!
-    @IBOutlet weak var getTokenButton: UIButton!
-    @IBOutlet weak var responseLabel: UILabel!
+    @IBOutlet weak var responseLabel: UITextView!
     
-    var accessTokenTEMPORARY : String!
+    var tokenType: String!
+    var accessToken: String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        accessTokenTEMPORARY = "CRWo74oidkhwYvhZKx6SIYAJfNm6CB";
+        responseLabel.text = "";
     }
     
     @IBAction func sendRequest(_ sender: AnyObject) {
         // construct the request
-        let request = ApiHelper.generateRequest(url: "https://api.hexoskin.com/api/datatype/", headers: ["Authorization" : "Bearer \(accessTokenTEMPORARY!)"]);
+        let request = ApiHelper.generateRequest(url: "https://api.hexoskin.com/api/data/", query: ["datatype__in" : "37", "record" : "110676"], headers: ["Authorization" : "\(tokenType!) \(accessToken!)"]);
         
         // make the request
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
@@ -43,18 +43,29 @@ class TestingViewController: UIViewController {
             }
             
             do {
-                let dataDictionary = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as! [String:Any];
-                self.responseLabel.text = dataDictionary.description;
-                
-            } catch let error as NSError {
-                print(error);
+                let dataDictionary = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:Any];
+                if dataDictionary == nil {
+                    let dataArray = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [Any];
+                    DispatchQueue.main.async {
+                        self.responseLabel.text = dataArray?.description;
+                        self.responseLabel.textColor = .red;
+                        self.responseLabel.backgroundColor = .black;
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.responseLabel.text = dataDictionary?.description;
+                        self.responseLabel.textColor = .red;
+                        self.responseLabel.backgroundColor = .black;
+                        
+                        // extract the data from the data dictionary
+                        
+                    }
+                }
+            } catch {
+                print("CASTING ERROR");
             }
         }
         task.resume()
-    }
-    
-    @IBAction func getToken(_ sender: AnyObject) {
-        ApiHelper.authorizeUser(clientId: clientId);
     }
     
 }

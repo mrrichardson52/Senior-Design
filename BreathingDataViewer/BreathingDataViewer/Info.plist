@@ -27,7 +27,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>mrrbreathingcoach</string>
+				<string></string>
 			</array>
 		</dict>
 	</array>
