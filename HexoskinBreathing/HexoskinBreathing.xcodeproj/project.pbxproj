@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3446A2AD1E7B2DA50036342C /* DataViewingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */; };
+		3446A2B21E7B3C1B0036342C /* ChildTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2B11E7B3C1B0036342C /* ChildTableViewCell.swift */; };
+		3446A2B41E7B3C5A0036342C /* HeaderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2B31E7B3C5A0036342C /* HeaderTableViewCell.swift */; };
+		3446A2B61E7B3D8D0036342C /* DataViewerHeaderCellView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3446A2B51E7B3D8D0036342C /* DataViewerHeaderCellView.xib */; };
+		3446A2B81E7B3D990036342C /* DataViewerChildCellView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3446A2B71E7B3D990036342C /* DataViewerChildCellView.xib */; };
 		347501FE1DCE2C4D002E6465 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347501FD1DCE2C4D002E6465 /* AppDelegate.swift */; };
 		347502031DCE2C4D002E6465 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 347502011DCE2C4D002E6465 /* Main.storyboard */; };
 		347502051DCE2C4D002E6465 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 347502041DCE2C4D002E6465 /* Assets.xcassets */; };
@@ -21,9 +26,18 @@
 		3475022C1DD04FE6002E6465 /* ccw_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 347502291DD04FE6002E6465 /* ccw_wheel.png */; };
 		3475022D1DD04FE6002E6465 /* cw_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 3475022A1DD04FE6002E6465 /* cw_wheel.png */; };
 		3475022E1DD04FE6002E6465 /* pause_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 3475022B1DD04FE6002E6465 /* pause_wheel.png */; };
+		3484D2601E42489800D162B7 /* ResultViewerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3484D25F1E42489800D162B7 /* ResultViewerViewController.swift */; };
+		3484D2621E42764400D162B7 /* beep.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3484D2611E42764400D162B7 /* beep.wav */; };
+		34CD11C21E382C3400C838F5 /* JSONHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CD11C11E382C3400C838F5 /* JSONHelper.swift */; };
+		34CD11C41E3A6E8800C838F5 /* DataResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CD11C31E3A6E8800C838F5 /* DataResponse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataViewingViewController.swift; sourceTree = "<group>"; };
+		3446A2B11E7B3C1B0036342C /* ChildTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChildTableViewCell.swift; sourceTree = "<group>"; };
+		3446A2B31E7B3C5A0036342C /* HeaderTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeaderTableViewCell.swift; sourceTree = "<group>"; };
+		3446A2B51E7B3D8D0036342C /* DataViewerHeaderCellView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DataViewerHeaderCellView.xib; sourceTree = "<group>"; };
+		3446A2B71E7B3D990036342C /* DataViewerChildCellView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = DataViewerChildCellView.xib; sourceTree = "<group>"; };
 		347501FA1DCE2C4D002E6465 /* HexoskinBreathing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HexoskinBreathing.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		347501FD1DCE2C4D002E6465 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		347502021DCE2C4D002E6465 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -41,6 +55,10 @@
 		347502291DD04FE6002E6465 /* ccw_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ccw_wheel.png; path = ../../../../ccw_wheel.png; sourceTree = "<group>"; };
 		3475022A1DD04FE6002E6465 /* cw_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = cw_wheel.png; path = ../../../../cw_wheel.png; sourceTree = "<group>"; };
 		3475022B1DD04FE6002E6465 /* pause_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pause_wheel.png; path = ../../../../pause_wheel.png; sourceTree = "<group>"; };
+		3484D25F1E42489800D162B7 /* ResultViewerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultViewerViewController.swift; sourceTree = "<group>"; };
+		3484D2611E42764400D162B7 /* beep.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = beep.wav; sourceTree = "<group>"; };
+		34CD11C11E382C3400C838F5 /* JSONHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONHelper.swift; sourceTree = "<group>"; };
+		34CD11C31E3A6E8800C838F5 /* DataResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataResponse.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,9 +72,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3446A2AE1E7B2E510036342C /* XIB */ = {
+			isa = PBXGroup;
+			children = (
+				3446A2B51E7B3D8D0036342C /* DataViewerHeaderCellView.xib */,
+				3446A2B71E7B3D990036342C /* DataViewerChildCellView.xib */,
+			);
+			name = XIB;
+			sourceTree = "<group>";
+		};
 		347501F11DCE2C4D002E6465 = {
 			isa = PBXGroup;
 			children = (
+				3484D2611E42764400D162B7 /* beep.wav */,
 				347501FC1DCE2C4D002E6465 /* HexoskinBreathing */,
 				347501FB1DCE2C4D002E6465 /* Products */,
 			);
@@ -73,6 +101,7 @@
 		347501FC1DCE2C4D002E6465 /* HexoskinBreathing */ = {
 			isa = PBXGroup;
 			children = (
+				3446A2AE1E7B2E510036342C /* XIB */,
 				347502221DD040FC002E6465 /* Images */,
 				347501FD1DCE2C4D002E6465 /* AppDelegate.swift */,
 				347502011DCE2C4D002E6465 /* Main.storyboard */,
@@ -87,6 +116,12 @@
 				347502181DCE2E58002E6465 /* MRRImmediatePanGestureRecognizer.swift */,
 				3475021A1DCE2E7B002E6465 /* TestingViewController.swift */,
 				3475021E1DCFFDB8002E6465 /* BreathingExercise.swift */,
+				34CD11C11E382C3400C838F5 /* JSONHelper.swift */,
+				34CD11C31E3A6E8800C838F5 /* DataResponse.swift */,
+				3484D25F1E42489800D162B7 /* ResultViewerViewController.swift */,
+				3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */,
+				3446A2B11E7B3C1B0036342C /* ChildTableViewCell.swift */,
+				3446A2B31E7B3C5A0036342C /* HeaderTableViewCell.swift */,
 			);
 			path = HexoskinBreathing;
 			sourceTree = "<group>";
@@ -161,10 +196,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3446A2B81E7B3D990036342C /* DataViewerChildCellView.xib in Resources */,
 				3475022E1DD04FE6002E6465 /* pause_wheel.png in Resources */,
+				3446A2B61E7B3D8D0036342C /* DataViewerHeaderCellView.xib in Resources */,
 				347502081DCE2C4D002E6465 /* LaunchScreen.storyboard in Resources */,
 				3475022C1DD04FE6002E6465 /* ccw_wheel.png in Resources */,
 				3475022D1DD04FE6002E6465 /* cw_wheel.png in Resources */,
+				3484D2621E42764400D162B7 /* beep.wav in Resources */,
 				347502051DCE2C4D002E6465 /* Assets.xcassets in Resources */,
 				347502031DCE2C4D002E6465 /* Main.storyboard in Resources */,
 			);
@@ -180,11 +218,17 @@
 				3475021B1DCE2E7B002E6465 /* TestingViewController.swift in Sources */,
 				347502111DCE2DBE002E6465 /* ApiHelper.swift in Sources */,
 				347502171DCE2E3A002E6465 /* MainMenuViewController.swift in Sources */,
+				34CD11C21E382C3400C838F5 /* JSONHelper.swift in Sources */,
+				3446A2AD1E7B2DA50036342C /* DataViewingViewController.swift in Sources */,
 				347502131DCE2DF6002E6465 /* ExerciseViewController.swift in Sources */,
 				347501FE1DCE2C4D002E6465 /* AppDelegate.swift in Sources */,
 				347502151DCE2E17002E6465 /* HomeViewController.swift in Sources */,
 				3475021F1DCFFDB8002E6465 /* BreathingExercise.swift in Sources */,
+				3446A2B21E7B3C1B0036342C /* ChildTableViewCell.swift in Sources */,
+				3446A2B41E7B3C5A0036342C /* HeaderTableViewCell.swift in Sources */,
+				34CD11C41E3A6E8800C838F5 /* DataResponse.swift in Sources */,
 				347502191DCE2E58002E6465 /* MRRImmediatePanGestureRecognizer.swift in Sources */,
+				3484D2601E42489800D162B7 /* ResultViewerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -348,6 +392,7 @@
 				3475020E1DCE2C4D002E6465 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

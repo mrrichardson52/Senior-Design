@@ -114,7 +114,8 @@ class ApiHelper: NSObject {
             urlString.append("?");
             urlString.append(query.stringFromHttpParameters());
         }
-        var request = URLRequest(url: URL(string: urlString)!);
+//        var request = URLRequest(url: URL(string: urlString)!);
+        var request = URLRequest(url: URL(string: urlString)!, cachePolicy: .reloadIgnoringCacheData)
         request.httpMethod = httpMethod;
         
         if !parameters.isEmpty {
@@ -132,6 +133,7 @@ class ApiHelper: NSObject {
         
         return request;
     }
+    
     
 }
 

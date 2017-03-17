@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+import AVFoundation
 
 struct InstructionDisplay {
     var label: UILabel!
@@ -15,7 +15,7 @@ struct InstructionDisplay {
     var labelVerticalConstraint: NSLayoutConstraint!
     var labelHorizontalConstraint: NSLayoutConstraint!
     var timerLabelHorizontalConstraint: NSLayoutConstraint!
-    var duration: Float = 0.0;
+    var duration: Double = 0.0;
 }
 
 class ExerciseViewController: UIViewController {
@@ -57,7 +57,7 @@ class ExerciseViewController: UIViewController {
     @IBOutlet weak var firstInstructionTimerHorizontalConstraint: NSLayoutConstraint!
     
     // Timer label that sits in the middle of the wheel
-    @IBOutlet weak var timerLabel: UILabel!
+//    @IBOutlet weak var timerLabel: UILabel!
  
     // imageview that stores the wheel
     @IBOutlet weak var imageView: UIImageView!
@@ -88,9 +88,23 @@ class ExerciseViewController: UIViewController {
     
     var alreadyFinished: Bool!
     
-    var currentTimerCounter: Float!
+    var currentTimerCounter: Double!
     var counterTimer: Timer!
     var instructionTimer: Timer!
+    let countDownInterval: Double = 1.0;
+    var metronomeTimer: Timer!
+    
+    // variables that store the start and end timestamps for the exercise
+    var startTimestamp: Int = 0;
+    var endTimestamp: Int = 0;
+    
+    // token information used for REST API calls
+    var accessToken: String!
+    var tokenType: String!
+    
+    // used for playing beep sound
+    var beepSound: URL!
+    var audioPlayer: AVAudioPlayer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -99,7 +113,7 @@ class ExerciseViewController: UIViewController {
         title = "Breathing Exercise";
         
         // initialize wheel image and add gesture recognizer
-        imageView.image = UIImage(named: "ccw_wheel.png");
+        imageView.image = UIImage(named: "pause_wheel.png");
         state = 1;
         panRecognizer = MRRImmediatePanGestureRecognizer(target: self, action: #selector(ExerciseViewController.imageViewPanned(sender:)));
         imageView.addGestureRecognizer(panRecognizer);
@@ -107,6 +121,14 @@ class ExerciseViewController: UIViewController {
         
         alreadyFinished = false;
         exercise = BreathingExercise();
+        
+        beepSound = URL(fileURLWithPath: Bundle.main.path(forResource: "beep", ofType: "wav")!)
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: beepSound);
+            audioPlayer.prepareToPlay();
+        } catch {
+            print("Error initializing audio player.");
+        }
     }
     
     override func loadView() {
@@ -172,8 +194,8 @@ class ExerciseViewController: UIViewController {
             var angle = getAngle(centralPoint: self.circleCenter, secondPoint: point);
             
             //print("Distance: \(dist)");
-            print("Angle: \(angle)");
-            print("Distance: \(dist)");
+//            print("Angle: \(angle)");
+//            print("Distance: \(dist)");
             
             angle = angle - 90;
             if angle < 0 {
@@ -185,32 +207,32 @@ class ExerciseViewController: UIViewController {
             })
             break;
         case UIGestureRecognizerState.ended:
-            switch state {
-            case 1:
-                // ccw -> pause
-                self.imageView.image = UIImage(named: "pause_wheel.png");
-                state = 2;
-                break;
-            case 2:
-                // pause -> cw
-                self.imageView.image = UIImage(named: "cw_wheel.png");
-                state = 3;
-                break;
-            case 3:
-                // cw -> pause
-                self.imageView.image = UIImage(named: "pause_wheel.png");
-                state = 4
-                break;
-            case 4:
-                // pause -> cww
-                self.imageView.image = UIImage(named: "ccw_wheel.png");
-                state = 1;
-                break;
-            default:
-                print("state should be 1-4");
-                state = 1;
-                break;
-            }
+//            switch state {
+//            case 1:
+//                // ccw -> pause
+//                self.imageView.image = UIImage(named: "pause_wheel.png");
+//                state = 2;
+//                break;
+//            case 2:
+//                // pause -> cw
+//                self.imageView.image = UIImage(named: "cw_wheel.png");
+//                state = 3;
+//                break;
+//            case 3:
+//                // cw -> pause
+//                self.imageView.image = UIImage(named: "pause_wheel.png");
+//                state = 4
+//                break;
+//            case 4:
+//                // pause -> cww
+//                self.imageView.image = UIImage(named: "ccw_wheel.png");
+//                state = 1;
+//                break;
+//            default:
+//                print("state should be 1-4");
+//                state = 1;
+//                break;
+//            }
             break;
         case UIGestureRecognizerState.cancelled:
             // This should not be reached
@@ -228,6 +250,10 @@ class ExerciseViewController: UIViewController {
         blurEffectView.removeFromSuperview();
         beginButton.removeFromSuperview();
         
+        // store start timestamp
+        let date = Date();
+        startTimestamp = Int(date.timeIntervalSince1970*256);
+        
         // initialize the instruction labels with the instructions and their durations
         // initialize the first/current instruction label with starting exercise indicator
         instructionDisplays[0].label.text = "Starting in: ";
@@ -239,7 +265,7 @@ class ExerciseViewController: UIViewController {
         instructionDisplays[0].timerLabel.textColor = currentInstructionTextColor;
 
         
-        var instruction: (complete: Bool, instruction: String, duration: Float);
+        var instruction: (complete: Bool, instruction: String, duration: Double);
         for index in 1...4 {
             // get the next instruction from the exercise
             instruction = exercise.next();
@@ -254,6 +280,9 @@ class ExerciseViewController: UIViewController {
                 instructionDisplays[index].duration = instruction.duration;
             } else {
                 instructionDisplays[index].label.text = exerciseCompleteIndicator;
+                instructionDisplays[index].timerLabel.text = "--";
+                self.alreadyFinished = true; 
+                break; 
             }
         }
         
@@ -270,8 +299,16 @@ class ExerciseViewController: UIViewController {
         // begin timer
         instructionTimer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(ExerciseViewController.timerEnded), userInfo: nil, repeats: false);
         currentTimerCounter = 3.0;
-        timerLabel.text = "3.0";
-        counterTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(ExerciseViewController.countdown), userInfo: nil, repeats: true);
+//        timerLabel.text = "3.0";
+        counterTimer = Timer.scheduledTimer(timeInterval: TimeInterval(countDownInterval), target: self, selector: #selector(ExerciseViewController.countdown), userInfo: nil, repeats: true);
+        
+        // begin another timer that plays the beep sound every second
+        metronomeTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ExerciseViewController.playBeep), userInfo: nil, repeats: true);
+    }
+    
+    func playBeep() {
+        // play the beep sound
+        audioPlayer.play()
     }
     
     func timerEnded() {
@@ -279,18 +316,43 @@ class ExerciseViewController: UIViewController {
         // start next timer here
         if getDisplayInPosition(position: 1).label.text != exerciseCompleteIndicator {
             self.currentTimerCounter = getDisplayInPosition(position: 1).duration;
-            self.timerLabel.text = String(format: "%.1f", self.currentTimerCounter);
             instructionTimer = Timer.scheduledTimer(timeInterval: TimeInterval(getDisplayInPosition(position: 1).duration), target: self, selector: #selector(ExerciseViewController.timerEnded), userInfo: nil, repeats: false);
-        } else {
+//            print("Timer scheduled for: \(getDisplayInPosition(position: 1).duration) seconds"); 
+            
+            // reset the countdown timer here
             counterTimer.invalidate();
-            timerLabel.text = "0.0";
+            getDisplayInPosition(position: 0).timerLabel.text = "0.0 s";
+            counterTimer = Timer.scheduledTimer(timeInterval: TimeInterval(countDownInterval), target: self, selector: #selector(ExerciseViewController.countdown), userInfo: nil, repeats: true);
+            
+        } else {
+            // Exercise has ended
+            counterTimer.invalidate();
+            metronomeTimer.invalidate();
+            
+            // store the end time
+            let date = Date();
+            endTimestamp = Int(date.timeIntervalSince1970*256);
+            
+//            // delay for 2 seconds before going to the results controller
+            Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(ExerciseViewController.pushResultsController), userInfo: nil, repeats: false);
+            
         }
         
         // set new destinations for the instruction displays
         for index in 0...4 {
             getDisplayInPosition(position: index).labelVerticalConstraint.constant += 50;
         }
-
+        
+        // display the appropriate wheel
+        let nextAction = self.getDisplayInPosition(position: 1).label.text;
+        if nextAction == "Inhale" {
+            self.imageView.image = UIImage(named: "cw_wheel.png");
+        } else if nextAction == "Exhale" {
+            self.imageView.image = UIImage(named: "ccw_wheel.png");
+        } else {
+            self.imageView.image = UIImage(named: "pause_wheel.png");
+        }
+        
         UIView.animate(withDuration: 0.3, animations: {
             self.getDisplayInPosition(position: 0).label.alpha = 0.0;
             self.getDisplayInPosition(position: 0).timerLabel.alpha = 0.0;
@@ -316,23 +378,50 @@ class ExerciseViewController: UIViewController {
                 self.getDisplayInPosition(position: 4).label.text = next.instruction;
                 self.getDisplayInPosition(position: 4).timerLabel.text = String(format: "%.1f s", next.duration);
             }
+            
             self.getDisplayInPosition(position: 4).label.textColor = self.queuedInstructionTextColor;
             self.getDisplayInPosition(position: 4).label.font = self.getDisplayInPosition(position: 4).label.font.withSize(self.queuedInstructionTextSize);
             self.getDisplayInPosition(position: 4).timerLabel.textColor = self.queuedInstructionTextColor;
             self.getDisplayInPosition(position: 4).timerLabel.font = self.getDisplayInPosition(position: 4).label.font.withSize(self.queuedInstructionTextSize);
-            var display = self.getDisplayInPosition(position: 4);
-            display.duration = next.duration;
+            
+            // the following instruction is different bc modification of the struct requires direct access since function getDisplayInPosition returns a copy
+            self.instructionDisplays[self.getDisplayNumber(position: 4)].duration = next.duration;
+            
             self.getDisplayInPosition(position: 4).labelVerticalConstraint.constant += -250;
             self.view.layoutIfNeeded();
         })
     }
     
+    
+    func pushResultsController() {
+        
+        // instantiate the view controller from interface builder
+        let storyboard = UIStoryboard(name: "Main", bundle: nil);
+        let viewController = storyboard.instantiateViewController(withIdentifier: "resultsViewController") as? ResultViewerViewController;
+        
+        // send the timestamps to the next view controller for result viewing
+        viewController?.startTimestamp = startTimestamp;
+        viewController?.endTimestamp = endTimestamp;
+        viewController?.accessToken = accessToken;
+        viewController?.tokenType = tokenType;
+        viewController?.exercise = exercise; 
+        self.navigationController?.pushViewController(viewController!, animated: true);
+    }
+    
+    /*
+     Function that executes whenever the countdownTimer fires. This function calculates
+     the time left during the execution of the current instruction and displays it as
+     feedback for the user.
+    */
     func countdown() {
-        if currentTimerCounter - 0.1 < 0.0 {
-            timerLabel.text = "0.0";
+        if currentTimerCounter - countDownInterval < 0.0 {
+            // The intruction has been completed and the clock should show 0 seconds left
+            getDisplayInPosition(position: 0).timerLabel.text = "0.0 s";
         } else {
-            timerLabel.text = String(format: "%.1f", currentTimerCounter - 0.1);
-            currentTimerCounter = currentTimerCounter - 0.1;
+            // The instruction has not been completed and the clock should be updated to
+            // the time remaining
+            getDisplayInPosition(position: 0).timerLabel.text = String(format: "%.1f s", currentTimerCounter - countDownInterval);
+            currentTimerCounter = currentTimerCounter - countDownInterval;
         }
     }
     
@@ -389,6 +478,14 @@ class ExerciseViewController: UIViewController {
         return instructionDisplays[returnPosition];
     }
     
+    func getDisplayNumber(position: Int) -> Int {
+        var returnPosition = position + self.currentLabel;
+        if returnPosition >= 5 {
+            returnPosition = returnPosition - 5;
+        }
+        return returnPosition;
+    }
+    
     func addBlurView() {
         //only apply the blur if the user hasn't disabled transparency effects
         if !UIAccessibilityIsReduceTransparencyEnabled() {
@@ -436,7 +533,7 @@ class ExerciseViewController: UIViewController {
         
         for index in 0...4 {
             instructionDisplays[index].label.text = "";
-            instructionDisplays[index].label.text = "";
+            instructionDisplays[index].timerLabel.text = "";
             instructionDisplays[index].labelVerticalConstraint.constant = CGFloat(-25 + 50 * (4-index));
             instructionDisplays[index].labelHorizontalConstraint.constant = 0;
             instructionDisplays[index].timerLabelHorizontalConstraint.constant = 0;
