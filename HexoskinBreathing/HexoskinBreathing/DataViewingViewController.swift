@@ -25,6 +25,11 @@ class DataViewingViewController: UIViewController {
     @IBOutlet weak var exhaleIndicator: UILabel!
     @IBOutlet weak var noDataIndicator: UILabel!
 
+    // section views within scroll view
+    // index 0 is the top third
+    // index 1 is the middle third
+    // index 2 is the bottom third
+    var sectionViews: [UIView]! = nil;
     
     // ratio of pixels to seconds
     let pixelSecondRatio: Double = 30;
@@ -69,14 +74,18 @@ class DataViewingViewController: UIViewController {
     }
     
     func populateScrollView() {
-                
+        
+        // add the section views to the content view in the scroll. 
+        // these will each store the data source views
+        addSectionViews();
+        
         // add the views for all of the included data sources
-        addViewsForDataSource(actions: exerciseData, section: 1, title: "Exercise");
+        addViewsForDataSource(actions: exerciseData, section: 0, title: "Exercise");
         if displayHexData {
-            addViewsForDataSource(actions: hexoskinData, section: 2, title: "Hexoskin data");
-            addViewsForDataSource(actions: ringData, section: 3, title: "Ring data");
-        } else {
+            addViewsForDataSource(actions: hexoskinData, section: 1, title: "Hexoskin data");
             addViewsForDataSource(actions: ringData, section: 2, title: "Ring data");
+        } else {
+            addViewsForDataSource(actions: ringData, section: 1, title: "Ring data");
         }
         
         // store the total exercise duration
@@ -131,17 +140,24 @@ class DataViewingViewController: UIViewController {
 
     func addViewsForDataSource(actions: [breathingAction], section: Int, title: String) {
         
-        // store the heights for the two views
+        // store the heights for label
         let labelHeight = 21;
-        let viewHeight = scrollParentView.frame.height * 0.33 * 0.5;
-        print("View Height: \(viewHeight)");
         
-        // calculate the distance from the top for the views
-        let sectionHeight: Double = Double(scrollParentView.frame.height) * 0.33;
-        let sectionPosition: Double = sectionHeight * (Double(section) - 1);
-        let distanceToTop = sectionHeight * (Double(section) - 1) + sectionHeight * 0.4;
-        print("Section Height: \(sectionHeight)");
-        print("Distance to Top: \(distanceToTop)");
+        // add the title label at the top
+        let titleLabel = UILabel();
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false;
+        titleLabel.text = title;
+        titleLabel.textAlignment = .center;
+        titleLabel.textColor = .black;
+        titleLabel.font = titleLabel.font.withSize(25);
+        scrollParentView.addSubview(titleLabel);
+        
+        // constrain the title
+        let titleTopConstraint = NSLayoutConstraint(item: titleLabel, attribute: .top, relatedBy: .equal, toItem: sectionViews[section], attribute: .top, multiplier: 1.0, constant: 0);
+        let titleHeightConstraint = NSLayoutConstraint(item: titleLabel, attribute: .height, relatedBy: .equal, toItem: sectionViews[section], attribute: .height, multiplier: 0.4, constant: 0);
+        let titleWidthConstraint = NSLayoutConstraint(item: titleLabel, attribute: .width, relatedBy: .equal, toItem: scrollParentView, attribute: .width, multiplier: 1.0, constant: 0);
+        let titleHorizontalConstraint = NSLayoutConstraint(item: titleLabel, attribute: .centerX, relatedBy: .equal, toItem: scrollParentView, attribute: .centerX, multiplier: 1.0, constant: 0);
+        scrollParentView.addConstraints([titleTopConstraint, titleHorizontalConstraint, titleWidthConstraint, titleHeightConstraint]);
         
         // iterate through all of the actions
         var previousLabel: UILabel! = nil;
@@ -153,7 +169,7 @@ class DataViewingViewController: UIViewController {
             // create the view that visualizes the duration
             let view = UIView();
             view.translatesAutoresizingMaskIntoConstraints = false;
-            contentView.addSubview(view);
+            sectionViews[section].addSubview(view);
             if action.action == Strings.inhale {
                 view.backgroundColor = Constants.inhaleIndicatorColor;
             } else if action.action == Strings.exhale {
@@ -169,15 +185,15 @@ class DataViewingViewController: UIViewController {
             let horizontalViewConstraint: NSLayoutConstraint!
             if previousLabel == nil {
                 // constrain to the left edge of the scrollview
-                horizontalViewConstraint = NSLayoutConstraint(item: contentView, attribute: .leading, relatedBy: .equal, toItem: view, attribute: .leading, multiplier: 1.0, constant: 0);
+                horizontalViewConstraint = NSLayoutConstraint(item: sectionViews[section], attribute: .leading, relatedBy: .equal, toItem: view, attribute: .leading, multiplier: 1.0, constant: 0);
                 
             } else {
                 // constrain to the trailing edge of the previous view
                 horizontalViewConstraint = NSLayoutConstraint(item: previousLabel, attribute: .trailing, relatedBy: .equal, toItem: view, attribute: .leading, multiplier: 1.0, constant: 0);
             }
             let widthViewConstraint: NSLayoutConstraint = NSLayoutConstraint(item: view, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(width));
-            let heightViewConstraint: NSLayoutConstraint = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: viewHeight);
-            let verticalViewConstraint: NSLayoutConstraint = NSLayoutConstraint(item: contentView, attribute: .top, relatedBy: .equal, toItem: view, attribute: .top, multiplier: 1.0, constant: CGFloat(-distanceToTop));
+            let heightViewConstraint: NSLayoutConstraint = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: sectionViews[section], attribute: .height, multiplier: 0.5, constant: 0);
+            let verticalViewConstraint: NSLayoutConstraint = NSLayoutConstraint(item: titleLabel, attribute: .bottom, relatedBy: .equal, toItem: view, attribute: .top, multiplier: 1.0, constant: 0);
             
             
             // create the label that displays duration
@@ -204,33 +220,55 @@ class DataViewingViewController: UIViewController {
 
             
             // add all of the constraints
-            scrollView.addConstraints([centerHorizontalLabelConstraint, widthLabelConstraint, heightLabelConstraint, centerVerticalLabelConstraint, horizontalViewConstraint, widthViewConstraint, heightViewConstraint, verticalViewConstraint]);
+            scrollParentView.addConstraints([centerHorizontalLabelConstraint, widthLabelConstraint, heightLabelConstraint, centerVerticalLabelConstraint, horizontalViewConstraint, widthViewConstraint, heightViewConstraint, verticalViewConstraint]);
             
             // set current label as previous label
             previousLabel = label;
             
         }
         
-        // add the title label at the top
-        let titleLabel = UILabel();
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false;
-        titleLabel.text = title;
-        titleLabel.textAlignment = .center;
-        titleLabel.textColor = .black;
-        titleLabel.font = titleLabel.font.withSize(25);
-        scrollParentView.addSubview(titleLabel);
         
-        // constrain the title
-        let titleTopConstraint = NSLayoutConstraint(item: titleLabel, attribute: .top, relatedBy: .equal, toItem: scrollParentView, attribute: .top, multiplier: 1.0, constant: CGFloat(sectionPosition));
-        let titleHeightConstraint = NSLayoutConstraint(item: titleLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(sectionHeight*0.4));
-        let titleWidthConstraint = NSLayoutConstraint(item: titleLabel, attribute: .width, relatedBy: .equal, toItem: scrollParentView, attribute: .width, multiplier: 1.0, constant: 0);
-        let titleHorizontalConstraint = NSLayoutConstraint(item: titleLabel, attribute: .centerX, relatedBy: .equal, toItem: scrollParentView, attribute: .centerX, multiplier: 1.0, constant: 0);
-        scrollParentView.addConstraints([titleTopConstraint, titleHorizontalConstraint, titleWidthConstraint, titleHeightConstraint]);
-        
-        // set the end of the last label to the end of the content view
-        let endConstraint: NSLayoutConstraint = NSLayoutConstraint(item: previousLabel, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailing, multiplier: 1.0, constant: 0);
+        // set the end of the last label to the end of the sectionview
+        let endConstraint: NSLayoutConstraint = NSLayoutConstraint(item: previousLabel, attribute: .trailing, relatedBy: .equal, toItem: sectionViews[section], attribute: .trailing, multiplier: 1.0, constant: 0);
         scrollView.addConstraint(endConstraint);
 
+    }
+    
+    func addSectionViews() {
+        // iterate three times to make three uiviews
+        sectionViews = [];
+        var previousSectionView: UIView!
+        var constraintsArray: [NSLayoutConstraint]!
+        for index in 0...2 {
+            
+            // clear the constraintsArray
+            constraintsArray = [];
+            
+            // create the view
+            let sectionView = UIView();
+            sectionView.backgroundColor = .clear;
+            sectionView.translatesAutoresizingMaskIntoConstraints = false;
+            sectionViews.append(sectionView);
+            contentView.addSubview(sectionViews[sectionViews.count-1]);
+            
+            // constrain the view, but don't add the width in yet since that will be determined 
+            // when the data source views are added
+            constraintsArray.append(NSLayoutConstraint(item: contentView, attribute: .leading, relatedBy: .equal, toItem: sectionView, attribute: .leading, multiplier: 1.0, constant: 0));
+            if index == 0 {
+                constraintsArray.append(NSLayoutConstraint(item: contentView, attribute: .top, relatedBy: .equal, toItem: sectionView, attribute: .top, multiplier: 1.0, constant: 0));
+            } else if index == 1 {
+                constraintsArray.append(NSLayoutConstraint(item: previousSectionView, attribute: .bottom, relatedBy: .equal, toItem: sectionView, attribute: .top, multiplier: 1.0, constant: 0));
+                constraintsArray.append(NSLayoutConstraint(item: previousSectionView, attribute: .height, relatedBy: .equal, toItem: sectionView, attribute: .height, multiplier: 1.0, constant: 0));
+            } else {
+                constraintsArray.append(NSLayoutConstraint(item: previousSectionView, attribute: .bottom, relatedBy: .equal, toItem: sectionView, attribute: .top, multiplier: 1.0, constant: 0));
+                constraintsArray.append(NSLayoutConstraint(item: contentView, attribute: .bottom, relatedBy: .equal, toItem: sectionView, attribute: .bottom, multiplier: 1.0, constant: 0));
+                constraintsArray.append(NSLayoutConstraint(item: previousSectionView, attribute: .height, relatedBy: .equal, toItem: sectionView, attribute: .height, multiplier: 1.0, constant: 0));
+            }
+            constraintsArray.append(NSLayoutConstraint(item: sectionView, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailing, multiplier: 1.0, constant: 0))
+            scrollView.addConstraints(constraintsArray);
+            
+            previousSectionView = sectionView;
+        }
     }
 
     // print all data for debugging purposes
