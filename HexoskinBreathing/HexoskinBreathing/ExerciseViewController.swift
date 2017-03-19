@@ -106,6 +106,17 @@ class ExerciseViewController: UIViewController {
     var beepSound: URL!
     var audioPlayer: AVAudioPlayer!
     
+    // boolean used for checking when the exercise begins
+    var exerciseBegan: Bool = false;
+    
+    var previousAngle: Float = 0.0;
+    var rotatingClockwise: Bool!
+    var startOfCurrentAction: Double!
+    var ringActions: [breathingAction] = [];
+    var timeOfRingRelease: Double!
+    var exerciseEnded: Bool = false;
+    var lastActionCaptured: Bool = false;
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -171,14 +182,12 @@ class ExerciseViewController: UIViewController {
             let dist = distance(firstPoint: point, secondPoint: self.circleCenter);
             var angle = getAngle(centralPoint: self.circleCenter, secondPoint: point);
             
-            //print("Distance: \(dist)");
-            print("Angle: \(angle)");
-            print("Distance: \(dist)");
-            
             angle = angle - 90;
             if angle < 0 {
                 angle = angle + 360;
             }
+            
+            previousAngle = angle;
             
             if dist < 70 || dist > 105 {
                 sender.state = UIGestureRecognizerState.cancelled;
@@ -187,72 +196,163 @@ class ExerciseViewController: UIViewController {
                     self.imageView.transform = CGAffineTransform(rotationAngle: -(CGFloat(angle) * CGFloat(M_PI) / 180.0))
                 })
             }
+            
+            // save the time when the action began
+            if !exerciseEnded {
+                let date = Date();
+                startOfCurrentAction = date.timeIntervalSince1970;
+                if timeOfRingRelease != nil {
+                    // this last action was a pause with no indication
+                    // save the times and calculate the duration of the pause
+                    let action = breathingAction(action: "Pause", duration: startOfCurrentAction - timeOfRingRelease, start: timeOfRingRelease, end: startOfCurrentAction);
+                    ringActions.append(action);
+                }
+            }
+            
             break;
         case UIGestureRecognizerState.changed:
             let point: CGPoint = sender.location(in: view);
-            let dist = distance(firstPoint: point, secondPoint: self.circleCenter);
             var angle = getAngle(centralPoint: self.circleCenter, secondPoint: point);
-            
-            //print("Distance: \(dist)");
-//            print("Angle: \(angle)");
-//            print("Distance: \(dist)");
             
             angle = angle - 90;
             if angle < 0 {
                 angle = angle + 360;
             }
             
+            // check if moving cw or ccw
+            if exerciseEnded && !lastActionCaptured {
+                print("Exercise ended. Capturing last action.");
+                // exercise is over. record the last action and then prevent other actions from 
+                // being captured
+                lastActionCaptured = true;
+                if rotatingClockwise == true {
+                    let actionEndTime = Date().timeIntervalSince1970;
+                    let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
+                    ringActions.append(action);
+                } else {
+                    let actionEndTime = Date().timeIntervalSince1970;
+                    let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
+                    ringActions.append(action);
+                }
+            } else if previousAngle - angle > 0 || previousAngle - angle < -300 {
+                // clockwise
+                print("Clockwise");
+                if rotatingClockwise == nil {
+                    print("rotating clockwise is nil. beginning first action");
+                    // check to see if the exercise has started yet
+                    if exerciseBegan {
+                        // this is the first action
+                        rotatingClockwise = true;
+                        
+                        // save the start time here
+                        startOfCurrentAction = Date().timeIntervalSince1970;
+                    }
+                    
+                } else if rotatingClockwise == false {
+                    // the previous counter clockwise action just ended
+                    // save the times and calculate the duration
+                    rotatingClockwise = true;
+                    let date = Date();
+                    let actionEndTime = date.timeIntervalSince1970;
+                    let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
+                    ringActions.append(action);
+                    startOfCurrentAction = actionEndTime;
+                }
+                
+            } else {
+                // counter clockwise
+                print("Counter clockwise");
+                if rotatingClockwise == nil {
+                    // this is the first action
+                    rotatingClockwise = false;
+                    print("rotating clockwise is nil. beginning first action");
+                    
+                    // savethe start time here
+                    startOfCurrentAction = Date().timeIntervalSince1970;
+                    
+                } else if rotatingClockwise == true {
+                    // the previous clockwise action just ended
+                    // save the times and calculate the duration
+                    rotatingClockwise = false;
+                    let date = Date();
+                    let actionEndTime = date.timeIntervalSince1970;
+                    let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
+                    ringActions.append(action);
+                    startOfCurrentAction = actionEndTime;
+                }
+                
+            }
+            previousAngle = angle;
+            
             UIView.animate(withDuration: 0.1, animations: {
                 self.imageView.transform = CGAffineTransform(rotationAngle: -(CGFloat(angle) * CGFloat(M_PI) / 180.0))
             })
             break;
-        case UIGestureRecognizerState.ended:
-//            switch state {
-//            case 1:
-//                // ccw -> pause
-//                self.imageView.image = UIImage(named: "pause_wheel.png");
-//                state = 2;
-//                break;
-//            case 2:
-//                // pause -> cw
-//                self.imageView.image = UIImage(named: "cw_wheel.png");
-//                state = 3;
-//                break;
-//            case 3:
-//                // cw -> pause
-//                self.imageView.image = UIImage(named: "pause_wheel.png");
-//                state = 4
-//                break;
-//            case 4:
-//                // pause -> cww
-//                self.imageView.image = UIImage(named: "ccw_wheel.png");
-//                state = 1;
-//                break;
-//            default:
-//                print("state should be 1-4");
-//                state = 1;
-//                break;
-//            }
-            break;
-        case UIGestureRecognizerState.cancelled:
-            // This should not be reached
-            print("uipangesturerecognizer: state cancelled");
-            break;
         default:
-            // This should not be reached
-            print("uipangesturerecognizer: state not recognized");
+            // this default should catch state ended and cancelled
+            
+            // determine which action just terminated and save the info
+            if lastActionCaptured {
+                // nothing should happen ifthe last action has already been captured
+            } else if rotatingClockwise == nil {
+                // enters here if the action is ending before the exercise even started
+            } else if rotatingClockwise == true {
+                // the last action was clockwise
+                // save the info for clockwise
+                let date = Date();
+                let actionEndTime = date.timeIntervalSince1970;
+                let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
+                ringActions.append(action);
+                startOfCurrentAction = actionEndTime;
+                timeOfRingRelease = actionEndTime;
+                
+            } else if rotatingClockwise == false {
+                // the last action was counterclockwise
+                // save the info for counterclockwise
+                let date = Date();
+                let actionEndTime = date.timeIntervalSince1970;
+                let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
+                ringActions.append(action);
+                startOfCurrentAction = actionEndTime;
+                timeOfRingRelease = actionEndTime;
+                
+            }
+            
             break;
         }
+//        case UIGestureRecognizerState.ended:
+//            // determine which action just terminated and save the info
+//            if rotatingClockwise == nil {
+//                // this is most likely an error, but nothing should happen
+//            } else if rotatingClockwise == true {
+//                // the last action was clockwise
+//                // save the info for clockwise
+//                
+//            } else if rotatingClockwise == false {
+//                // the last action was counterclockwise 
+//                // save the info for counterclockwise
+//                
+//            }
+//            
+//            let date = Date();
+//            timeOfRingRelease = (date.timeIntervalSince1970)*256;
+//            
+//            break;
+//        case UIGestureRecognizerState.cancelled:
+//            // This should not be reached
+//            print("uipangesturerecognizer: state cancelled");
+//            break;
+//        default:
+//            // This should not be reached
+//            print("uipangesturerecognizer: state not recognized");
+//            break;
+//        }
     }
     
     func beginExercise() {
         // remove blurring view and begin button
         blurEffectView.removeFromSuperview();
         beginButton.removeFromSuperview();
-        
-        // store start timestamp
-        let date = Date();
-        startTimestamp = Int(date.timeIntervalSince1970*256);
         
         // initialize the instruction labels with the instructions and their durations
         // initialize the first/current instruction label with starting exercise indicator
@@ -313,6 +413,15 @@ class ExerciseViewController: UIViewController {
     
     func timerEnded() {
         
+        // check if this is the first time entering. if so, the exercise is just beginning, 
+        // so save the timestamp
+        if !exerciseBegan {
+            // store start timestamp
+            let date = Date();
+            startTimestamp = Int((date.timeIntervalSince1970-1)*256);
+            exerciseBegan = true; 
+        }
+        
         // start next timer here
         if getDisplayInPosition(position: 1).label.text != exerciseCompleteIndicator {
             self.currentTimerCounter = getDisplayInPosition(position: 1).duration;
@@ -326,6 +435,7 @@ class ExerciseViewController: UIViewController {
             
         } else {
             // Exercise has ended
+            exerciseEnded = true;
             counterTimer.invalidate();
             metronomeTimer.invalidate();
             
@@ -398,13 +508,14 @@ class ExerciseViewController: UIViewController {
         // instantiate the view controller from interface builder
         let storyboard = UIStoryboard(name: "Main", bundle: nil);
         let viewController = storyboard.instantiateViewController(withIdentifier: "resultsViewController") as? ResultViewerViewController;
-        
+                
         // send the timestamps to the next view controller for result viewing
         viewController?.startTimestamp = startTimestamp;
         viewController?.endTimestamp = endTimestamp;
         viewController?.accessToken = accessToken;
         viewController?.tokenType = tokenType;
-        viewController?.exercise = exercise; 
+        viewController?.exercise = exercise;
+        viewController?.ringActions = ringActions; 
         self.navigationController?.pushViewController(viewController!, animated: true);
     }
     

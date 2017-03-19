@@ -29,6 +29,7 @@ class ResultViewerViewController: UIViewController {
     var exercise: BreathingExercise!    // the exercise the user was supposed to complete
     var breathingActions: [breathingAction]! // the actions that were recorded during the exercise
     var performanceResults: [(completed: Bool, instruction: String, duration: Double)]! = nil;
+    var ringActions: [breathingAction]!
     
     @IBOutlet weak var instructionsLabel: UILabel!
     @IBOutlet weak var analyzeButton: UIButton!
@@ -48,8 +49,24 @@ class ResultViewerViewController: UIViewController {
         self.navigationItem.leftBarButtonItem = backButton;
         
         // initialize the instruction view
-        instructionsLabel.text = "1. Disconnect device from shirt\n\n2. Connect device to computer\n\n3. Sync data using HxServices"; 
-    
+        instructionsLabel.text = "1. Disconnect device from shirt\n\n2. Connect device to computer\n\n3. Sync data using HxServices";
+        
+        // print out ring actions for debugging
+        print("\nOriginal ring Actions:");
+        for action in ringActions {
+            print("\(action.action) \(action.duration)")
+        }
+        print("End of original ring actions.\n");
+        
+        // filter the ring actions
+        filterRingActions();
+        
+        // print out ring actions for debugging
+        print("\nFiltered ring Actions:");
+        for action in ringActions {
+            print("\(action.action) \(action.duration)")
+        }
+        print("End of filtered ring actions.\n");
     }
     
     // Function fired when the user presses the main menu button
@@ -189,12 +206,12 @@ class ResultViewerViewController: UIViewController {
             for index in 0...inhalationStarts.count {
                 // check if there is an inspiration
                 if index < expirationStarts.count {
-                    action = breathingAction(action: "Inhale", duration: (expirationStarts[index].0-inhalationStarts[index].0)/256, start: Double(inhalationStarts[index].0)/256, end: Double(expirationStarts[index].0)/256);
+                    action = breathingAction(action: "Inhale", duration: (expirationStarts[index].0-inhalationStarts[index].0)/256, start: Double(inhalationStarts[index].0)/256 - Double(startTimestamp)/256, end: Double(expirationStarts[index].0)/256 - Double(startTimestamp)/256);
                     breathingActions.append(action);
                     
                     // check if there is another expiration
                     if index + 1 < inhalationStarts.count {
-                        action = breathingAction(action: "Exhale", duration: (inhalationStarts[index+1].0-expirationStarts[index].0)/256, start: Double(expirationStarts[index].0/256), end: Double(inhalationStarts[index+1].0/256));
+                        action = breathingAction(action: "Exhale", duration: (inhalationStarts[index+1].0-expirationStarts[index].0)/256, start: Double(expirationStarts[index].0)/256 - Double(startTimestamp)/256, end: Double(inhalationStarts[index+1].0)/256 - Double(startTimestamp)/256);
                         breathingActions.append(action);
                     }
                 }
@@ -204,12 +221,12 @@ class ResultViewerViewController: UIViewController {
             for index in 0...expirationStarts.count {
                 // check if there is an inspiration
                 if index < inhalationStarts.count {
-                    action = breathingAction(action: "Exhale", duration: (inhalationStarts[index].0-expirationStarts[index].0)/256, start: Double(expirationStarts[index].0/256), end: Double(inhalationStarts[index].0/256));
+                    action = breathingAction(action: "Exhale", duration: (inhalationStarts[index].0-expirationStarts[index].0)/256, start: Double(expirationStarts[index].0)/256 - Double(startTimestamp)/256, end: Double(inhalationStarts[index].0)/256 - Double(startTimestamp)/256);
                     breathingActions.append(action);
                     
                     // check if there is another expiration
                     if index + 1 < inhalationStarts.count {
-                        action = breathingAction(action: "Inhale", duration: (expirationStarts[index+1].0-inhalationStarts[index].0)/256, start: Double(inhalationStarts[index].0/256), end: Double(expirationStarts[index+1].0/256));
+                        action = breathingAction(action: "Inhale", duration: (expirationStarts[index+1].0-inhalationStarts[index].0)/256, start: Double(inhalationStarts[index].0)/256 - Double(startTimestamp)/256, end: Double(expirationStarts[index+1].0)/256 - Double(startTimestamp)/256);
                         breathingActions.append(action);
                     }
                 }
@@ -227,7 +244,8 @@ class ResultViewerViewController: UIViewController {
     func analyzeExercisePerformance() {
         
         // save the start timestamp of the exercise in seconds
-        var instructionStart: Double = Double(self.startTimestamp)/256;
+//        var instructionStart: Double = Double(self.startTimestamp)/256;
+        var instructionStart: Double = 0.0;
         
         // prune the breathingActions array by removing actions that end before 1 second past the start
         var frontPruningComplete: Bool = false;
@@ -351,17 +369,137 @@ class ResultViewerViewController: UIViewController {
     
         }
         
-        // FOR TESTING PURPOSES - print out the results of the performance analysis
-//        for result in performanceResults {
-//            print("\(result.instruction) \(result.duration) was completed: \(result.completed)");
-//        }
-        
     }
     
     @IBAction func getResults(_ sender: Any) {
         
         print("get results");
         self.getRecordID();
+    }
+    
+    func filterRingActions() {
+        // remove actions with durations smaller than the threshold
+        // the filtering is removing small errors that occur with the ring interface
+        var index: Int = 0;
+        while index < ringActions.count {
+            
+            // if the next action is the same, absorb them together regardless of duration
+            if index < ringActions.count - 1 && ringActions[index].action == ringActions[index+1].action {
+                ringActions[index+1].duration += ringActions[index].duration;
+                ringActions[index+1].start = ringActions[index].start;
+                
+                // remove the current action
+                ringActions.remove(at: index);
+                
+                // index should not be incremented because the combined action
+                // still needs to be checked.
+            }
+            
+            // check that current action's duration is less than the threshold
+            else if ringActions[index].duration < 0.5 {
+                
+                // if it's the first action, absorb into the second action
+                if index == 0 {
+                    // absorb this action into the next action
+                    // verify that there are more than one action
+                    if ringActions.count > 1 {
+                        ringActions[1].duration += ringActions[index].duration;
+                        ringActions[1].start = ringActions[index].start;
+                        
+                        // then remove the first action
+                        ringActions.remove(at: index);
+                        
+                        // index should not be incremented since the action at index 1 is now
+                        // at index 0. So the action at index 0 still needs to be checked.
+                    }
+                }
+                
+                // if it's the last action, absorb into the second to last action
+                else if index == ringActions.count - 1 {
+                    // absorb this action into the previous action
+                    // verify that there are more than one action
+                    if ringActions.count > 1 {
+                        ringActions[index-1].duration += ringActions[index].duration;
+                        ringActions[index-1].end = ringActions[index].end;
+                        
+                        // then remove the current action
+                        ringActions.remove(at: index);
+                        
+                        // index should not be incremented because the last action was checked
+                        // so no more need to be checked. The loop will end now anyway.
+                    }
+                }
+                
+                // if the action is surrounded by two like actions, then absorb all three actions
+                // together. we can assume this action is not the first or last action.
+                else if ringActions[index-1].action == ringActions[index+1].action {
+                    // absorb all the current and the next action into the previous
+                    ringActions[index-1].duration += ringActions[index].duration + ringActions[index+1].duration;
+                    ringActions[index-1].end = ringActions[index+1].end;
+                    
+                    // remove the current and next actions
+                    ringActions.remove(at: index);
+                    ringActions.remove(at: index);
+                    
+                    // index should not be incremented since we assume the previous action's
+                    // duration was already larger than the threshold.
+                }
+                
+                // if action is a pause, absorb to the previous action.
+                else if ringActions[index].action == "Pause" {
+                    // absorb to the previous action
+                    ringActions[index-1].duration += ringActions[index].duration;
+                    ringActions[index-1].end = ringActions[index].end;
+                    
+                    // remove the current action
+                    ringActions.remove(at: index);
+                }
+                
+                // if one of the surrounding actions is a pause, then add the current action
+                // to the non-pause action. We can assume that they are not both pauses since
+                // that is taken care of in the above else-if.
+                else if ringActions[index-1].action == "Pause" {
+                    // absorb action with next action
+                    ringActions[index].action = ringActions[index+1].action;
+                    ringActions[index].duration += ringActions[index+1].duration;
+                    ringActions[index].end = ringActions[index+1].end;
+                    
+                    // now remove the next action
+                    ringActions.remove(at: index+1);
+                    
+                    // do not increment the index because the new combined action still needs 
+                    // to be checked
+                    
+                } else if ringActions[index+1].action == "Pause" {
+                    // absorb action with previous action
+                    ringActions[index-1].duration += ringActions[index].duration;
+                    ringActions[index-1].end = ringActions[index].end;
+                    
+                    // remove this action
+                    ringActions.remove(at: index);
+                    
+                    // do not increment the index
+                }
+                
+                // if it reaches else, there is a problem. Print out error.
+                else {
+                    print("ERROR: ring action filtering.");
+                }
+            }
+            
+            // The current action is accepted
+            else {
+                index += 1;
+            }
+            
+        }
+        
+    }
+    
+    func printActions(actions: [breathingAction]) {
+        for action in ringActions {
+            print("\(action.action) \(action.duration)")
+        }
     }
 
     

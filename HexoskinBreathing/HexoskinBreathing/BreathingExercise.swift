@@ -19,7 +19,7 @@ class BreathingExercise: NSObject {
         print("BreathingExercise"); 
         // create a blank breathing exercise here 
 //        instructions = [0 : ("Inhale", 2)];
-        instructions = [0 : ("Inhale", 4), 1 : ("Exhale", 4), 2 : ("Inhale", 6), 3 : ("Exhale", 6), 4 : ("Inhale", 6), 5 : ("Exhale", 6)];
+        instructions = [0 : ("Inhale", 4), 1 : ("Exhale", 4), 2 : ("Inhale", 6), 3 : ("Exhale", 6)];
         instructionCount = instructions.count;
         currentInstruction = -1;
     }
