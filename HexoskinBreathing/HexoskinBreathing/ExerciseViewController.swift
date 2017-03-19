@@ -112,16 +112,21 @@ class ExerciseViewController: UIViewController {
     var previousAngle: Float = 0.0;
     var rotatingClockwise: Bool!
     var startOfCurrentAction: Double!
-    var ringActions: [breathingAction] = [];
     var timeOfRingRelease: Double!
     var exerciseEnded: Bool = false;
     var lastActionCaptured: Bool = false;
+    var ringActions: [breathingAction] = []; 
+
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // set the title for the nav bar
         title = "Breathing Exercise";
+        
+        // initialize the ring action array
+        
         
         // initialize wheel image and add gesture recognizer
         imageView.image = UIImage(named: "pause_wheel.png");
@@ -204,7 +209,8 @@ class ExerciseViewController: UIViewController {
                 if timeOfRingRelease != nil {
                     // this last action was a pause with no indication
                     // save the times and calculate the duration of the pause
-                    let action = breathingAction(action: "Pause", duration: startOfCurrentAction - timeOfRingRelease, start: timeOfRingRelease, end: startOfCurrentAction);
+                    let action = breathingAction(action: "Pause", duration: startOfCurrentAction - timeOfRingRelease, start: timeOfRingRelease - Double(startTimestamp)/256, end: startOfCurrentAction - Double(startTimestamp)/256);
+                    print("Adding action: .began - \(action.action) \(action.duration)");
                     ringActions.append(action);
                 }
             }
@@ -220,67 +226,71 @@ class ExerciseViewController: UIViewController {
             }
             
             // check if moving cw or ccw
-            if exerciseEnded && !lastActionCaptured {
-                print("Exercise ended. Capturing last action.");
-                // exercise is over. record the last action and then prevent other actions from 
-                // being captured
-                lastActionCaptured = true;
-                if rotatingClockwise == true {
-                    let actionEndTime = Date().timeIntervalSince1970;
-                    let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
-                    ringActions.append(action);
-                } else {
-                    let actionEndTime = Date().timeIntervalSince1970;
-                    let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
-                    ringActions.append(action);
-                }
-            } else if previousAngle - angle > 0 || previousAngle - angle < -300 {
-                // clockwise
-                print("Clockwise");
-                if rotatingClockwise == nil {
-                    print("rotating clockwise is nil. beginning first action");
-                    // check to see if the exercise has started yet
-                    if exerciseBegan {
-                        // this is the first action
-                        rotatingClockwise = true;
+            if !lastActionCaptured {
+                if exerciseEnded {
+                    //                print("Exercise ended. Capturing last action.");
+                    // exercise is over. record the last action and then prevent other actions from
+                    // being captured
+                    lastActionCaptured = true;
+                    if rotatingClockwise == true {
+                        let actionEndTime = Date().timeIntervalSince1970;
+                        let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
+                        print("Adding action: .changed 1 - \(action.action) \(action.duration)");
+                        ringActions.append(action);
+                    } else {
+                        let actionEndTime = Date().timeIntervalSince1970;
+                        let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
+                        print("Adding action: .changed 2 - \(action.action) \(action.duration)");
+                        ringActions.append(action);
+                    }
+                } else if previousAngle - angle > 0 || previousAngle - angle < -300 {
+                    // clockwise
+                    if rotatingClockwise == nil {
+                        // check to see if the exercise has started yet
+                        if exerciseBegan {
+                            // this is the first action
+                            rotatingClockwise = true;
+                            
+                            // save the start time here
+                            startOfCurrentAction = Date().timeIntervalSince1970;
+                        }
                         
-                        // save the start time here
-                        startOfCurrentAction = Date().timeIntervalSince1970;
+                    } else if rotatingClockwise == false {
+                        // the previous counter clockwise action just ended
+                        // save the times and calculate the duration
+                        rotatingClockwise = true;
+                        let date = Date();
+                        let actionEndTime = date.timeIntervalSince1970;
+                        let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
+                        print("Adding action: .changed 3 - \(action.action) \(action.duration)");
+                        ringActions.append(action);
+                        startOfCurrentAction = actionEndTime;
                     }
                     
-                } else if rotatingClockwise == false {
-                    // the previous counter clockwise action just ended
-                    // save the times and calculate the duration
-                    rotatingClockwise = true;
-                    let date = Date();
-                    let actionEndTime = date.timeIntervalSince1970;
-                    let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
-                    ringActions.append(action);
-                    startOfCurrentAction = actionEndTime;
-                }
-                
-            } else {
-                // counter clockwise
-                print("Counter clockwise");
-                if rotatingClockwise == nil {
-                    // this is the first action
-                    rotatingClockwise = false;
-                    print("rotating clockwise is nil. beginning first action");
+                } else {
+                    // counter clockwise
+                    if rotatingClockwise == nil {
+                        if exerciseBegan {
+                            // this is the first action
+                            rotatingClockwise = false;
+                            
+                            // save the start time here
+                            startOfCurrentAction = Date().timeIntervalSince1970;
+                        }
+                        
+                    } else if rotatingClockwise == true {
+                        // the previous clockwise action just ended
+                        // save the times and calculate the duration
+                        rotatingClockwise = false;
+                        let date = Date();
+                        let actionEndTime = date.timeIntervalSince1970;
+                        let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
+                        print("Adding action: .changed 4 - \(action.action) \(action.duration)");
+                        ringActions.append(action);
+                        startOfCurrentAction = actionEndTime;
+                    }
                     
-                    // savethe start time here
-                    startOfCurrentAction = Date().timeIntervalSince1970;
-                    
-                } else if rotatingClockwise == true {
-                    // the previous clockwise action just ended
-                    // save the times and calculate the duration
-                    rotatingClockwise = false;
-                    let date = Date();
-                    let actionEndTime = date.timeIntervalSince1970;
-                    let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
-                    ringActions.append(action);
-                    startOfCurrentAction = actionEndTime;
                 }
-                
             }
             previousAngle = angle;
             
@@ -292,61 +302,37 @@ class ExerciseViewController: UIViewController {
             // this default should catch state ended and cancelled
             
             // determine which action just terminated and save the info
-            if lastActionCaptured {
-                // nothing should happen ifthe last action has already been captured
-            } else if rotatingClockwise == nil {
-                // enters here if the action is ending before the exercise even started
-            } else if rotatingClockwise == true {
-                // the last action was clockwise
-                // save the info for clockwise
-                let date = Date();
-                let actionEndTime = date.timeIntervalSince1970;
-                let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
-                ringActions.append(action);
-                startOfCurrentAction = actionEndTime;
-                timeOfRingRelease = actionEndTime;
-                
-            } else if rotatingClockwise == false {
-                // the last action was counterclockwise
-                // save the info for counterclockwise
-                let date = Date();
-                let actionEndTime = date.timeIntervalSince1970;
-                let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction, end: actionEndTime);
-                ringActions.append(action);
-                startOfCurrentAction = actionEndTime;
-                timeOfRingRelease = actionEndTime;
-                
+            if !lastActionCaptured {
+                if rotatingClockwise == nil {
+                    // enters here if the action is ending before the exercise even started
+                } else if rotatingClockwise == true {
+                    // the last action was clockwise
+                    // save the info for clockwise
+                    let date = Date();
+                    let actionEndTime = date.timeIntervalSince1970;
+                    let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
+                    print("Adding action: .default 1 - \(action.action) \(action.duration)");
+                    ringActions.append(action);
+                    startOfCurrentAction = actionEndTime;
+                    timeOfRingRelease = actionEndTime;
+                    
+                } else if rotatingClockwise == false {
+                    // the last action was counterclockwise
+                    // save the info for counterclockwise
+                    let date = Date();
+                    let actionEndTime = date.timeIntervalSince1970;
+                    let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
+                    ringActions.append(action);
+                    print("Adding action: .changed 2 - \(action.action) \(action.duration)");
+                    startOfCurrentAction = actionEndTime;
+                    timeOfRingRelease = actionEndTime;
+                    
+                }
             }
             
             break;
         }
-//        case UIGestureRecognizerState.ended:
-//            // determine which action just terminated and save the info
-//            if rotatingClockwise == nil {
-//                // this is most likely an error, but nothing should happen
-//            } else if rotatingClockwise == true {
-//                // the last action was clockwise
-//                // save the info for clockwise
-//                
-//            } else if rotatingClockwise == false {
-//                // the last action was counterclockwise 
-//                // save the info for counterclockwise
-//                
-//            }
-//            
-//            let date = Date();
-//            timeOfRingRelease = (date.timeIntervalSince1970)*256;
-//            
-//            break;
-//        case UIGestureRecognizerState.cancelled:
-//            // This should not be reached
-//            print("uipangesturerecognizer: state cancelled");
-//            break;
-//        default:
-//            // This should not be reached
-//            print("uipangesturerecognizer: state not recognized");
-//            break;
-//        }
+        
     }
     
     func beginExercise() {
@@ -365,19 +351,19 @@ class ExerciseViewController: UIViewController {
         instructionDisplays[0].timerLabel.textColor = currentInstructionTextColor;
 
         
-        var instruction: (complete: Bool, instruction: String, duration: Double);
+        var action: breathingAction!
         for index in 1...4 {
             // get the next instruction from the exercise
-            instruction = exercise.next();
+            action = exercise.next();
             
             instructionDisplays[index].label.font = instructionDisplays[index].label.font.withSize(queuedInstructionTextSize);
             instructionDisplays[index].timerLabel.font = instructionDisplays[index].timerLabel.font.withSize(queuedInstructionTextSize);
             instructionDisplays[index].label.textColor = queuedInstructionTextColor;
             instructionDisplays[index].timerLabel.textColor = queuedInstructionTextColor;
-            if !instruction.complete {
-                instructionDisplays[index].label.text = instruction.instruction;
-                instructionDisplays[index].timerLabel.text = String(format: "%.1f s", instruction.duration);
-                instructionDisplays[index].duration = instruction.duration;
+            if action.action != Strings.notAnAction {
+                instructionDisplays[index].label.text = action.action;
+                instructionDisplays[index].timerLabel.text = String(format: "%.1f s", action.duration);
+                instructionDisplays[index].duration = action.duration;
             } else {
                 instructionDisplays[index].label.text = exerciseCompleteIndicator;
                 instructionDisplays[index].timerLabel.text = "--";
@@ -476,17 +462,17 @@ class ExerciseViewController: UIViewController {
             self.view.layoutIfNeeded();
         }, completion: { (myBool) in
             // load up the hidden display with the next instruction and move it into the correct position at the top
-            let next = self.exercise.next();
+            let nextAction = self.exercise.next();
             if self.alreadyFinished == true {
                 self.getDisplayInPosition(position: 4).label.text = "";
                 self.getDisplayInPosition(position: 4).timerLabel.text = "";
-            } else if next.complete {
+            } else if nextAction.action == Strings.notAnAction {
                 self.getDisplayInPosition(position: 4).label.text = self.exerciseCompleteIndicator;
                 self.getDisplayInPosition(position: 4).timerLabel.text = "--";
                 self.alreadyFinished = true;
             } else {
-                self.getDisplayInPosition(position: 4).label.text = next.instruction;
-                self.getDisplayInPosition(position: 4).timerLabel.text = String(format: "%.1f s", next.duration);
+                self.getDisplayInPosition(position: 4).label.text = nextAction.action;
+                self.getDisplayInPosition(position: 4).timerLabel.text = String(format: "%.1f s", nextAction.duration);
             }
             
             self.getDisplayInPosition(position: 4).label.textColor = self.queuedInstructionTextColor;
@@ -495,7 +481,7 @@ class ExerciseViewController: UIViewController {
             self.getDisplayInPosition(position: 4).timerLabel.font = self.getDisplayInPosition(position: 4).label.font.withSize(self.queuedInstructionTextSize);
             
             // the following instruction is different bc modification of the struct requires direct access since function getDisplayInPosition returns a copy
-            self.instructionDisplays[self.getDisplayNumber(position: 4)].duration = next.duration;
+            self.instructionDisplays[self.getDisplayNumber(position: 4)].duration = nextAction.duration;
             
             self.getDisplayInPosition(position: 4).labelVerticalConstraint.constant += -250;
             self.view.layoutIfNeeded();
@@ -633,7 +619,6 @@ class ExerciseViewController: UIViewController {
     }
     
     func initInstructionDisplays() {
-        
         // initialize the array of instruction labels
         let display1 = InstructionDisplay(label: firstInstructionLabel, timerLabel: firstTimerLabel, labelVerticalConstraint: firstVerticalConstraint, labelHorizontalConstraint: firstHorizontalConstraint, timerLabelHorizontalConstraint: firstInstructionTimerHorizontalConstraint, duration: 0.0);
         let display2 = InstructionDisplay(label: secondInstructionLabel, timerLabel: secondTimerLabel, labelVerticalConstraint: secondVerticalConstraint, labelHorizontalConstraint: secondHorizontalConstraint, timerLabelHorizontalConstraint: secondInstructionTimerHorizontalConstraint, duration: 0.0);
@@ -651,6 +636,5 @@ class ExerciseViewController: UIViewController {
         }
         
     }
-    
     
 }

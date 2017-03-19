@@ -8,13 +8,6 @@
 
 import UIKit
 
-struct breathingAction {
-    var action: String = "";
-    var duration: Double = 0.0;
-    var start: Double = 0;
-    var end: Double = 0;
-}
-
 class AnalysisPreparationViewController: UIViewController {
     
     // variables that store the start and end timestamps for the exercise
@@ -27,8 +20,8 @@ class AnalysisPreparationViewController: UIViewController {
     var tokenType: String!
     
     var exercise: BreathingExercise!    // the exercise the user was supposed to complete
-    var breathingActions: [breathingAction]! // the actions that were recorded during the exercise
-    var performanceResults: [(completed: Bool, instruction: String, duration: Double)]! = nil;
+    var hexoskinData: [breathingAction]! // the actions that were recorded during the exercise
+    var exerciseData: [breathingAction]!
     var ringActions: [breathingAction]!
     
     @IBOutlet weak var instructionsLabel: UILabel!
@@ -51,22 +44,9 @@ class AnalysisPreparationViewController: UIViewController {
         // initialize the instruction view
         instructionsLabel.text = "1. Disconnect device from shirt\n\n2. Connect device to computer\n\n3. Sync data using HxServices";
         
-        // print out ring actions for debugging
-        print("\nOriginal ring Actions:");
-        for action in ringActions {
-            print("\(action.action) \(action.duration)")
-        }
-        print("End of original ring actions.\n");
-        
         // filter the ring actions
         filterRingActions();
         
-        // print out ring actions for debugging
-        print("\nFiltered ring Actions:");
-        for action in ringActions {
-            print("\(action.action) \(action.duration)")
-        }
-        print("End of filtered ring actions.\n");
     }
     
     // Function fired when the user presses the main menu button
@@ -96,7 +76,12 @@ class AnalysisPreparationViewController: UIViewController {
             do {
                 let dataDictionary = try JSONSerialization.jsonObject(with: data);
                 let dataResponse = try DataResponse(json: dataDictionary);
-                self.breathingActions = self.getExerciseBreathingData(inhalationStarts: dataResponse.returnedData["34"]!, expirationStarts: dataResponse.returnedData["35"]!);
+                self.hexoskinData = self.getExerciseBreathingData(inhalationStarts: dataResponse.returnedData["34"]!, expirationStarts: dataResponse.returnedData["35"]!);
+                
+                print("Hexoskin data in analysis prep:");
+                for action in self.hexoskinData {
+                    print("\(action.action) \(action.duration)");
+                }
                 
                 // at this point, the exercise and results are both stored as member variables.
                 // the following function uses those members to determine how well the user followed
@@ -109,8 +94,10 @@ class AnalysisPreparationViewController: UIViewController {
                     // the data will be displayed in a table
                     let storyboard = UIStoryboard(name: "Main", bundle: nil);
                     let viewController = storyboard.instantiateViewController(withIdentifier: "dataViewController") as? DataViewingViewController;
-                    viewController?.performanceResults = self.performanceResults;
-                    viewController?.results = self.breathingActions;
+                    viewController?.exerciseData = self.exerciseData;
+                    viewController?.hexoskinData = self.hexoskinData;
+                    viewController?.ringData = self.ringActions;
+                    viewController?.displayHexData = true;
                     self.navigationController?.pushViewController(viewController!, animated: true);
                 }
 
@@ -120,17 +107,6 @@ class AnalysisPreparationViewController: UIViewController {
             }
         }
         task.resume()
-    }
-    
-    func pushDataViewingController() {
-        print("pushing data viewing controller...");
-        // consolidate the data and prepare to send it to the next controller where
-        // the data will be displayed in a table
-        let storyboard = UIStoryboard(name: "Main", bundle: nil);
-        let viewController = storyboard.instantiateViewController(withIdentifier: "dataViewController") as? DataViewingViewController;
-        viewController?.performanceResults = self.performanceResults;
-        viewController?.results = breathingActions;
-        self.navigationController?.pushViewController(viewController!, animated: true);
     }
     
     func getRecordID() {
@@ -180,9 +156,6 @@ class AnalysisPreparationViewController: UIViewController {
             }
         }
         
-        // try clearing the cache
-//        URLCache.shared.removeAllCachedResponses();
-        
         recordTask.resume()
     }
     
@@ -196,8 +169,8 @@ class AnalysisPreparationViewController: UIViewController {
         }
         
         // initialize the return array
-        var breathingActions: [breathingAction] = [];
-        var action: breathingAction = breathingAction();
+        var hexoskinData: [breathingAction] = [];
+        var action: breathingAction!
         
         // first find out if the first action is an inhale or exhale
         let difference = inhalationStarts[0].0 - expirationStarts[0].0;
@@ -207,12 +180,12 @@ class AnalysisPreparationViewController: UIViewController {
                 // check if there is an inspiration
                 if index < expirationStarts.count {
                     action = breathingAction(action: "Inhale", duration: (expirationStarts[index].0-inhalationStarts[index].0)/256, start: Double(inhalationStarts[index].0)/256 - Double(startTimestamp)/256, end: Double(expirationStarts[index].0)/256 - Double(startTimestamp)/256);
-                    breathingActions.append(action);
+                    hexoskinData.append(action);
                     
                     // check if there is another expiration
                     if index + 1 < inhalationStarts.count {
                         action = breathingAction(action: "Exhale", duration: (inhalationStarts[index+1].0-expirationStarts[index].0)/256, start: Double(expirationStarts[index].0)/256 - Double(startTimestamp)/256, end: Double(inhalationStarts[index+1].0)/256 - Double(startTimestamp)/256);
-                        breathingActions.append(action);
+                        hexoskinData.append(action);
                     }
                 }
             }
@@ -222,12 +195,12 @@ class AnalysisPreparationViewController: UIViewController {
                 // check if there is an inspiration
                 if index < inhalationStarts.count {
                     action = breathingAction(action: "Exhale", duration: (inhalationStarts[index].0-expirationStarts[index].0)/256, start: Double(expirationStarts[index].0)/256 - Double(startTimestamp)/256, end: Double(inhalationStarts[index].0)/256 - Double(startTimestamp)/256);
-                    breathingActions.append(action);
+                    hexoskinData.append(action);
                     
                     // check if there is another expiration
                     if index + 1 < inhalationStarts.count {
                         action = breathingAction(action: "Inhale", duration: (expirationStarts[index+1].0-inhalationStarts[index].0)/256, start: Double(inhalationStarts[index].0)/256 - Double(startTimestamp)/256, end: Double(expirationStarts[index+1].0)/256 - Double(startTimestamp)/256);
-                        breathingActions.append(action);
+                        hexoskinData.append(action);
                     }
                 }
             }
@@ -237,30 +210,29 @@ class AnalysisPreparationViewController: UIViewController {
             return [];
         }
         
-        return breathingActions;
+        return hexoskinData;
     }
     
-    // use the exercise and breathingActions member variables to analyze the performance
+    // use the exercise and hexoskinData member variables to analyze the performance
     func analyzeExercisePerformance() {
         
         // save the start timestamp of the exercise in seconds
-//        var instructionStart: Double = Double(self.startTimestamp)/256;
-        var instructionStart: Double = 0.0;
+        var actionStart: Double = 0.0;
         
-        // prune the breathingActions array by removing actions that end before 1 second past the start
+        // prune the hexoskinData array by removing actions that end before 1 second past the start
         var frontPruningComplete: Bool = false;
         while !frontPruningComplete {
-            let action = breathingActions[0];
-            if Double(action.end) < instructionStart+1 {
+            let action = hexoskinData[0];
+            if Double(action.end) < actionStart+1 {
                 // remove the action since it ends before the exercise really starts
-                breathingActions.remove(at: 0);
+                hexoskinData.remove(at: 0);
             } else {
                 frontPruningComplete = true;
             }
         }
         
         // initialize a container to hold the performance results
-        performanceResults = [];
+        exerciseData = [];
         
         // reset the exercise so that we can easily iterate through it
         exercise.reset();
@@ -272,8 +244,8 @@ class AnalysisPreparationViewController: UIViewController {
         var storedAction: breathingAction! = nil;
         
         // iterate through the exercise
-        var currentInstruction = exercise.next();
-        while !currentInstruction.complete {
+        var currentAction = exercise.next();
+        while currentAction.action != Strings.notAnAction {
             
             // find the breathing action that has the latest start but still starts within 2 seconds +/- 
             // ...of the current instruction
@@ -281,30 +253,30 @@ class AnalysisPreparationViewController: UIViewController {
             storedAction = nil;
             var condition: Bool = true;
             while condition {
-                if index >= breathingActions.count {
+                if index >= hexoskinData.count {
                     // there are no more breathing actions
                     condition = false;
                     
                     // check to see if the previous loop found a candidate
                     if storedAction != nil {
                         // the storedAction's duration needs to be checked to see if it satisfies the instruction
-                        if Double(storedAction.duration) > currentInstruction.duration - Constants.breathLengthAllowableError && Double(storedAction.duration) < currentInstruction.duration + Constants.breathLengthAllowableError {
+                        if Double(storedAction.duration) > currentAction.duration - Constants.breathLengthAllowableError && Double(storedAction.duration) < currentAction.duration + Constants.breathLengthAllowableError {
                             // the storedAction satisfies the instruction
-                            performanceResults.append((true, currentInstruction.instruction, currentInstruction.duration));
+                            exerciseData.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.completed));
                         }
                     } else {
                         // no action satisfies the instruction
-                        performanceResults.append((false, currentInstruction.instruction, currentInstruction.duration));
+                        exerciseData.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.notCompleted));
                     }
                     
                 } else {
 
-                    let action = breathingActions[index];
-                    if Double(action.start) < instructionStart + Constants.startBreathSearchWindow && Double(action.start) > instructionStart - Constants.startBreathSearchWindow {
+                    let action = hexoskinData[index];
+                    if Double(action.start) < actionStart + Constants.startBreathSearchWindow && Double(action.start) > actionStart - Constants.startBreathSearchWindow {
                         // this is a candidate to be the action that satisfies the instruction
                         
                         // verify that the actions are both inhale or exhale
-                        if action.action == currentInstruction.instruction {
+                        if action.action == currentAction.action {
                             // instructions are the same
                             
                             // store this action
@@ -314,23 +286,23 @@ class AnalysisPreparationViewController: UIViewController {
                         // increment the index since we will be moving to the next action
                         index = index + 1;
                         
-                    } else if Double(action.start) > instructionStart + Constants.startBreathSearchWindow {
+                    } else if Double(action.start) > actionStart + Constants.startBreathSearchWindow {
                         // none of the following actions will satisfy the instruction
                         condition = false;
                         
                         // check to see if the previous loop found a candidate
                         if storedAction != nil {
                             // the storedAction's duration needs to be checked to see if it satisfies the instruction
-                            if Double(storedAction.duration) > currentInstruction.duration - Constants.breathLengthAllowableError && Double(storedAction.duration) < currentInstruction.duration + Constants.breathLengthAllowableError {
+                            if Double(storedAction.duration) > currentAction.duration - Constants.breathLengthAllowableError && Double(storedAction.duration) < currentAction.duration + Constants.breathLengthAllowableError {
                                 // the storedAction satisfies the instruction
-                                performanceResults.append((true, currentInstruction.instruction, currentInstruction.duration));
+                                exerciseData.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.completed));
                             } else {
                                 // the candidate action was not the proper duration
-                                performanceResults.append((false, currentInstruction.instruction, currentInstruction.duration));
+                                exerciseData.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.notCompleted));
                             }
                         } else {
                             // no action satisfies the instruction
-                            performanceResults.append((false, currentInstruction.instruction, currentInstruction.duration));
+                            exerciseData.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.notCompleted));
                         }
                     } else {
                         // the action started too early to be considered for the current instruction
@@ -340,33 +312,33 @@ class AnalysisPreparationViewController: UIViewController {
                 }
             }
             
-            instructionStart = instructionStart + currentInstruction.duration;
-            currentInstruction = exercise.next();
+            actionStart = actionStart + currentAction.duration;
+            currentAction = exercise.next();
         }
         
-        // prune the breathingActions array by removing actions that start after 1 second before the end of the last instruction
+        // prune the hexoskinData array by removing actions that start after 1 second before the end of the last instruction
         var backPruningComplete: Bool = false;
         index = 0;
         while !backPruningComplete {
             
             // verify the index is valid
-            if index >= breathingActions.count {
+            if index >= hexoskinData.count {
                 // invalid index
                 // exit the loop
                 backPruningComplete = true;
             } else {
                 // valid index
                 // verify that the action falls inside the exercise timestamps
-                let action = breathingActions[index];
-                if Double(action.start) > instructionStart - 1 {
+                let action = hexoskinData[index];
+                if Double(action.start) > actionStart - 1 {
                     // remove the action since it starts basically at the end of the exercise
-                    breathingActions.remove(at: index);
+                    hexoskinData.remove(at: index);
                 } else {
                     // if the action is not removed, increment the index
                     index = index + 1;
                 }
             }
-    
+            
         }
         
     }
@@ -378,6 +350,7 @@ class AnalysisPreparationViewController: UIViewController {
     }
     
     func filterRingActions() {
+        
         // remove actions with durations smaller than the threshold
         // the filtering is removing small errors that occur with the ring interface
         var index: Int = 0;

@@ -25,5 +25,13 @@ struct Constants {
 
 struct Strings {
     
+    // strings for breathing actions
+    static let inhale = "Inhale";
+    static let exhale = "Exhale";
+    static let pause = "Pause";
+    static let notAnAction = "Not an action";
+    static let completed = "completed";
+    static let notCompleted = "notCompleted";
+    static let ignored = "ignored"; 
     
 }

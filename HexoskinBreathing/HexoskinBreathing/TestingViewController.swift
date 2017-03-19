@@ -107,7 +107,7 @@ class TestingViewController: UIViewController {
         
         // initialize the return array
         var breathingActions: [breathingAction] = [];
-        var action: breathingAction = breathingAction();
+        var action: breathingAction!;
         
         // first find out if the first action is an inhale or exhale
         let difference = inhalationStarts[0].0 - expirationStarts[0].0;

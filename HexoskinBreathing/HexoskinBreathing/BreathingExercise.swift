@@ -8,42 +8,56 @@
 
 import UIKit
 
+struct breathingAction {
+    var action: String = "";
+    var duration: Double = 0.0;
+    var start: Double = 0;
+    var end: Double = 0;
+    var status: String = "";
+    
+    init(action: String, duration: Double, start: Double, end: Double) {
+        self.action = action;
+        self.duration = duration;
+        self.start = start;
+        self.end = end;
+        self.status = Strings.ignored;
+    }
+    
+    init(action: String, duration: Double, start: Double, end: Double, status: String) {
+        self.action = action;
+        self.duration = duration;
+        self.start = start;
+        self.end = end;
+        self.status = status;
+    }
+}
 
 class BreathingExercise: NSObject {
     
-    var instructionCount: Int!
-    var currentInstruction: Int!
-    var instructions: [Int : (instruction: String, duration: Double)]!
+    var actionCount: Int!
+    var currentAction: Int!
+    var actions: [breathingAction]!
     
     override init() {
-        print("BreathingExercise"); 
-        // create a blank breathing exercise here 
-//        instructions = [0 : ("Inhale", 2)];
-        instructions = [0 : ("Inhale", 4), 1 : ("Exhale", 4), 2 : ("Inhale", 6), 3 : ("Exhale", 6)];
-        instructionCount = instructions.count;
-        currentInstruction = -1;
-    }
-    
-    func next() -> (complete: Bool, instruction: String, duration: Double){
-        currentInstruction = currentInstruction + 1;
-        if self.currentInstruction >= instructionCount {
-            return (true, "Not an instruction", 0.0);
-        } else {
-            let next = instructions[currentInstruction];
-            return (false, (next?.instruction)!, (next?.duration)!);
-        }
-    }
-    
-    func stringAtIndex(index: Int) -> String {
+        // create a breathing exercise here
+        actions = [breathingAction(action: Strings.inhale, duration: 4, start: 0, end: 4), breathingAction(action: Strings.exhale, duration: 4, start: 4, end: 8)];
         
-        if index > instructionCount - 1 {
-            return "--";
+//        actions = [breathingAction(action: Strings.inhale, duration: 4, start: 0, end: 4), breathingAction(action: Strings.exhale, duration: 4, start: 4, end: 8), breathingAction(action: Strings.inhale, duration: 6, start: 8, end: 14), breathingAction(action: Strings.exhale, duration: 6, start: 14, end: 20), breathingAction(action: Strings.inhale, duration: 8, start: 20, end: 28), breathingAction(action: Strings.exhale, duration: 8, start: 28, end: 36)];
+        actionCount = actions.count;
+        currentAction = -1;
+    }
+    
+    func next() -> breathingAction {
+        currentAction = currentAction + 1;
+        if currentAction >= actionCount {
+            return breathingAction(action: Strings.notAnAction, duration: 0, start: 0, end: 0);
+        } else {
+            return actions[currentAction];
         }
-        return String.init(format: "%@ %.2f", (instructions[index]?.instruction)!, (instructions[index]?.duration)!);
     }
     
     func reset() {
-        currentInstruction = -1; 
+        currentAction = -1;
     }
 
 }
