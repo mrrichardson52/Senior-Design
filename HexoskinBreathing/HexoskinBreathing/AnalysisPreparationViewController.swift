@@ -1,5 +1,5 @@
 //
-//  ResultViewerViewController.swift
+//  AnalysisPreparationViewController.swift
 //  HexoskinBreathing
 //
 //  Created by Matthew Richardson on 2/1/17.
@@ -15,7 +15,7 @@ struct breathingAction {
     var end: Double = 0;
 }
 
-class ResultViewerViewController: UIViewController {
+class AnalysisPreparationViewController: UIViewController {
     
     // variables that store the start and end timestamps for the exercise
     var startTimestamp: Int = -1;
@@ -45,7 +45,7 @@ class ResultViewerViewController: UIViewController {
         // set background color to white
         self.view.backgroundColor = .white;
         
-        let backButton : UIBarButtonItem = UIBarButtonItem(title: "Main Menu", style: .plain, target: self, action: #selector(ResultViewerViewController.backButtonPressed));
+        let backButton : UIBarButtonItem = UIBarButtonItem(title: "Main Menu", style: .plain, target: self, action: #selector(AnalysisPreparationViewController.backButtonPressed));
         self.navigationItem.leftBarButtonItem = backButton;
         
         // initialize the instruction view
@@ -288,7 +288,7 @@ class ResultViewerViewController: UIViewController {
                     // check to see if the previous loop found a candidate
                     if storedAction != nil {
                         // the storedAction's duration needs to be checked to see if it satisfies the instruction
-                        if Double(storedAction.duration) > currentInstruction.duration - 2 && Double(storedAction.duration) < currentInstruction.duration + 2 {
+                        if Double(storedAction.duration) > currentInstruction.duration - Constants.breathLengthAllowableError && Double(storedAction.duration) < currentInstruction.duration + Constants.breathLengthAllowableError {
                             // the storedAction satisfies the instruction
                             performanceResults.append((true, currentInstruction.instruction, currentInstruction.duration));
                         }
@@ -300,7 +300,7 @@ class ResultViewerViewController: UIViewController {
                 } else {
 
                     let action = breathingActions[index];
-                    if Double(action.start) < instructionStart + 2 && Double(action.start) > instructionStart - 2 {
+                    if Double(action.start) < instructionStart + Constants.startBreathSearchWindow && Double(action.start) > instructionStart - Constants.startBreathSearchWindow {
                         // this is a candidate to be the action that satisfies the instruction
                         
                         // verify that the actions are both inhale or exhale
@@ -314,14 +314,14 @@ class ResultViewerViewController: UIViewController {
                         // increment the index since we will be moving to the next action
                         index = index + 1;
                         
-                    } else if Double(action.start) > instructionStart + 2 {
+                    } else if Double(action.start) > instructionStart + Constants.startBreathSearchWindow {
                         // none of the following actions will satisfy the instruction
                         condition = false;
                         
                         // check to see if the previous loop found a candidate
                         if storedAction != nil {
                             // the storedAction's duration needs to be checked to see if it satisfies the instruction
-                            if Double(storedAction.duration) > currentInstruction.duration - 2 && Double(storedAction.duration) < currentInstruction.duration + 2 {
+                            if Double(storedAction.duration) > currentInstruction.duration - Constants.breathLengthAllowableError && Double(storedAction.duration) < currentInstruction.duration + Constants.breathLengthAllowableError {
                                 // the storedAction satisfies the instruction
                                 performanceResults.append((true, currentInstruction.instruction, currentInstruction.duration));
                             } else {

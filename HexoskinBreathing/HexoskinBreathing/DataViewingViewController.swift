@@ -30,7 +30,6 @@ class DataViewingViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("View did load");
         
         self.view.backgroundColor = .white;
         
@@ -48,16 +47,14 @@ class DataViewingViewController: UIViewController {
         scrollView.translatesAutoresizingMaskIntoConstraints = false;
         contentView.translatesAutoresizingMaskIntoConstraints = false;
         
-        // set the font colors of the indicator views
-        inhaleIndicator.backgroundColor = UIColor(red:0.96, green:0.94, blue:0.78, alpha:1.0);
-        exhaleIndicator.backgroundColor = UIColor(red:0.78, green:0.87, blue:0.96, alpha:1.0);
-        noDataIndicator.backgroundColor = UIColor.lightGray;
+        // set the colors of the indicator views
+        inhaleIndicator.backgroundColor = Constants.inhaleIndicatorColor;
+        exhaleIndicator.backgroundColor = Constants.exhaleIndicatorColor;
+        noDataIndicator.backgroundColor = Constants.noDataIndicatorColor;
         inhaleIndicator.textColor = .black;
         exhaleIndicator.textColor = .black;
         noDataIndicator.textColor = .black;
         
-        // print out the content insets
-        print("Content inset top: \(scrollView.contentInset.top)");
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -90,7 +87,7 @@ class DataViewingViewController: UIViewController {
             // create the label that lists the action and duration
             let label = UILabel();
             label.font = label.font.withSize(15);
-            if instruction.duration >= 2.0 {
+            if instruction.duration >= Constants.resultsViewDurationThreshold {
                 // display the duration
                 label.text = "\(Int(instruction.duration))  s";
             } else {
@@ -177,7 +174,7 @@ class DataViewingViewController: UIViewController {
             // create the label that lists the action and duration
             let label = UILabel();
             label.font = label.font.withSize(15);
-            if action.duration >= 2.0 {
+            if action.duration >= Constants.resultsViewDurationThreshold {
                 let formattedDuration: String = String.init(format: "%.1f s", action.duration);
                 label.text = formattedDuration;
             } else {

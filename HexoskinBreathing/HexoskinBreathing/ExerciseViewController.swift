@@ -418,7 +418,7 @@ class ExerciseViewController: UIViewController {
         if !exerciseBegan {
             // store start timestamp
             let date = Date();
-            startTimestamp = Int((date.timeIntervalSince1970-1)*256);
+            startTimestamp = Int((date.timeIntervalSince1970-Constants.exerciseStartTimeAdjustment)*256);
             exerciseBegan = true; 
         }
         
@@ -507,7 +507,7 @@ class ExerciseViewController: UIViewController {
         
         // instantiate the view controller from interface builder
         let storyboard = UIStoryboard(name: "Main", bundle: nil);
-        let viewController = storyboard.instantiateViewController(withIdentifier: "resultsViewController") as? ResultViewerViewController;
+        let viewController = storyboard.instantiateViewController(withIdentifier: "analysisPreparationViewController") as? AnalysisPreparationViewController;
                 
         // send the timestamps to the next view controller for result viewing
         viewController?.startTimestamp = startTimestamp;

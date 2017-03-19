@@ -300,10 +300,10 @@
             </objects>
             <point key="canvasLocation" x="1449" y="-421"/>
         </scene>
-        <!--Result Viewer View Controller-->
+        <!--Analysis Preparation View Controller-->
         <scene sceneID="Ngl-Ic-5G6">
             <objects>
-                <viewController storyboardIdentifier="resultsViewController" id="aL9-aB-Kun" customClass="ResultViewerViewController" customModule="HexoskinBreathing" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="analysisPreparationViewController" id="aL9-aB-Kun" customClass="AnalysisPreparationViewController" customModule="HexoskinBreathing" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="uP5-RV-ebR"/>
                         <viewControllerLayoutGuide type="bottom" id="WWl-D6-vKk"/>
