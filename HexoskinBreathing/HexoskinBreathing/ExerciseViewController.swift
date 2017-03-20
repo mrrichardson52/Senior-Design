@@ -176,6 +176,14 @@ class ExerciseViewController: UIViewController {
         if counterTimer != nil {
             counterTimer.invalidate();
         }
+        if metronomeTimer != nil {
+            metronomeTimer.invalidate();
+        }
+        
+        // stop the audioPlayer
+        if audioPlayer.isPlaying {
+            audioPlayer.stop()
+        }
     }
     
     func imageViewPanned(sender:UIPanGestureRecognizer) {
@@ -209,8 +217,7 @@ class ExerciseViewController: UIViewController {
                 if timeOfRingRelease != nil {
                     // this last action was a pause with no indication
                     // save the times and calculate the duration of the pause
-                    let action = breathingAction(action: "Pause", duration: startOfCurrentAction - timeOfRingRelease, start: timeOfRingRelease - Double(startTimestamp)/256, end: startOfCurrentAction - Double(startTimestamp)/256);
-                    print("Adding action: .began - \(action.action) \(action.duration)");
+                    let action = breathingAction(action: "Pause", duration: startOfCurrentAction - timeOfRingRelease, start: timeOfRingRelease - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
                     ringActions.append(action);
                 }
             }
@@ -228,19 +235,16 @@ class ExerciseViewController: UIViewController {
             // check if moving cw or ccw
             if !lastActionCaptured {
                 if exerciseEnded {
-                    //                print("Exercise ended. Capturing last action.");
                     // exercise is over. record the last action and then prevent other actions from
                     // being captured
                     lastActionCaptured = true;
                     if rotatingClockwise == true {
                         let actionEndTime = Date().timeIntervalSince1970;
-                        let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
-                        print("Adding action: .changed 1 - \(action.action) \(action.duration)");
+                        let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
                         ringActions.append(action);
                     } else {
                         let actionEndTime = Date().timeIntervalSince1970;
-                        let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
-                        print("Adding action: .changed 2 - \(action.action) \(action.duration)");
+                        let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
                         ringActions.append(action);
                     }
                 } else if previousAngle - angle > 0 || previousAngle - angle < -300 {
@@ -261,8 +265,7 @@ class ExerciseViewController: UIViewController {
                         rotatingClockwise = true;
                         let date = Date();
                         let actionEndTime = date.timeIntervalSince1970;
-                        let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
-                        print("Adding action: .changed 3 - \(action.action) \(action.duration)");
+                        let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
                         ringActions.append(action);
                         startOfCurrentAction = actionEndTime;
                     }
@@ -284,8 +287,7 @@ class ExerciseViewController: UIViewController {
                         rotatingClockwise = false;
                         let date = Date();
                         let actionEndTime = date.timeIntervalSince1970;
-                        let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
-                        print("Adding action: .changed 4 - \(action.action) \(action.duration)");
+                        let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
                         ringActions.append(action);
                         startOfCurrentAction = actionEndTime;
                     }
@@ -310,8 +312,7 @@ class ExerciseViewController: UIViewController {
                     // save the info for clockwise
                     let date = Date();
                     let actionEndTime = date.timeIntervalSince1970;
-                    let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
-                    print("Adding action: .default 1 - \(action.action) \(action.duration)");
+                    let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
                     ringActions.append(action);
                     startOfCurrentAction = actionEndTime;
                     timeOfRingRelease = actionEndTime;
@@ -321,9 +322,8 @@ class ExerciseViewController: UIViewController {
                     // save the info for counterclockwise
                     let date = Date();
                     let actionEndTime = date.timeIntervalSince1970;
-                    let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256, end: actionEndTime - Double(startTimestamp)/256);
+                    let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
                     ringActions.append(action);
-                    print("Adding action: .changed 2 - \(action.action) \(action.duration)");
                     startOfCurrentAction = actionEndTime;
                     timeOfRingRelease = actionEndTime;
                     
@@ -385,7 +385,6 @@ class ExerciseViewController: UIViewController {
         // begin timer
         instructionTimer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(ExerciseViewController.timerEnded), userInfo: nil, repeats: false);
         currentTimerCounter = 3.0;
-//        timerLabel.text = "3.0";
         counterTimer = Timer.scheduledTimer(timeInterval: TimeInterval(countDownInterval), target: self, selector: #selector(ExerciseViewController.countdown), userInfo: nil, repeats: true);
         
         // begin another timer that plays the beep sound every second
@@ -412,7 +411,6 @@ class ExerciseViewController: UIViewController {
         if getDisplayInPosition(position: 1).label.text != exerciseCompleteIndicator {
             self.currentTimerCounter = getDisplayInPosition(position: 1).duration;
             instructionTimer = Timer.scheduledTimer(timeInterval: TimeInterval(getDisplayInPosition(position: 1).duration), target: self, selector: #selector(ExerciseViewController.timerEnded), userInfo: nil, repeats: false);
-//            print("Timer scheduled for: \(getDisplayInPosition(position: 1).duration) seconds"); 
             
             // reset the countdown timer here
             counterTimer.invalidate();
@@ -429,7 +427,7 @@ class ExerciseViewController: UIViewController {
             let date = Date();
             endTimestamp = Int(date.timeIntervalSince1970*256);
             
-//            // delay for 2 seconds before going to the results controller
+            // delay for 2 seconds before going to the results controller
             Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(ExerciseViewController.pushResultsController), userInfo: nil, repeats: false);
             
         }
