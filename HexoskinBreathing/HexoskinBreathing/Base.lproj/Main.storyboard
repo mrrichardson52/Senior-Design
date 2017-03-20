@@ -300,10 +300,10 @@
             </objects>
             <point key="canvasLocation" x="1449" y="-421"/>
         </scene>
-        <!--Analysis Preparation View Controller-->
+        <!--Data Picker-->
         <scene sceneID="Ngl-Ic-5G6">
             <objects>
-                <viewController storyboardIdentifier="analysisPreparationViewController" id="aL9-aB-Kun" customClass="AnalysisPreparationViewController" customModule="HexoskinBreathing" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="analysisPreparationViewController" title="Data Picker" id="aL9-aB-Kun" customClass="AnalysisPreparationViewController" customModule="HexoskinBreathing" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="uP5-RV-ebR"/>
                         <viewControllerLayoutGuide type="bottom" id="WWl-D6-vKk"/>
@@ -312,60 +312,75 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Instructions" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sIl-bP-XFp">
-                                <rect key="frame" x="45" y="131" width="314" height="201"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="201" id="3NM-sV-m4L"/>
-                                    <constraint firstAttribute="width" constant="314" id="ATO-B5-FRe"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="* Sync data with your Hexoskin account using HxServices before continuing" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sIl-bP-XFp">
+                                <rect key="frame" x="31" y="359" width="331" height="76"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Exercise Complete" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tMZ-Vc-xdr">
-                                <rect key="frame" x="78" y="58" width="219" height="39"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="39" id="3KC-Np-YFq"/>
-                                    <constraint firstAttribute="width" constant="219" id="rWE-1c-06g"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="26"/>
-                                <color key="textColor" red="0.23086064449999999" green="0.46815543199999998" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="65s-6B-h5S">
-                                <rect key="frame" x="16" y="493" width="312" height="48"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="65s-6B-h5S">
+                                <rect key="frame" x="31" y="433" width="312" height="48"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="1" green="0.40000000600000002" blue="0.40000000600000002" alpha="1" colorSpace="calibratedRGB"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="312" id="5I4-7j-lFR"/>
-                                    <constraint firstAttribute="height" constant="48" id="H47-3Z-nDS"/>
-                                </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="25"/>
-                                <state key="normal" title="Data uploading complete">
+                                <state key="normal" title="Analyze">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
                                     <action selector="getResults:" destination="aL9-aB-Kun" eventType="touchUpInside" id="lpU-YT-kaR"/>
                                 </connections>
                             </button>
+                            <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="CRa-uR-EmM">
+                                <rect key="frame" x="0.0" y="88" width="176" height="225"/>
+                                <subviews>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ioa-Tt-5Kz">
+                                        <rect key="frame" x="32" y="8" width="95" height="40"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                        <state key="normal" title="Hexoskin"/>
+                                    </button>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="hexoskinShirtTransparent.png" translatesAutoresizingMaskIntoConstraints="NO" id="Cwl-kA-7IQ">
+                                        <rect key="frame" x="22" y="76" width="114" height="114"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="100" id="8sq-Oc-Y8G"/>
+                                            <constraint firstAttribute="width" constant="77" id="NrG-Te-A84"/>
+                                        </constraints>
+                                    </imageView>
+                                </subviews>
+                            </view>
+                            <view contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="88F-4J-vPE">
+                                <rect key="frame" x="167" y="88" width="240" height="255"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="cw_wheel.png" translatesAutoresizingMaskIntoConstraints="NO" id="7k6-IL-vXI">
+                                        <rect key="frame" x="50" y="88" width="108" height="102"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="100" id="35R-il-6LA"/>
+                                            <constraint firstAttribute="height" constant="100" id="mWO-EB-dr6"/>
+                                        </constraints>
+                                    </imageView>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iMo-W4-pfQ">
+                                        <rect key="frame" x="50" y="8" width="79" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                        <state key="normal" title="Ring"/>
+                                    </button>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="sIl-bP-XFp" firstAttribute="centerX" secondItem="uaP-Mv-Arn" secondAttribute="centerX" id="D1S-Bu-bXJ"/>
-                            <constraint firstItem="sIl-bP-XFp" firstAttribute="top" secondItem="tMZ-Vc-xdr" secondAttribute="bottom" constant="10" id="JWh-dc-HmD"/>
-                            <constraint firstItem="tMZ-Vc-xdr" firstAttribute="centerX" secondItem="uaP-Mv-Arn" secondAttribute="centerX" id="OIm-f4-63e"/>
-                            <constraint firstItem="65s-6B-h5S" firstAttribute="centerX" secondItem="uaP-Mv-Arn" secondAttribute="centerX" id="eMR-lJ-oHz"/>
-                            <constraint firstItem="tMZ-Vc-xdr" firstAttribute="top" secondItem="uP5-RV-ebR" secondAttribute="bottom" constant="30" id="lcJ-sk-cZp"/>
-                            <constraint firstItem="65s-6B-h5S" firstAttribute="top" secondItem="sIl-bP-XFp" secondAttribute="bottom" constant="30" id="toe-Wt-Y2L"/>
+                            <constraint firstItem="CRa-uR-EmM" firstAttribute="leading" secondItem="uaP-Mv-Arn" secondAttribute="leading" id="U08-US-h7O"/>
+                            <constraint firstAttribute="trailing" secondItem="88F-4J-vPE" secondAttribute="trailing" id="Ucn-9w-Xd9"/>
+                            <constraint firstItem="88F-4J-vPE" firstAttribute="width" secondItem="CRa-uR-EmM" secondAttribute="width" id="bun-dR-kZ0"/>
+                            <constraint firstItem="88F-4J-vPE" firstAttribute="leading" secondItem="CRa-uR-EmM" secondAttribute="trailing" id="kDt-gB-f5b"/>
                         </constraints>
                     </view>
-                    <connections>
-                        <outlet property="analyzeButton" destination="65s-6B-h5S" id="gRW-fI-aDb"/>
-                        <outlet property="instructionsLabel" destination="sIl-bP-XFp" id="jH1-jy-yEn"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="n4c-L4-oUC" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2221.5999999999999" y="-352.17391304347831"/>
+            <point key="canvasLocation" x="2140" y="-352.17391304347831"/>
         </scene>
         <!--Data Viewing View Controller-->
         <scene sceneID="lMF-lz-mKl">
@@ -778,4 +793,8 @@
             <point key="canvasLocation" x="1477.5999999999999" y="445.72713643178412"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="cw_wheel.png" width="480" height="480"/>
+        <image name="hexoskinShirtTransparent.png" width="100" height="77"/>
+    </resources>
 </document>

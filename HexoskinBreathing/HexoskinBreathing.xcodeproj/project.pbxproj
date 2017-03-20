@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		342718671E7F570A0038BD77 /* hexoskinShirtTransparent.png in Resources */ = {isa = PBXBuildFile; fileRef = 342718661E7F570A0038BD77 /* hexoskinShirtTransparent.png */; };
 		3446A2AD1E7B2DA50036342C /* DataViewingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */; };
 		3446A2B21E7B3C1B0036342C /* ChildTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2B11E7B3C1B0036342C /* ChildTableViewCell.swift */; };
 		3446A2B41E7B3C5A0036342C /* HeaderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2B31E7B3C5A0036342C /* HeaderTableViewCell.swift */; };
@@ -36,6 +37,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		342718661E7F570A0038BD77 /* hexoskinShirtTransparent.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hexoskinShirtTransparent.png; sourceTree = "<group>"; };
 		3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataViewingViewController.swift; sourceTree = "<group>"; };
 		3446A2B11E7B3C1B0036342C /* ChildTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChildTableViewCell.swift; sourceTree = "<group>"; };
 		3446A2B31E7B3C5A0036342C /* HeaderTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeaderTableViewCell.swift; sourceTree = "<group>"; };
@@ -92,6 +94,7 @@
 			children = (
 				3484D2611E42764400D162B7 /* beep.wav */,
 				3446A2BF1E7CF9B70036342C /* greencheck.png */,
+				342718661E7F570A0038BD77 /* hexoskinShirtTransparent.png */,
 				3446A2C01E7CF9B70036342C /* redx.png */,
 				347501FC1DCE2C4D002E6465 /* HexoskinBreathing */,
 				347501FB1DCE2C4D002E6465 /* Products */,
@@ -209,6 +212,7 @@
 				3446A2B81E7B3D990036342C /* DataViewerChildCellView.xib in Resources */,
 				3475022E1DD04FE6002E6465 /* pause_wheel.png in Resources */,
 				3446A2B61E7B3D8D0036342C /* DataViewerHeaderCellView.xib in Resources */,
+				342718671E7F570A0038BD77 /* hexoskinShirtTransparent.png in Resources */,
 				347502081DCE2C4D002E6465 /* LaunchScreen.storyboard in Resources */,
 				3475022C1DD04FE6002E6465 /* ccw_wheel.png in Resources */,
 				3475022D1DD04FE6002E6465 /* cw_wheel.png in Resources */,

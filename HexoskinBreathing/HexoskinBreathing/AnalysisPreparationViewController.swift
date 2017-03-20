@@ -10,6 +10,8 @@ import UIKit
 
 class AnalysisPreparationViewController: UIViewController {
     
+    
+    
     // variables that store the start and end timestamps for the exercise
     var startTimestamp: Int = -1;
     var endTimestamp: Int = -1;
@@ -24,8 +26,8 @@ class AnalysisPreparationViewController: UIViewController {
     var exerciseData: [breathingAction]!
     var ringActions: [breathingAction]!
     
-    @IBOutlet weak var instructionsLabel: UILabel!
-    @IBOutlet weak var analyzeButton: UIButton!
+    
+    
     
     // the reference to the task that gets the record id
     var recordTask: URLSessionDataTask! = nil;
