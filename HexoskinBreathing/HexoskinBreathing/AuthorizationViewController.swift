@@ -1,5 +1,5 @@
 //
-//  HomeViewController.swift
+//  AuthorizationViewController.swift
 //  HexoskinBreathing
 //
 //  Created by Matthew Richardson on 11/5/16.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class HomeViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate {
+class AuthorizationViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate {
     
     @IBOutlet weak var clientIdTextField: UITextField!
     @IBOutlet weak var nextButton: UIButton!
@@ -22,7 +22,7 @@ class HomeViewController: UIViewController, UITextFieldDelegate, UIGestureRecogn
         title = "Breathing Coach Login";
         
         clientIdTextField.delegate = self;
-        let tapRecognizer: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(HomeViewController.dismissKeyboard));
+        let tapRecognizer: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(AuthorizationViewController.dismissKeyboard));
         view.addGestureRecognizer(tapRecognizer);
         clientId = "LUXOh5X5mc3B4lT1jQLTZU6lkA08Ha";
     }

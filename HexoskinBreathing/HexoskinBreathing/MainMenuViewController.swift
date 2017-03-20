@@ -142,7 +142,9 @@ class MainMenuViewController: UIViewController {
     override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
         if identifier == "testingSegue" || identifier == "performExerciseSegue" {
             if !signedIn {
-                print("unauthorized. please sign in."); 
+                // indicate unauthorized
+                let alert = UIAlertController(title: "Unauthorized", message: "Please sign in.", preferredStyle: .alert)
+                self.present(alert, animated: true, completion: nil)
                 return false;
             }
         }
@@ -158,11 +160,7 @@ class MainMenuViewController: UIViewController {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "testingSegue" {
-            let destination = segue.destination as! TestingViewController;
-            destination.accessToken = accessToken;
-            destination.tokenType = tokenType;
-        } else if segue.identifier == "performExerciseSegue" {
+        if segue.identifier == "performExerciseSegue" {
             let destination = segue.destination as! ExerciseViewController;
             destination.accessToken = accessToken;
             destination.tokenType = tokenType;

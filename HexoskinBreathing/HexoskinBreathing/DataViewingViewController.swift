@@ -45,7 +45,6 @@ class DataViewingViewController: UIViewController {
         self.title = "Analysis"; 
         
         // remove the back button here
-//        self.navigationItem.setHidesBackButton(true, animated: false);
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(DataViewingViewController.donePressed));
         
         // prepare the views for autolayout
@@ -60,19 +59,11 @@ class DataViewingViewController: UIViewController {
         exhaleIndicator.textColor = .black;
         noDataIndicator.textColor = .black;
         
-        // print data before equalizing
-//        print("BEFORE EQUALIZING");
-//        printAllData();
-        
         // prepare the data for display
         // only equalize if ring or hexoskin is showing
         if displayRingData || displayHexData {
             equalizeDataSources();
         }
-        
-        // print data after equalizing
-//        print("\nAFTER EQUALIZING");
-//        printAllData();
         
     }
     
@@ -294,32 +285,11 @@ class DataViewingViewController: UIViewController {
             previousSectionView = sectionView;
         }
     }
-
-//    // print all data for debugging purposes
-//    func printAllData() {
-//        print("\nExercise Data:");
-//        for action in exerciseData {
-//            print("\(action.action) \(action.duration) start: \(action.start) end: \(action.end)");
-//        }
-//        print("\nHexoskin Data:");
-//        for action in hexoskinData {
-//            print("\(action.action) \(action.duration) start: \(action.start) end: \(action.end)");
-//        }
-//        print("\nRing Data:");
-//        for action in ringData {
-//            print("\(action.action) \(action.duration) start: \(action.start) end: \(action.end)");
-//        }
-//    }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator);
-        print("Before rotation");
-        coordinator.animate(alongsideTransition: {
+        coordinator.animate(alongsideTransition: nil, completion: {
             _ in
-            print("During rotation");
-        }, completion: {
-            _ in
-            print("After rotation");
             DispatchQueue.main.async {
                 self.scrollParentView.layoutSubviews()
             }

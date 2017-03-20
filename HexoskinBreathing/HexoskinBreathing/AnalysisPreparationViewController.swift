@@ -51,7 +51,7 @@ class AnalysisPreparationViewController: UIViewController {
         self.view.backgroundColor = .white;
         
         let cancelButton : UIBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(AnalysisPreparationViewController.cancelButtonPressed));
-        self.navigationItem.rightBarButtonItem = cancelButton;
+        self.navigationItem.leftBarButtonItem = cancelButton;
         self.navigationItem.setHidesBackButton(true, animated: false); 
         
         // initialize the instruction view
@@ -126,11 +126,6 @@ class AnalysisPreparationViewController: UIViewController {
                 let dataResponse = try DataResponse(json: dataDictionary);
                 self.hexoskinData = self.getExerciseBreathingData(inhalationStarts: dataResponse.returnedData["34"]!, expirationStarts: dataResponse.returnedData["35"]!);
                 
-                print("Hexoskin data in analysis prep:");
-                for action in self.hexoskinData {
-                    print("\(action.action) \(action.duration)");
-                }
-                
                 // at this point, the exercise and results are both stored as member variables.
                 // the following function uses those members to determine how well the user followed
                 // the prescribed exercise. it saves the r
@@ -172,8 +167,6 @@ class AnalysisPreparationViewController: UIViewController {
     
     func getRecordID() {
         
-        print("get record id");
-        
         // construct the request
         let request = ApiHelper.generateRequest(url: "https://api.hexoskin.com/api/record/", query: ["end__gte":String(startTimestamp) ,"start__lte":String(endTimestamp)], headers: ["Authorization" : "\(tokenType!) \(accessToken!)"]);
         
@@ -191,9 +184,7 @@ class AnalysisPreparationViewController: UIViewController {
             
             do {
                 let dataDictionary = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:Any];
-//                print(dataDictionary?.description);
                 let objectsArray = dataDictionary?["objects"] as? [Any];
-                print("Objects Array Count: \(objectsArray?.count)"); 
                 if objectsArray?.count == 1 {
                     // there is only 1 record so the filtering worked
                     let recordDictionary = objectsArray?[0] as? [String:Any];
@@ -201,14 +192,10 @@ class AnalysisPreparationViewController: UIViewController {
                     self.recordID = id!;
                     self.fetchResults();
                 } else {
-                    print("Could not get record. Objects returned: \(objectsArray?.count)");
                     // present alert on main thread
                     DispatchQueue.main.async {
                         // indicate here that the data has not been uploaded correctly
                         let alert = UIAlertController(title: "Data not found", message: "Ensure that the data has been uploaded to the Hexoskin Services using HxServices.", preferredStyle: .alert)
-                        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: {action in
-                            print(self.recordTask.description);
-                        }))
                         self.present(alert, animated: true, completion: nil)
                     }
                 }
@@ -538,12 +525,6 @@ class AnalysisPreparationViewController: UIViewController {
         }
         
     }
-    
-    func printActions(actions: [breathingAction]) {
-        for action in ringActions {
-            print("\(action.action) \(action.duration)")
-        }
-    }
 
     @IBAction func hexoskinButtonPressed(_ sender: Any) {
         setHexoskinSelection(selected: !hexoskinSelected);
@@ -554,12 +535,10 @@ class AnalysisPreparationViewController: UIViewController {
     }
 
     func hexoskinImagePressed(sender: UITapGestureRecognizer) {
-        print("hexoskinImagePressed");
         setHexoskinSelection(selected: !hexoskinSelected);
     }
     
     func ringImagePressed(sender: UITapGestureRecognizer) {
-        print("ringImagePressed"); 
         setRingSelection(selected: !ringSelected);
     }
     
