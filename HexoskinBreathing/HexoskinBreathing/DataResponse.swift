@@ -21,6 +21,9 @@ class DataResponse: NSObject {
         if jsonArray == nil {
             throw JSONParsingError.parsingError("Parsing json as array resulted in error.");
         }
+        if jsonArray?.count == 0 {
+            throw JSONParsingError.parsingError("Parsing json as array resulted in error.");
+        }
         let jsonDictionary = jsonArray?[0] as? [String: Any];
         if jsonDictionary == nil {
             throw JSONParsingError.parsingError("Creating dictionary from the json array resulted in error.");

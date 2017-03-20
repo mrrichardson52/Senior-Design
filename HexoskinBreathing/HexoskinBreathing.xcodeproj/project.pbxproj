@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		342718671E7F570A0038BD77 /* hexoskinShirtTransparent.png in Resources */ = {isa = PBXBuildFile; fileRef = 342718661E7F570A0038BD77 /* hexoskinShirtTransparent.png */; };
 		3446A2AD1E7B2DA50036342C /* DataViewingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */; };
 		3446A2B21E7B3C1B0036342C /* ChildTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2B11E7B3C1B0036342C /* ChildTableViewCell.swift */; };
 		3446A2B41E7B3C5A0036342C /* HeaderTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2B31E7B3C5A0036342C /* HeaderTableViewCell.swift */; };
@@ -32,12 +31,12 @@
 		3475022E1DD04FE6002E6465 /* pause_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 3475022B1DD04FE6002E6465 /* pause_wheel.png */; };
 		3484D2601E42489800D162B7 /* AnalysisPreparationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3484D25F1E42489800D162B7 /* AnalysisPreparationViewController.swift */; };
 		3484D2621E42764400D162B7 /* beep.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3484D2611E42764400D162B7 /* beep.wav */; };
+		34A2D5B31E7F9D700054D365 /* hexoskinShirtTransparent.png in Resources */ = {isa = PBXBuildFile; fileRef = 34A2D5B21E7F9D700054D365 /* hexoskinShirtTransparent.png */; };
 		34CD11C21E382C3400C838F5 /* JSONHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CD11C11E382C3400C838F5 /* JSONHelper.swift */; };
 		34CD11C41E3A6E8800C838F5 /* DataResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CD11C31E3A6E8800C838F5 /* DataResponse.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		342718661E7F570A0038BD77 /* hexoskinShirtTransparent.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hexoskinShirtTransparent.png; sourceTree = "<group>"; };
 		3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataViewingViewController.swift; sourceTree = "<group>"; };
 		3446A2B11E7B3C1B0036342C /* ChildTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChildTableViewCell.swift; sourceTree = "<group>"; };
 		3446A2B31E7B3C5A0036342C /* HeaderTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HeaderTableViewCell.swift; sourceTree = "<group>"; };
@@ -65,6 +64,7 @@
 		3475022B1DD04FE6002E6465 /* pause_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = pause_wheel.png; path = ../../../../pause_wheel.png; sourceTree = "<group>"; };
 		3484D25F1E42489800D162B7 /* AnalysisPreparationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalysisPreparationViewController.swift; sourceTree = "<group>"; };
 		3484D2611E42764400D162B7 /* beep.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = beep.wav; sourceTree = "<group>"; };
+		34A2D5B21E7F9D700054D365 /* hexoskinShirtTransparent.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hexoskinShirtTransparent.png; sourceTree = "<group>"; };
 		34CD11C11E382C3400C838F5 /* JSONHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONHelper.swift; sourceTree = "<group>"; };
 		34CD11C31E3A6E8800C838F5 /* DataResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataResponse.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -94,7 +94,7 @@
 			children = (
 				3484D2611E42764400D162B7 /* beep.wav */,
 				3446A2BF1E7CF9B70036342C /* greencheck.png */,
-				342718661E7F570A0038BD77 /* hexoskinShirtTransparent.png */,
+				34A2D5B21E7F9D700054D365 /* hexoskinShirtTransparent.png */,
 				3446A2C01E7CF9B70036342C /* redx.png */,
 				347501FC1DCE2C4D002E6465 /* HexoskinBreathing */,
 				347501FB1DCE2C4D002E6465 /* Products */,
@@ -212,7 +212,7 @@
 				3446A2B81E7B3D990036342C /* DataViewerChildCellView.xib in Resources */,
 				3475022E1DD04FE6002E6465 /* pause_wheel.png in Resources */,
 				3446A2B61E7B3D8D0036342C /* DataViewerHeaderCellView.xib in Resources */,
-				342718671E7F570A0038BD77 /* hexoskinShirtTransparent.png in Resources */,
+				34A2D5B31E7F9D700054D365 /* hexoskinShirtTransparent.png in Resources */,
 				347502081DCE2C4D002E6465 /* LaunchScreen.storyboard in Resources */,
 				3475022C1DD04FE6002E6465 /* ccw_wheel.png in Resources */,
 				3475022D1DD04FE6002E6465 /* cw_wheel.png in Resources */,

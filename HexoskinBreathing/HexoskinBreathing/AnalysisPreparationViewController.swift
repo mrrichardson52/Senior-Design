@@ -10,6 +10,13 @@ import UIKit
 
 class AnalysisPreparationViewController: UIViewController {
     
+    // interface members
+    @IBOutlet weak var hexoskinButton: UIButton!
+    @IBOutlet weak var ringButton: UIButton!
+    @IBOutlet weak var analyzeButton: UIButton!
+    @IBOutlet weak var hexoskinImageView: UIImageView!
+    @IBOutlet weak var ringImageView: UIImageView!
+    @IBOutlet weak var syncWarningLabel: UILabel!
     
     
     // variables that store the start and end timestamps for the exercise
@@ -21,40 +28,79 @@ class AnalysisPreparationViewController: UIViewController {
     var accessToken: String!
     var tokenType: String!
     
-    var exercise: BreathingExercise!    // the exercise the user was supposed to complete
-    var hexoskinData: [breathingAction]! // the actions that were recorded during the exercise
-    var exerciseData: [breathingAction]!
-    var ringActions: [breathingAction]!
+    var exercise: BreathingExercise! = nil;    // the exercise the user was supposed to complete
+    var hexoskinData: [breathingAction]! = nil; // the actions that were recorded during the exercise
+    var exerciseData: [breathingAction]! = nil;
+    var ringActions: [breathingAction]! = nil;
     
-    
-    
+    // variables that store which buttons are selected
+    var hexoskinSelected: Bool = false;
+    var ringSelected: Bool = false;
     
     // the reference to the task that gets the record id
     var recordTask: URLSessionDataTask! = nil;
     
+    // this variable stores whether this is the first time viewdidappear is executing
+    var firstExecution: Bool = true;
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        title = "Results"; 
+        title = "Data Picker";
         
         // set background color to white
         self.view.backgroundColor = .white;
         
-        let backButton : UIBarButtonItem = UIBarButtonItem(title: "Main Menu", style: .plain, target: self, action: #selector(AnalysisPreparationViewController.backButtonPressed));
-        self.navigationItem.leftBarButtonItem = backButton;
+        let cancelButton : UIBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(AnalysisPreparationViewController.cancelButtonPressed));
+        self.navigationItem.rightBarButtonItem = cancelButton;
+        self.navigationItem.setHidesBackButton(true, animated: false); 
         
         // initialize the instruction view
-        instructionsLabel.text = "1. Disconnect device from shirt\n\n2. Connect device to computer\n\n3. Sync data using HxServices";
+        hideSyncLabel();
         
         // filter the ring actions
         filterRingActions();
         
+        // add gesture recognizers to the imageviews
+        hexoskinImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(AnalysisPreparationViewController.hexoskinImagePressed(sender:))));
+        ringImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(AnalysisPreparationViewController.ringImagePressed(sender:))));
+        hexoskinImageView.isUserInteractionEnabled = true;
+        ringImageView.isUserInteractionEnabled = true;
+        
+        hexoskinButton.alpha = 0;
+        ringButton.alpha = 0;
+        hexoskinImageView.alpha = 0;
+        ringImageView.alpha = 0;
+        analyzeButton.alpha = 0;
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated);
+        
+        if firstExecution {
+            
+            // set up the two radio buttons
+            hexoskinButton.layer.cornerRadius = 5
+            hexoskinButton.layer.borderWidth = 2.0
+            hexoskinButton.layer.masksToBounds = true
+            ringButton.layer.cornerRadius = 5
+            ringButton.layer.borderWidth = 2.0
+            ringButton.layer.masksToBounds = true
+            
+            // set the defaults as unselected
+            UIView.animate(withDuration: 0.2, animations: {
+                self.setRingSelection(selected: false);
+                self.setHexoskinSelection(selected: false);
+                self.analyzeButton.alpha = 1.0;
+            })
+            
+            firstExecution = false; 
+        }
     }
     
     // Function fired when the user presses the main menu button
     // This should direct them back to the main menu
-    func backButtonPressed() {
-        print("Back button pressed");
+    func cancelButtonPressed() {
+        print("Cancel button pressed");
     }
     
     // function fired after the timer delay expires
@@ -100,9 +146,22 @@ class AnalysisPreparationViewController: UIViewController {
                     viewController?.hexoskinData = self.hexoskinData;
                     viewController?.ringData = self.ringActions;
                     viewController?.displayHexData = true;
+                    viewController?.displayRingData = self.ringSelected;
                     self.navigationController?.pushViewController(viewController!, animated: true);
                 }
 
+                
+            } catch JSONParsingError.parsingError {
+                // the user was uploading the data, but the upload was not complete
+                // create an alert on the main thread
+                DispatchQueue.main.async {
+                    // indicate here that the data has not been uploaded correctly
+                    let alert = UIAlertController(title: "Data sync in progress", message: "Try pressing the button again in a few seconds ", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: {action in
+                        print(self.recordTask.description);
+                    }))
+                    self.present(alert, animated: true, completion: nil)
+                }
                 
             } catch {
                 print("CASTING ERROR");
@@ -346,9 +405,18 @@ class AnalysisPreparationViewController: UIViewController {
     }
     
     @IBAction func getResults(_ sender: Any) {
-        
-        print("get results");
-        self.getRecordID();
+        if hexoskinSelected {
+            self.getRecordID();
+        } else {
+            let storyboard = UIStoryboard(name: "Main", bundle: nil);
+            let viewController = storyboard.instantiateViewController(withIdentifier: "dataViewController") as? DataViewingViewController;
+            viewController?.exerciseData = self.exercise.actions;
+            viewController?.hexoskinData = nil;
+            viewController?.ringData = self.ringActions;
+            viewController?.displayHexData = false;
+            viewController?.displayRingData = ringSelected; 
+            self.navigationController?.pushViewController(viewController!, animated: true);
+        }
     }
     
     func filterRingActions() {
@@ -477,5 +545,75 @@ class AnalysisPreparationViewController: UIViewController {
         }
     }
 
+    @IBAction func hexoskinButtonPressed(_ sender: Any) {
+        setHexoskinSelection(selected: !hexoskinSelected);
+    }
     
+    @IBAction func ringButtonPressed(_ sender: Any) {
+        setRingSelection(selected: !ringSelected);
+    }
+
+    func hexoskinImagePressed(sender: UITapGestureRecognizer) {
+        print("hexoskinImagePressed");
+        setHexoskinSelection(selected: !hexoskinSelected);
+    }
+    
+    func ringImagePressed(sender: UITapGestureRecognizer) {
+        print("ringImagePressed"); 
+        setRingSelection(selected: !ringSelected);
+    }
+    
+    func setHexoskinSelection(selected: Bool) {
+        // start by setting the selected variable for hexoskin
+        hexoskinSelected = selected;
+        
+        if selected {
+            // mark the hexoskin as selected
+            hexoskinImageView.alpha = 1.0;
+            hexoskinButton.layer.borderColor = Constants.radioButtonSelectedColor.cgColor;
+            hexoskinButton.setTitleColor(Constants.radioButtonSelectedColor, for: .normal);
+            hexoskinButton.alpha = 1.0;
+            
+            // show the syncing label
+            showSyncLabel();
+        } else {
+            // mark the hexoskin as not selected
+            hexoskinImageView.alpha = 0.4;
+            hexoskinButton.layer.borderColor = Constants.radioButtonUnselectedColor.cgColor;
+            hexoskinButton.setTitleColor(Constants.radioButtonUnselectedColor, for: .normal);
+            hexoskinButton.alpha = 0.4;
+            
+            // hide the syncing label
+            hideSyncLabel();
+        }
+    }
+    
+    func setRingSelection(selected: Bool) {
+        // start by setting the selected variable for ring
+        ringSelected = selected;
+        
+        if selected {
+            // mark the hexoskin as selected
+            ringImageView.alpha = 1.0;
+            ringButton.layer.borderColor = Constants.radioButtonSelectedColor.cgColor;
+            ringButton.setTitleColor(Constants.radioButtonSelectedColor, for: .normal);
+            ringButton.alpha = 1.0;
+            
+        } else {
+            // mark the hexoskin as not selected
+            ringImageView.alpha = 0.4;
+            ringButton.layer.borderColor = Constants.radioButtonUnselectedColor.cgColor;
+            ringButton.setTitleColor(Constants.radioButtonUnselectedColor, for: .normal);
+            ringButton.alpha = 0.4;
+            
+        }
+    }
+    
+    func showSyncLabel() {
+        syncWarningLabel.text = "* Sync data with your Hexoskin account using HxServices before continuing";
+    }
+    
+    func hideSyncLabel() {
+        syncWarningLabel.text = "";
+    }
 }

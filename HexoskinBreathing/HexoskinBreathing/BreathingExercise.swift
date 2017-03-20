@@ -40,9 +40,9 @@ class BreathingExercise: NSObject {
     
     override init() {
         // create a breathing exercise here
-//        actions = [breathingAction(action: Strings.inhale, duration: 4, start: 0, end: 4), breathingAction(action: Strings.exhale, duration: 4, start: 4, end: 8)];
+        actions = [breathingAction(action: Strings.inhale, duration: 4, start: 0, end: 4), breathingAction(action: Strings.exhale, duration: 4, start: 4, end: 8)];
         
-        actions = [breathingAction(action: Strings.inhale, duration: 4, start: 0, end: 4), breathingAction(action: Strings.exhale, duration: 4, start: 4, end: 8), breathingAction(action: Strings.inhale, duration: 6, start: 8, end: 14), breathingAction(action: Strings.exhale, duration: 6, start: 14, end: 20), breathingAction(action: Strings.inhale, duration: 8, start: 20, end: 28), breathingAction(action: Strings.exhale, duration: 8, start: 28, end: 36)];
+//        actions = [breathingAction(action: Strings.inhale, duration: 4, start: 0, end: 4), breathingAction(action: Strings.exhale, duration: 4, start: 4, end: 8), breathingAction(action: Strings.inhale, duration: 6, start: 8, end: 14), breathingAction(action: Strings.exhale, duration: 6, start: 14, end: 20), breathingAction(action: Strings.inhale, duration: 8, start: 20, end: 28), breathingAction(action: Strings.exhale, duration: 8, start: 28, end: 36)];
         actionCount = actions.count;
         currentAction = -1;
     }

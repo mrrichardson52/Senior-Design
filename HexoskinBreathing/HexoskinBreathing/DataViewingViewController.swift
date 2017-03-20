@@ -36,10 +36,17 @@ class DataViewingViewController: UIViewController {
     
     // boolean that says whether or not to display the Hexoskin data
     var displayHexData: Bool = false;
+    var displayRingData: Bool = false;
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = .white;
+        
+        self.title = "Analysis"; 
+        
+        // remove the back button here
+//        self.navigationItem.setHidesBackButton(true, animated: false);
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(DataViewingViewController.donePressed));
         
         // prepare the views for autolayout
         scrollView.translatesAutoresizingMaskIntoConstraints = false;
@@ -54,15 +61,18 @@ class DataViewingViewController: UIViewController {
         noDataIndicator.textColor = .black;
         
         // print data before equalizing
-        print("BEFORE EQUALIZING");
-        printAllData();
+//        print("BEFORE EQUALIZING");
+//        printAllData();
         
         // prepare the data for display
-        equalizeDataSources();
+        // only equalize if ring or hexoskin is showing
+        if displayRingData || displayHexData {
+            equalizeDataSources();
+        }
         
         // print data after equalizing
-        print("\nAFTER EQUALIZING");
-        printAllData();
+//        print("\nAFTER EQUALIZING");
+//        printAllData();
         
     }
     
@@ -71,6 +81,10 @@ class DataViewingViewController: UIViewController {
         
         // now that the constraints are active, we can add the views to the scroll view
         populateScrollView();
+    }
+    
+    func donePressed() {
+        
     }
     
     func populateScrollView() {
@@ -83,8 +97,10 @@ class DataViewingViewController: UIViewController {
         addViewsForDataSource(actions: exerciseData, section: 0, title: "Exercise");
         if displayHexData {
             addViewsForDataSource(actions: hexoskinData, section: 1, title: "Hexoskin data");
-            addViewsForDataSource(actions: ringData, section: 2, title: "Ring data");
-        } else {
+            if displayRingData {
+                addViewsForDataSource(actions: ringData, section: 2, title: "Ring data");
+            }
+        } else if displayRingData {
             addViewsForDataSource(actions: ringData, section: 1, title: "Ring data");
         }
         
@@ -98,19 +114,27 @@ class DataViewingViewController: UIViewController {
     func equalizeDataSources() {
         
         // verify that the ringData array is not empty
-        if ringData.count == 0 {
+        if displayRingData && ringData.count == 0 {
+            ringData.append(breathingAction(action: Strings.notAnAction, duration: 0.0, start: 0.0, end: 0.0));
+        }
+        
+        // verify that the hexData array is not empty
+        if displayHexData && hexoskinData.count == 0 {
             ringData.append(breathingAction(action: Strings.notAnAction, duration: 0.0, start: 0.0, end: 0.0));
         }
         
         // grab the earliest start time and latest end time
         let earliestStart: Double!
         let latestEnding: Double!
-        if displayHexData {
+        if displayHexData && displayRingData {
             earliestStart = min(exerciseData[0].start, hexoskinData[0].start, ringData[0].start);
             latestEnding = max(exerciseData[exerciseData.count-1].end, hexoskinData[hexoskinData.count-1].end, ringData[ringData.count-1].end);
-        } else {
+        } else if displayRingData {
             earliestStart = min(exerciseData[0].start, ringData[0].start);
             latestEnding = max(exerciseData[exerciseData.count-1].end, ringData[ringData.count-1].end);
+        } else {
+            earliestStart = min(exerciseData[0].start, hexoskinData[0].start);
+            latestEnding = max(exerciseData[exerciseData.count-1].end, hexoskinData[hexoskinData.count-1].end);
         }
         
         // check if the data source has a beginning equal to that of the earliest start.
@@ -118,10 +142,10 @@ class DataViewingViewController: UIViewController {
         if exerciseData[0].start != earliestStart {
             exerciseData.insert(breathingAction(action: Strings.notAnAction, duration: exerciseData[0].start - earliestStart, start: earliestStart, end: exerciseData[0].start), at: 0);
         }
-        if hexoskinData[0].start != earliestStart && displayHexData {
+        if displayHexData && hexoskinData[0].start != earliestStart {
             hexoskinData.insert(breathingAction(action: Strings.notAnAction, duration: hexoskinData[0].start - earliestStart, start: earliestStart, end: hexoskinData[0].start), at: 0);
         }
-        if ringData[0].start != earliestStart {
+        if displayRingData && ringData[0].start != earliestStart {
             ringData.insert(breathingAction(action: Strings.notAnAction, duration: ringData[0].start - earliestStart, start: earliestStart, end: ringData[0].start), at: 0);
         }
         
@@ -129,10 +153,10 @@ class DataViewingViewController: UIViewController {
         if exerciseData[exerciseData.count-1].end != latestEnding {
             exerciseData.append(breathingAction(action: Strings.notAnAction, duration: latestEnding - exerciseData[exerciseData.count-1].end, start: exerciseData[exerciseData.count-1].end, end: latestEnding));
         }
-        if hexoskinData[hexoskinData.count-1].end != latestEnding && displayHexData {
+        if displayHexData && hexoskinData[hexoskinData.count-1].end != latestEnding {
             hexoskinData.append(breathingAction(action: Strings.notAnAction, duration: latestEnding - hexoskinData[hexoskinData.count-1].end, start: hexoskinData[hexoskinData.count-1].end, end: latestEnding));
         }
-        if ringData[ringData.count-1].end != latestEnding {
+        if displayRingData && ringData[ringData.count-1].end != latestEnding {
             ringData.append(breathingAction(action: Strings.notAnAction, duration: latestEnding - ringData[ringData.count-1].end, start: ringData[ringData.count-1].end, end: latestEnding));
         }
         
@@ -271,21 +295,21 @@ class DataViewingViewController: UIViewController {
         }
     }
 
-    // print all data for debugging purposes
-    func printAllData() {
-        print("\nExercise Data:");
-        for action in exerciseData {
-            print("\(action.action) \(action.duration) start: \(action.start) end: \(action.end)");
-        }
-        print("\nHexoskin Data:");
-        for action in hexoskinData {
-            print("\(action.action) \(action.duration) start: \(action.start) end: \(action.end)");
-        }
-        print("\nRing Data:");
-        for action in ringData {
-            print("\(action.action) \(action.duration) start: \(action.start) end: \(action.end)");
-        }
-    }
+//    // print all data for debugging purposes
+//    func printAllData() {
+//        print("\nExercise Data:");
+//        for action in exerciseData {
+//            print("\(action.action) \(action.duration) start: \(action.start) end: \(action.end)");
+//        }
+//        print("\nHexoskin Data:");
+//        for action in hexoskinData {
+//            print("\(action.action) \(action.duration) start: \(action.start) end: \(action.end)");
+//        }
+//        print("\nRing Data:");
+//        for action in ringData {
+//            print("\(action.action) \(action.duration) start: \(action.start) end: \(action.end)");
+//        }
+//    }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator);
