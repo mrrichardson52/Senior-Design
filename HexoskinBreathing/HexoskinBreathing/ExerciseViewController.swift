@@ -77,7 +77,7 @@ class ExerciseViewController: UIViewController {
     
     var state: Int!
     
-    var panRecognizer = ImmediatePanGestureRecognizer() // recognizer for sliding the button up the bar
+    var panRecognizer = MRRImmediatePanGestureRecognizer() // recognizer for sliding the button up the bar
     
     var beginButton: UIButton!
     var blurEffectView: UIVisualEffectView!
@@ -131,7 +131,7 @@ class ExerciseViewController: UIViewController {
         // initialize wheel image and add gesture recognizer
         imageView.image = UIImage(named: "pause_wheel.png");
         state = 1;
-        panRecognizer = ImmediatePanGestureRecognizer(target: self, action: #selector(ExerciseViewController.imageViewPanned(sender:)));
+        panRecognizer = MRRImmediatePanGestureRecognizer(target: self, action: #selector(ExerciseViewController.imageViewPanned(sender:)));
         imageView.addGestureRecognizer(panRecognizer);
         imageView.isUserInteractionEnabled = true;
         

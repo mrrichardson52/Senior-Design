@@ -161,7 +161,7 @@ class MainMenuViewController: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "performExerciseSegue" {
-            let destination = segue.destination as! ExerciseDesignerViewController;
+            let destination = segue.destination as! ExerciseViewController;
             destination.accessToken = accessToken;
             destination.tokenType = tokenType;
         }

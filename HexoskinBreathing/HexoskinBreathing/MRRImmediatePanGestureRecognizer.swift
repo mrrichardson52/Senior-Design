@@ -1,5 +1,5 @@
 //
-//  ImmediatePanGestureRecognizer.swift
+//  MRRImmediatePanGestureRecognizer.swift
 //  HexoskinBreathing
 //
 //  Created by Matthew Richardson on 11/5/16.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ImmediatePanGestureRecognizer: UIPanGestureRecognizer {
+class MRRImmediatePanGestureRecognizer: UIPanGestureRecognizer {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         print("touches began");
