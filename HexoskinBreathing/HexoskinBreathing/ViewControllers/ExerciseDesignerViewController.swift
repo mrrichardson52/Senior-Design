@@ -20,7 +20,6 @@ class ExerciseDesignerViewController: UIViewController {
         // Do any additional setup after loading the view.
     }
 
-    // CHANGES
     /*
     // MARK: - Navigation
 
