@@ -117,16 +117,14 @@ class ExerciseViewController: UIViewController {
     var lastActionCaptured: Bool = false;
     var ringActions: [breathingAction] = []; 
 
-
+    // boolean used for determining whether to play the metronome or not
+    var playMetronome: Bool = false;
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // set the title for the nav bar
         title = "Breathing Exercise";
-        
-        // initialize the ring action array
-        
         
         // initialize wheel image and add gesture recognizer
         imageView.image = UIImage(named: "pause_wheel.png");
@@ -136,14 +134,16 @@ class ExerciseViewController: UIViewController {
         imageView.isUserInteractionEnabled = true;
         
         alreadyFinished = false;
-        exercise = BreathingExercise();
+        //        exercise = BreathingExercise();
         
-        beepSound = URL(fileURLWithPath: Bundle.main.path(forResource: "beep", ofType: "wav")!)
-        do {
-            audioPlayer = try AVAudioPlayer(contentsOf: beepSound);
-            audioPlayer.prepareToPlay();
-        } catch {
-            print("Error initializing audio player.");
+        if playMetronome {
+            beepSound = URL(fileURLWithPath: Bundle.main.path(forResource: "beep", ofType: "wav")!)
+            do {
+                audioPlayer = try AVAudioPlayer(contentsOf: beepSound);
+                audioPlayer.prepareToPlay();
+            } catch {
+                print("Error initializing audio player.");
+            }
         }
     }
     
@@ -176,13 +176,16 @@ class ExerciseViewController: UIViewController {
         if counterTimer != nil {
             counterTimer.invalidate();
         }
-        if metronomeTimer != nil {
-            metronomeTimer.invalidate();
-        }
-        
-        // stop the audioPlayer
-        if audioPlayer.isPlaying {
-            audioPlayer.stop()
+        if playMetronome {
+            
+            if metronomeTimer != nil {
+                metronomeTimer.invalidate();
+            }
+            
+            // stop the audioPlayer
+            if audioPlayer.isPlaying {
+                audioPlayer.stop()
+            }
         }
     }
     
@@ -388,7 +391,9 @@ class ExerciseViewController: UIViewController {
         counterTimer = Timer.scheduledTimer(timeInterval: TimeInterval(countDownInterval), target: self, selector: #selector(ExerciseViewController.countdown), userInfo: nil, repeats: true);
         
         // begin another timer that plays the beep sound every second
-        metronomeTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ExerciseViewController.playBeep), userInfo: nil, repeats: true);
+        if playMetronome {
+            metronomeTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ExerciseViewController.playBeep), userInfo: nil, repeats: true);
+        }
     }
     
     func playBeep() {
@@ -421,7 +426,10 @@ class ExerciseViewController: UIViewController {
             // Exercise has ended
             exerciseEnded = true;
             counterTimer.invalidate();
-            metronomeTimer.invalidate();
+            
+            if playMetronome {
+                metronomeTimer.invalidate();
+            }
             
             // store the end time
             let date = Date();
