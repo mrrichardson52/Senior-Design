@@ -39,10 +39,25 @@ class BreathingExercise: NSObject {
     var actions: [breathingAction]!
     
     override init() {
+        actions = []; 
+        actionCount = actions.count;
+        currentAction = -1;
         // create a breathing exercise here
-        actions = [breathingAction(action: Strings.inhale, duration: 4, start: 0, end: 4), breathingAction(action: Strings.exhale, duration: 4, start: 4, end: 8)];
+//        actions = [breathingAction(action: Strings.inhale, duration: 4, start: 0, end: 4), breathingAction(action: Strings.exhale, duration: 4, start: 4, end: 8)];
         
 //        actions = [breathingAction(action: Strings.inhale, duration: 4, start: 0, end: 4), breathingAction(action: Strings.exhale, duration: 4, start: 4, end: 8), breathingAction(action: Strings.inhale, duration: 6, start: 8, end: 14), breathingAction(action: Strings.exhale, duration: 6, start: 14, end: 20), breathingAction(action: Strings.inhale, duration: 8, start: 20, end: 28), breathingAction(action: Strings.exhale, duration: 8, start: 28, end: 36)];
+    }
+    
+    // create an exercise with the specified breath duration and the number of cycles
+    init(duration: Double, cycles: Int) {
+        actions = [];
+        var lastEnding: Double = 0;
+        for _ in 1...cycles {
+            actions.append(breathingAction(action: Strings.inhale, duration: duration, start: 0, end: duration + lastEnding));
+            lastEnding += duration;
+            actions.append(breathingAction(action: Strings.exhale, duration: duration, start: lastEnding, end: duration+lastEnding));
+            lastEnding += duration;
+        }
         actionCount = actions.count;
         currentAction = -1;
     }

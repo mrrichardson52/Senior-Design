@@ -18,6 +18,12 @@ struct Constants {
     static let radioButtonUnselectedColor = UIColor(red:0.78, green:0.78, blue:0.74, alpha:1.0)
     static let radioButtonSelectedColor = UIColor(red:0.00, green:0.49, blue:0.55, alpha:1.0);
     
+    // POSSIBLE COLORS FOR SCHEME
+    static let backgroundColor = UIColor(red:0.80, green:0.80, blue:0.75, alpha:1.0)
+    static let navigationBarControllerColor = UIColor(red:0.38, green:0.43, blue:0.44, alpha:1.0)
+    static let latteColor = UIColor(red:0.87, green:0.74, blue:0.58, alpha:1.0)
+    static let coffeeColor = UIColor(red:0.70, green:0.53, blue:0.40, alpha:1.0)
+    
     // various thresholds
     static let resultsViewDurationThreshold = 2.0;
     static let breathLengthAllowableError = 2.0;
