@@ -8,7 +8,7 @@
 
 import UIKit
 
-class AnalysisPreparationViewController: UIViewController {
+class AnalysisPreparationViewController: MRRViewController {
     
     // interface members
     @IBOutlet weak var hexoskinButton: UIButton!
@@ -18,6 +18,8 @@ class AnalysisPreparationViewController: UIViewController {
     @IBOutlet weak var ringImageView: UIImageView!
     @IBOutlet weak var syncWarningLabel: UILabel!
     
+    // indicate signed in
+    var signedIn: Bool!
     
     // variables that store the start and end timestamps for the exercise
     var startTimestamp: Int = -1;
@@ -46,19 +48,21 @@ class AnalysisPreparationViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Data Picker";
-        
-        // set background color to white
-        self.view.backgroundColor = .white;
-        
+                
         let cancelButton : UIBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(AnalysisPreparationViewController.cancelButtonPressed));
-        self.navigationItem.leftBarButtonItem = cancelButton;
-        self.navigationItem.setHidesBackButton(true, animated: false); 
+        self.navigationItem.rightBarButtonItem = cancelButton;
+        
+        // set color for warning label
+        syncWarningLabel.textColor = Constants.basicTextColor;
         
         // initialize the instruction view
         hideSyncLabel();
         
         // filter the ring actions
         filterRingActions();
+        
+        // round the corners of the analyze button
+        analyzeButton.layer.cornerRadius = 8; 
         
         // add gesture recognizers to the imageviews
         hexoskinImageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(AnalysisPreparationViewController.hexoskinImagePressed(sender:))));
@@ -69,8 +73,18 @@ class AnalysisPreparationViewController: UIViewController {
         hexoskinButton.alpha = 0;
         ringButton.alpha = 0;
         hexoskinImageView.alpha = 0;
+        hexoskinImageView.layer.cornerRadius = 8;
+        hexoskinImageView.clipsToBounds = true; 
         ringImageView.alpha = 0;
         analyzeButton.alpha = 0;
+        analyzeButton.backgroundColor = Constants.basicButtonBackgroundColor;
+        analyzeButton.setTitleColor(Constants.basicButtonTextColor, for: .normal);
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated);
+        
+        self.showNavigationBar();
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -100,7 +114,8 @@ class AnalysisPreparationViewController: UIViewController {
     // Function fired when the user presses the main menu button
     // This should direct them back to the main menu
     func cancelButtonPressed() {
-        print("Cancel button pressed");
+        // pop back to main menu
+        _ = self.navigationController?.popToRootViewController(animated: true);
     }
     
     // function fired after the timer delay expires
@@ -129,7 +144,7 @@ class AnalysisPreparationViewController: UIViewController {
                 // at this point, the exercise and results are both stored as member variables.
                 // the following function uses those members to determine how well the user followed
                 // the prescribed exercise. it saves the r
-                self.analyzeExercisePerformance();
+                self.analyzeExercisePerformance(data: self.hexoskinData);
                 
                 // push the next view controller on the main queue
                 DispatchQueue.main.async {
@@ -142,6 +157,7 @@ class AnalysisPreparationViewController: UIViewController {
                     viewController?.ringData = self.ringActions;
                     viewController?.displayHexData = true;
                     viewController?.displayRingData = self.ringSelected;
+                    viewController?.exerciseDuration = self.exercise.exerciseDuration;
                     self.navigationController?.pushViewController(viewController!, animated: true);
                 }
 
@@ -196,6 +212,7 @@ class AnalysisPreparationViewController: UIViewController {
                     DispatchQueue.main.async {
                         // indicate here that the data has not been uploaded correctly
                         let alert = UIAlertController(title: "Data not found", message: "Ensure that the data has been uploaded to the Hexoskin Services using HxServices.", preferredStyle: .alert)
+                        alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil));
                         self.present(alert, animated: true, completion: nil)
                     }
                 }
@@ -258,26 +275,72 @@ class AnalysisPreparationViewController: UIViewController {
             return [];
         }
         
-        return hexoskinData;
-    }
-    
-    // use the exercise and hexoskinData member variables to analyze the performance
-    func analyzeExercisePerformance() {
-        
-        // save the start timestamp of the exercise in seconds
-        var actionStart: Double = 0.0;
+        // check to see if the last action ends before the end of the exercise
+        // it is possible that the user began an action before the exercise ended,
+        // but did not end that action until after 2 seconds past the end of the exercise,
+        // at which point that last action would not be included. If the last action
+        // ends before the end of the exercise, fill in with contrasting action.
+//        let lastAction = hexoskinData[hexoskinData.count - 1];
+//        if lastAction.action == Strings.inhale || lastAction.action == Strings.exhale {
+//            print("Last action ending: \(lastAction.end)");
+//            print("End of exercise: \(Double(endTimestamp)/256 - Double(startTimestamp)/256)");
+//            if lastAction.end < Double(endTimestamp)/256 - Double(startTimestamp)/256 {
+//                // the last action ended before the end of the exercise
+//                if lastAction.action == Strings.inhale {
+//                    print("Appending an exhale");
+//                    hexoskinData.append(breathingAction(action: Strings.exhale, duration: Double(endTimestamp)/256 - Double(startTimestamp)/256 - lastAction.end, start: lastAction.end, end: Double(endTimestamp)/256 - Double(startTimestamp/256)));
+//                } else {
+//                    print("Appending an inhale");
+//                    hexoskinData.append(breathingAction(action: Strings.inhale, duration: Double(endTimestamp)/256 - Double(startTimestamp)/256 - lastAction.end, start: lastAction.end, end: Double(endTimestamp)/256 - Double(startTimestamp/256)));
+//                }
+//            }
+//        }
         
         // prune the hexoskinData array by removing actions that end before 1 second past the start
         var frontPruningComplete: Bool = false;
         while !frontPruningComplete {
             let action = hexoskinData[0];
-            if Double(action.end) < actionStart+1 {
+            if Double(action.end) < 1 {
                 // remove the action since it ends before the exercise really starts
                 hexoskinData.remove(at: 0);
             } else {
                 frontPruningComplete = true;
             }
         }
+        
+        // prune the hexoskinData array by removing actions that start after 1 second before the end of the last instruction
+        var backPruningComplete: Bool = false;
+        var index = 0;
+        while !backPruningComplete {
+            
+            // verify the index is valid
+            if index >= hexoskinData.count {
+                // invalid index
+                // exit the loop
+                backPruningComplete = true;
+            } else {
+                // valid index
+                // verify that the action falls inside the exercise timestamps
+                let action = hexoskinData[index];
+                if Double(action.start) > exercise.exerciseDuration - 1 {
+                    // remove the action since it starts basically at the end of the exercise
+                    hexoskinData.remove(at: index);
+                } else {
+                    // if the action is not removed, increment the index
+                    index = index + 1;
+                }
+            }
+            
+        }
+        
+        return hexoskinData;
+    }
+    
+    // use the exercise and passed data arrays of breathingActions to analyze the performance
+    func analyzeExercisePerformance(data: [breathingAction]) {
+        
+        // set the start of the first action to 0
+        var actionStart: Double = 0.0;
         
         // initialize a container to hold the performance results
         exerciseData = [];
@@ -301,16 +364,19 @@ class AnalysisPreparationViewController: UIViewController {
             storedAction = nil;
             var condition: Bool = true;
             while condition {
-                if index >= hexoskinData.count {
+                if index >= data.count {
                     // there are no more breathing actions
                     condition = false;
                     
                     // check to see if the previous loop found a candidate
                     if storedAction != nil {
                         // the storedAction's duration needs to be checked to see if it satisfies the instruction
-                        if Double(storedAction.duration) > currentAction.duration - Constants.breathLengthAllowableError && Double(storedAction.duration) < currentAction.duration + Constants.breathLengthAllowableError {
+                        if Double(storedAction.duration) > currentAction.duration - Constants.breathLengthAllowableError {
                             // the storedAction satisfies the instruction
                             exerciseData.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.completed));
+                        } else {
+                            // the last candidate's duration was not long enough
+                            exerciseData.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.notCompleted));
                         }
                     } else {
                         // no action satisfies the instruction
@@ -319,7 +385,7 @@ class AnalysisPreparationViewController: UIViewController {
                     
                 } else {
 
-                    let action = hexoskinData[index];
+                    let action = data[index];
                     if Double(action.start) < actionStart + Constants.startBreathSearchWindow && Double(action.start) > actionStart - Constants.startBreathSearchWindow {
                         // this is a candidate to be the action that satisfies the instruction
                         
@@ -341,7 +407,7 @@ class AnalysisPreparationViewController: UIViewController {
                         // check to see if the previous loop found a candidate
                         if storedAction != nil {
                             // the storedAction's duration needs to be checked to see if it satisfies the instruction
-                            if Double(storedAction.duration) > currentAction.duration - Constants.breathLengthAllowableError && Double(storedAction.duration) < currentAction.duration + Constants.breathLengthAllowableError {
+                            if Double(storedAction.duration) > currentAction.duration - Constants.breathLengthAllowableError {
                                 // the storedAction satisfies the instruction
                                 exerciseData.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.completed));
                             } else {
@@ -364,31 +430,6 @@ class AnalysisPreparationViewController: UIViewController {
             currentAction = exercise.next();
         }
         
-        // prune the hexoskinData array by removing actions that start after 1 second before the end of the last instruction
-        var backPruningComplete: Bool = false;
-        index = 0;
-        while !backPruningComplete {
-            
-            // verify the index is valid
-            if index >= hexoskinData.count {
-                // invalid index
-                // exit the loop
-                backPruningComplete = true;
-            } else {
-                // valid index
-                // verify that the action falls inside the exercise timestamps
-                let action = hexoskinData[index];
-                if Double(action.start) > actionStart - 1 {
-                    // remove the action since it starts basically at the end of the exercise
-                    hexoskinData.remove(at: index);
-                } else {
-                    // if the action is not removed, increment the index
-                    index = index + 1;
-                }
-            }
-            
-        }
-        
     }
     
     @IBAction func getResults(_ sender: Any) {
@@ -397,11 +438,13 @@ class AnalysisPreparationViewController: UIViewController {
         } else {
             let storyboard = UIStoryboard(name: "Main", bundle: nil);
             let viewController = storyboard.instantiateViewController(withIdentifier: "dataViewController") as? DataViewingViewController;
-            viewController?.exerciseData = self.exercise.actions;
+            self.analyzeExercisePerformance(data: ringActions);
+            viewController?.exerciseData = self.exerciseData;
             viewController?.hexoskinData = nil;
             viewController?.ringData = self.ringActions;
             viewController?.displayHexData = false;
-            viewController?.displayRingData = ringSelected; 
+            viewController?.displayRingData = ringSelected;
+            viewController?.exerciseDuration = self.exercise.exerciseDuration; 
             self.navigationController?.pushViewController(viewController!, animated: true);
         }
     }
@@ -525,7 +568,7 @@ class AnalysisPreparationViewController: UIViewController {
         }
         
     }
-
+    
     @IBAction func hexoskinButtonPressed(_ sender: Any) {
         setHexoskinSelection(selected: !hexoskinSelected);
     }
@@ -543,10 +586,12 @@ class AnalysisPreparationViewController: UIViewController {
     }
     
     func setHexoskinSelection(selected: Bool) {
-        // start by setting the selected variable for hexoskin
-        hexoskinSelected = selected;
         
-        if selected {
+        // set the selected variable for hexoskin
+        // if not signed in, hexoskin
+        hexoskinSelected = selected && signedIn;
+        
+        if hexoskinSelected {
             // mark the hexoskin as selected
             hexoskinImageView.alpha = 1.0;
             hexoskinButton.layer.borderColor = Constants.radioButtonSelectedColor.cgColor;
@@ -564,6 +609,14 @@ class AnalysisPreparationViewController: UIViewController {
             
             // hide the syncing label
             hideSyncLabel();
+        }
+        
+        // if not signed in, show error
+        if signedIn == false && selected == true {
+            // if not signed in, show alert
+            let alert = UIAlertController(title: "Not signed in", message: "Hexoskin data unavailable.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
+            self.present(alert, animated: true, completion: nil)
         }
     }
     
@@ -594,5 +647,13 @@ class AnalysisPreparationViewController: UIViewController {
     
     func hideSyncLabel() {
         syncWarningLabel.text = "";
+    }
+    
+    func printData(data: [breathingAction], heading: String) {
+        print("\n\(heading)\n");
+        for action in data {
+            print("\(action.action) \(action.duration)s start: \(action.start) end: \(action.end)");
+        }
+        print("\n"); 
     }
 }

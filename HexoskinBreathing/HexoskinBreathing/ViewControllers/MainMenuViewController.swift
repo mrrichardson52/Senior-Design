@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MainMenuViewController: UIViewController {
+class MainMenuViewController: MRRViewController {
     
     var accessToken: String!
     var tokenType: String!
@@ -16,10 +16,31 @@ class MainMenuViewController: UIViewController {
 
     @IBOutlet weak var accountConnectedLabel: UILabel!
     @IBOutlet weak var signedInButton: UIButton!
+    @IBOutlet weak var performExerciseButton: UIButton!
+    @IBOutlet weak var signInDividerView: UIView!
+    @IBOutlet weak var welcomeLabel: UILabel!
+    @IBOutlet weak var breathingBuddyTitleLabel: UILabel!
+    @IBOutlet weak var topBorderView: UIView!
+    @IBOutlet weak var bottomBorderView: UIView!
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // set up the perform exercise button
+        performExerciseButton.setTitleColor(Constants.electricBlue, for: .normal);
+        performExerciseButton.backgroundColor = UIColor.clear;
+        performExerciseButton.layer.cornerRadius = 8;
+        
+        // set up the divider view
+//        signInDividerView.backgroundColor = Constants.brownish;
+        signInDividerView.backgroundColor = .clear;
+        
+        // set up the welcome label
+        welcomeLabel.textColor = Constants.basicTextColor;
+        signedInButton.setTitleColor(Constants.electricBlue, for: .normal);
+        signedInButton.backgroundColor = .clear;
+        signedInButton.layer.cornerRadius = 5;
 
         // add an observer to receive the message when the app is opened via deep linking
         NotificationCenter.default.addObserver(
@@ -30,6 +51,20 @@ class MainMenuViewController: UIViewController {
         
         // attempt to authorize user automatically
         authorizeUser();
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated);
+        
+        // hide the navigation bar
+        self.hideNavigationBar();
+        
+        // configure the title view
+        breathingBuddyTitleLabel.text = "Breathing\nBuddy"; 
+        breathingBuddyTitleLabel.textColor = Constants.basicTextColor;
+        breathingBuddyTitleLabel.backgroundColor = .clear;
+        topBorderView.backgroundColor = Constants.electricBlue;
+        bottomBorderView.backgroundColor = Constants.electricBlue; 
     }
     
     func authorizeUser() {
@@ -139,33 +174,63 @@ class MainMenuViewController: UIViewController {
         authorizeUser();
     }
     
-    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
-        if identifier == "testingSegue" || identifier == "performExerciseSegue" {
-            if !signedIn {
-                // indicate unauthorized
-                let alert = UIAlertController(title: "Unauthorized", message: "Please sign in.", preferredStyle: .alert)
-                self.present(alert, animated: true, completion: nil)
-                return false;
-            }
+    @IBAction func performExerciseButtonPressed(_ sender: Any) {
+        // check if signed
+        if !signedIn {
+            
+            // indicate unauthorized
+            let alert = UIAlertController(title: "Not signed in", message: "Hexoskin data is only accessible when signed in.", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Sign in", style: .default, handler: {
+                _ in
+                DispatchQueue.main.async {
+                    // push the authorization view controller to begin sign in process
+                    self.pushAuthorizationViewController();
+                }
+            }));
+            alert.addAction(UIAlertAction(title: "Continue without signing in", style: .default, handler: {
+                _ in
+                DispatchQueue.main.async {
+                    // continue without signing in
+                    self.pushExerciseDesignerViewController(signedIn: false);
+                }
+            }));
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil));
+            self.present(alert, animated: true, completion: nil);
+            
+        } else {
+            
+            //push the exercise design controller
+            pushExerciseDesignerViewController(signedIn: true);
         }
-        if identifier == "loginSegue" {
-            if signedIn {
-                // sign out
-                indicateNotSignedIn();
-                return false;
-            }
-        }
-        return true;
-
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "performExerciseSegue" {
-            let destination = segue.destination as! ExerciseDesignerViewController;
-            destination.accessToken = accessToken;
-            destination.tokenType = tokenType;
+    @IBAction func signInButtonPressed(_ sender: Any) {
+        if signedIn {
+            // sign out
+            self.indicateNotSignedIn();
+        } else {
+            self.pushAuthorizationViewController();
         }
     }
+    
+    func pushExerciseDesignerViewController(signedIn: Bool) {
+        // instantiate the view controller from interface builder
+        let storyboard = UIStoryboard(name: "Main", bundle: nil);
+        let viewController = storyboard.instantiateViewController(withIdentifier: "exerciseDesignerViewController") as? ExerciseDesignerViewController;
+        
+        // set the authorization details and exercise members for the exercise view controller
+        viewController?.accessToken = accessToken;
+        viewController?.tokenType = tokenType;
+        // also indicate whether signed in or not
+        viewController?.signedIn = signedIn;
+        self.navigationController?.pushViewController(viewController!, animated: true);
+    }
 
+    func pushAuthorizationViewController() {
+        // instantiate the view controller from interface builder
+        let storyboard = UIStoryboard(name: "Main", bundle: nil);
+        let viewController = storyboard.instantiateViewController(withIdentifier: "authorizationViewController") as? AuthorizationViewController;
+        self.navigationController?.pushViewController(viewController!, animated: true);
+    }
 
 }

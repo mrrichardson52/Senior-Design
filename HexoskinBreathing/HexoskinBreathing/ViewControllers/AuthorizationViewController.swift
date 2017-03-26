@@ -8,10 +8,12 @@
 
 import UIKit
 
-class AuthorizationViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate {
+class AuthorizationViewController: MRRViewController, UITextFieldDelegate, UIGestureRecognizerDelegate {
     
+    @IBOutlet weak var loginParentView: UIView!
     @IBOutlet weak var clientIdTextField: UITextField!
     @IBOutlet weak var nextButton: UIButton!
+    @IBOutlet weak var instructionLabel: UILabel!
     var clientId: String!
     var clientSecret: String!
     var clientIdNumber: String!
@@ -19,12 +21,33 @@ class AuthorizationViewController: UIViewController, UITextFieldDelegate, UIGest
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        title = "Breathing Coach Login";
+        title = "Sign In";
+        self.addBackButton()
         
         clientIdTextField.delegate = self;
         let tapRecognizer: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(AuthorizationViewController.dismissKeyboard));
         view.addGestureRecognizer(tapRecognizer);
         clientId = "LUXOh5X5mc3B4lT1jQLTZU6lkA08Ha";
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated);
+        
+        self.showNavigationBar();
+        prepareSubviews();
+    }
+    
+    func prepareSubviews() {
+        loginParentView.backgroundColor = Constants.darkViewBackground;
+        loginParentView.layer.cornerRadius = 8;
+        nextButton.layer.cornerRadius = 8;
+        nextButton.backgroundColor = .clear;
+        nextButton.setTitleColor(Constants.basicTextColor, for: .normal);
+        clientIdTextField.backgroundColor = Constants.basicTextColor;
+        clientIdTextField.textColor = .black;
+        clientIdTextField.text = "Default Account";
+        instructionLabel.textColor = Constants.basicTextColor;
+        instructionLabel.backgroundColor = .clear;
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
@@ -44,6 +67,7 @@ class AuthorizationViewController: UIViewController, UITextFieldDelegate, UIGest
     
     @IBAction func nextPressed(_ sender: Any) {
         _ = navigationController?.popViewController(animated: false);
+        print(clientId); 
         ApiHelper.authorizeUser(clientId: clientId);
     }
 

@@ -7,8 +7,22 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3418A53F1E81FB210003312C /* MRRViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3418A53E1E81FB210003312C /* MRRViewController.swift */; };
 		3446A2AD1E7B2DA50036342C /* DataViewingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */; };
 		3446A2C41E7E02860036342C /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2C31E7E02860036342C /* Constants.swift */; };
+		3456CF9A1E8234940005B806 /* breathingBuddyLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CF991E8234940005B806 /* breathingBuddyLogo.png */; };
+		3456CF9E1E823CF50005B806 /* BreathingBuddyTitle.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CF9D1E823CF50005B806 /* BreathingBuddyTitle.png */; };
+		3456CFA01E82E56F0005B806 /* ccw_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CF9F1E82E56F0005B806 /* ccw_wheel.png */; };
+		3456CFA21E8304280005B806 /* BreathingBuddyTitleDark.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CFA11E8304280005B806 /* BreathingBuddyTitleDark.png */; };
+		3456CFA41E83096A0005B806 /* breathingBuddyLogoDark.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CFA31E83096A0005B806 /* breathingBuddyLogoDark.png */; };
+		3456CFA61E8320D70005B806 /* BreathingBuddyTitleLight.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CFA51E8320D70005B806 /* BreathingBuddyTitleLight.png */; };
+		3456CFA81E8333590005B806 /* hexoskinLogo.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 3456CFA71E8333590005B806 /* hexoskinLogo.jpeg */; };
+		3456CFAA1E8343E70005B806 /* hexoskinImage.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 3456CFA91E8343E70005B806 /* hexoskinImage.jpeg */; };
+		3456CFAC1E8358030005B806 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3456CFAB1E8358030005B806 /* Extensions.swift */; };
+		3456CFAE1E836ECA0005B806 /* actionResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3456CFAD1E836ECA0005B806 /* actionResultView.swift */; };
+		3456CFB21E84943D0005B806 /* Structs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3456CFB11E84943D0005B806 /* Structs.swift */; };
+		3456CFB41E84946D0005B806 /* Enums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3456CFB31E84946D0005B806 /* Enums.swift */; };
+		3456CFB81E85BA200005B806 /* downArray.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CFB71E85BA200005B806 /* downArray.png */; };
 		347501FE1DCE2C4D002E6465 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 347501FD1DCE2C4D002E6465 /* AppDelegate.swift */; };
 		347502031DCE2C4D002E6465 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 347502011DCE2C4D002E6465 /* Main.storyboard */; };
 		347502051DCE2C4D002E6465 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 347502041DCE2C4D002E6465 /* Assets.xcassets */; };
@@ -21,7 +35,6 @@
 		3475021F1DCFFDB8002E6465 /* BreathingExercise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3475021E1DCFFDB8002E6465 /* BreathingExercise.swift */; };
 		3484D2601E42489800D162B7 /* AnalysisPreparationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3484D25F1E42489800D162B7 /* AnalysisPreparationViewController.swift */; };
 		34A0A9AF1E80B3AC005EAB7B /* beep.wav in Resources */ = {isa = PBXBuildFile; fileRef = 34A0A9AE1E80B3AC005EAB7B /* beep.wav */; };
-		34A0A9B61E80B3C5005EAB7B /* ccw_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 34A0A9B01E80B3C5005EAB7B /* ccw_wheel.png */; };
 		34A0A9B71E80B3C5005EAB7B /* cw_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 34A0A9B11E80B3C5005EAB7B /* cw_wheel.png */; };
 		34A0A9B81E80B3C5005EAB7B /* greencheck.png in Resources */ = {isa = PBXBuildFile; fileRef = 34A0A9B21E80B3C5005EAB7B /* greencheck.png */; };
 		34A0A9B91E80B3C5005EAB7B /* hexoskinShirtTransparent.png in Resources */ = {isa = PBXBuildFile; fileRef = 34A0A9B31E80B3C5005EAB7B /* hexoskinShirtTransparent.png */; };
@@ -33,8 +46,22 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3418A53E1E81FB210003312C /* MRRViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MRRViewController.swift; sourceTree = "<group>"; };
 		3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataViewingViewController.swift; sourceTree = "<group>"; };
 		3446A2C31E7E02860036342C /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		3456CF991E8234940005B806 /* breathingBuddyLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = breathingBuddyLogo.png; sourceTree = "<group>"; };
+		3456CF9D1E823CF50005B806 /* BreathingBuddyTitle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BreathingBuddyTitle.png; sourceTree = "<group>"; };
+		3456CF9F1E82E56F0005B806 /* ccw_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ccw_wheel.png; sourceTree = "<group>"; };
+		3456CFA11E8304280005B806 /* BreathingBuddyTitleDark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BreathingBuddyTitleDark.png; sourceTree = "<group>"; };
+		3456CFA31E83096A0005B806 /* breathingBuddyLogoDark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = breathingBuddyLogoDark.png; sourceTree = "<group>"; };
+		3456CFA51E8320D70005B806 /* BreathingBuddyTitleLight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BreathingBuddyTitleLight.png; sourceTree = "<group>"; };
+		3456CFA71E8333590005B806 /* hexoskinLogo.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = hexoskinLogo.jpeg; sourceTree = "<group>"; };
+		3456CFA91E8343E70005B806 /* hexoskinImage.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = hexoskinImage.jpeg; sourceTree = "<group>"; };
+		3456CFAB1E8358030005B806 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		3456CFAD1E836ECA0005B806 /* actionResultView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = actionResultView.swift; sourceTree = "<group>"; };
+		3456CFB11E84943D0005B806 /* Structs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Structs.swift; sourceTree = "<group>"; };
+		3456CFB31E84946D0005B806 /* Enums.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Enums.swift; sourceTree = "<group>"; };
+		3456CFB71E85BA200005B806 /* downArray.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = downArray.png; sourceTree = "<group>"; };
 		347501FA1DCE2C4D002E6465 /* HexoskinBreathing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HexoskinBreathing.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		347501FD1DCE2C4D002E6465 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		347502021DCE2C4D002E6465 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -50,7 +77,6 @@
 		3475021E1DCFFDB8002E6465 /* BreathingExercise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreathingExercise.swift; sourceTree = "<group>"; };
 		3484D25F1E42489800D162B7 /* AnalysisPreparationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnalysisPreparationViewController.swift; sourceTree = "<group>"; };
 		34A0A9AE1E80B3AC005EAB7B /* beep.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = beep.wav; sourceTree = "<group>"; };
-		34A0A9B01E80B3C5005EAB7B /* ccw_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ccw_wheel.png; sourceTree = "<group>"; };
 		34A0A9B11E80B3C5005EAB7B /* cw_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cw_wheel.png; sourceTree = "<group>"; };
 		34A0A9B21E80B3C5005EAB7B /* greencheck.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = greencheck.png; sourceTree = "<group>"; };
 		34A0A9B31E80B3C5005EAB7B /* hexoskinShirtTransparent.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = hexoskinShirtTransparent.png; sourceTree = "<group>"; };
@@ -110,7 +136,15 @@
 		347502221DD040FC002E6465 /* Images */ = {
 			isa = PBXGroup;
 			children = (
-				34A0A9B01E80B3C5005EAB7B /* ccw_wheel.png */,
+				3456CFB71E85BA200005B806 /* downArray.png */,
+				3456CFA91E8343E70005B806 /* hexoskinImage.jpeg */,
+				3456CFA71E8333590005B806 /* hexoskinLogo.jpeg */,
+				3456CFA51E8320D70005B806 /* BreathingBuddyTitleLight.png */,
+				3456CFA31E83096A0005B806 /* breathingBuddyLogoDark.png */,
+				3456CFA11E8304280005B806 /* BreathingBuddyTitleDark.png */,
+				3456CF9F1E82E56F0005B806 /* ccw_wheel.png */,
+				3456CF9D1E823CF50005B806 /* BreathingBuddyTitle.png */,
+				3456CF991E8234940005B806 /* breathingBuddyLogo.png */,
 				34A0A9B11E80B3C5005EAB7B /* cw_wheel.png */,
 				34A0A9B21E80B3C5005EAB7B /* greencheck.png */,
 				34A0A9B31E80B3C5005EAB7B /* hexoskinShirtTransparent.png */,
@@ -156,6 +190,11 @@
 				34CD11C31E3A6E8800C838F5 /* DataResponse.swift */,
 				3475021E1DCFFDB8002E6465 /* BreathingExercise.swift */,
 				347502181DCE2E58002E6465 /* ImmediatePanGestureRecognizer.swift */,
+				3418A53E1E81FB210003312C /* MRRViewController.swift */,
+				3456CFAB1E8358030005B806 /* Extensions.swift */,
+				3456CFAD1E836ECA0005B806 /* actionResultView.swift */,
+				3456CFB11E84943D0005B806 /* Structs.swift */,
+				3456CFB31E84946D0005B806 /* Enums.swift */,
 			);
 			path = CustomClasses;
 			sourceTree = "<group>";
@@ -221,15 +260,23 @@
 			buildActionMask = 2147483647;
 			files = (
 				34A0A9BA1E80B3C5005EAB7B /* pause_wheel.png in Resources */,
+				3456CFA01E82E56F0005B806 /* ccw_wheel.png in Resources */,
 				34A0A9AF1E80B3AC005EAB7B /* beep.wav in Resources */,
 				34A0A9B71E80B3C5005EAB7B /* cw_wheel.png in Resources */,
+				3456CFA61E8320D70005B806 /* BreathingBuddyTitleLight.png in Resources */,
+				3456CF9A1E8234940005B806 /* breathingBuddyLogo.png in Resources */,
+				3456CFAA1E8343E70005B806 /* hexoskinImage.jpeg in Resources */,
 				347502081DCE2C4D002E6465 /* LaunchScreen.storyboard in Resources */,
+				3456CFA41E83096A0005B806 /* breathingBuddyLogoDark.png in Resources */,
+				3456CFB81E85BA200005B806 /* downArray.png in Resources */,
 				347502051DCE2C4D002E6465 /* Assets.xcassets in Resources */,
+				3456CFA21E8304280005B806 /* BreathingBuddyTitleDark.png in Resources */,
 				34A0A9B91E80B3C5005EAB7B /* hexoskinShirtTransparent.png in Resources */,
 				34A0A9BB1E80B3C5005EAB7B /* redx.png in Resources */,
+				3456CF9E1E823CF50005B806 /* BreathingBuddyTitle.png in Resources */,
 				347502031DCE2C4D002E6465 /* Main.storyboard in Resources */,
 				34A0A9B81E80B3C5005EAB7B /* greencheck.png in Resources */,
-				34A0A9B61E80B3C5005EAB7B /* ccw_wheel.png in Resources */,
+				3456CFA81E8333590005B806 /* hexoskinLogo.jpeg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -244,14 +291,19 @@
 				347502171DCE2E3A002E6465 /* MainMenuViewController.swift in Sources */,
 				34CD11C21E382C3400C838F5 /* JSONHelper.swift in Sources */,
 				3446A2AD1E7B2DA50036342C /* DataViewingViewController.swift in Sources */,
+				3418A53F1E81FB210003312C /* MRRViewController.swift in Sources */,
 				3446A2C41E7E02860036342C /* Constants.swift in Sources */,
 				347502131DCE2DF6002E6465 /* ExerciseViewController.swift in Sources */,
 				347501FE1DCE2C4D002E6465 /* AppDelegate.swift in Sources */,
 				347502151DCE2E17002E6465 /* AuthorizationViewController.swift in Sources */,
+				3456CFAE1E836ECA0005B806 /* actionResultView.swift in Sources */,
 				3475021F1DCFFDB8002E6465 /* BreathingExercise.swift in Sources */,
+				3456CFB21E84943D0005B806 /* Structs.swift in Sources */,
+				3456CFAC1E8358030005B806 /* Extensions.swift in Sources */,
 				34BE1C1C1E803B3100878574 /* ExerciseDesignerViewController.swift in Sources */,
 				34CD11C41E3A6E8800C838F5 /* DataResponse.swift in Sources */,
 				347502191DCE2E58002E6465 /* ImmediatePanGestureRecognizer.swift in Sources */,
+				3456CFB41E84946D0005B806 /* Enums.swift in Sources */,
 				3484D2601E42489800D162B7 /* AnalysisPreparationViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

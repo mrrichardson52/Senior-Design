@@ -8,7 +8,7 @@
 
 import UIKit
 
-class DataViewingViewController: UIViewController {
+class DataViewingViewController: MRRViewController {
     
     // exercise information and data
     var exerciseData: [breathingAction]!;
@@ -32,19 +32,32 @@ class DataViewingViewController: UIViewController {
     var sectionViews: [UIView]! = nil;
     
     // ratio of pixels to seconds
-    let pixelSecondRatio: Double = 30;
+    var pixelSecondRatio: Double = 30;
     
     // boolean that says whether or not to display the Hexoskin data
     var displayHexData: Bool = false;
     var displayRingData: Bool = false;
     
+    // graph border line height
+    let borderLineHeight: CGFloat = 2;
+    let borderLineColor: UIColor = .clear;
+    let borderLineBuffer: CGFloat = 12;
+    
+    // base duration for exercise
+    var baseDuration: Double = 0;
+    
+    // original exercise duration
+    var exerciseDuration: Double = 0;
+    
     override func viewDidLoad() {
-        super.viewDidLoad()
-        self.view.backgroundColor = .white;
+        super.viewDidLoad()        
+        self.title = "Analysis";
         
-        self.title = "Analysis"; 
+        print("Exercise duration: \(exerciseDuration)");
         
-        // remove the back button here
+        calculateThresholdsAndRatios();
+        
+        self.addBackButton()
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(DataViewingViewController.donePressed));
         
         // prepare the views for autolayout
@@ -54,28 +67,45 @@ class DataViewingViewController: UIViewController {
         // set the colors of the indicator views
         inhaleIndicator.backgroundColor = Constants.inhaleIndicatorColor;
         exhaleIndicator.backgroundColor = Constants.exhaleIndicatorColor;
-        noDataIndicator.backgroundColor = Constants.noDataIndicatorColor;
-        inhaleIndicator.textColor = .black;
-        exhaleIndicator.textColor = .black;
-        noDataIndicator.textColor = .black;
+        noDataIndicator.backgroundColor = .black;
+        inhaleIndicator.textColor = Constants.inhaleIndicatorTextColor;
+        exhaleIndicator.textColor = Constants.exhaleIndicatorTextColor;
+        noDataIndicator.textColor = Constants.basicTextColor;
+        
+        // set the background colors for the scrollview
+        scrollView.backgroundColor = Constants.backgroundColor;
+        contentView.backgroundColor = Constants.backgroundColor;
+        scrollParentView.backgroundColor = Constants.backgroundColor;
         
         // prepare the data for display
         // only equalize if ring or hexoskin is showing
         if displayRingData || displayHexData {
+//            print("\nBefore Equalization:\n");
+//            printData(data: exerciseData, heading: "Exercise Data");
+//            printData(data: hexoskinData, heading: "Hexoskin Data");
+//            printData(data: ringData, heading: "Ring Data");
+            
             equalizeDataSources();
+            
+//            print("After Equalization:\n");
+//            printData(data: exerciseData, heading: "Exercise Data");
+//            printData(data: hexoskinData, heading: "Hexoskin Data");
+//            printData(data: ringData, heading: "Ring Data");
         }
         
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated);
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated);
         
-        // now that the constraints are active, we can add the views to the scroll view
-        populateScrollView();
+        self.showNavigationBar();
+        
+        populateScrollView()
     }
     
     func donePressed() {
-        
+        // pop back to main menu
+        _ = self.navigationController?.popToRootViewController(animated: true); 
     }
     
     func populateScrollView() {
@@ -155,15 +185,12 @@ class DataViewingViewController: UIViewController {
 
     func addViewsForDataSource(actions: [breathingAction], section: Int, title: String) {
         
-        // store the heights for label
-        let labelHeight = 21;
-        
         // add the title label at the top
         let titleLabel = UILabel();
         titleLabel.translatesAutoresizingMaskIntoConstraints = false;
         titleLabel.text = title;
         titleLabel.textAlignment = .center;
-        titleLabel.textColor = .black;
+        titleLabel.textColor = Constants.basicTextColor;
         titleLabel.font = titleLabel.font.withSize(25);
         scrollParentView.addSubview(titleLabel);
         
@@ -175,78 +202,76 @@ class DataViewingViewController: UIViewController {
         scrollParentView.addConstraints([titleTopConstraint, titleHorizontalConstraint, titleWidthConstraint, titleHeightConstraint]);
         
         // iterate through all of the actions
-        var previousLabel: UILabel! = nil;
+        var previousView: UIView! = nil;
+        var counter = -1;
         for action in actions {
+            counter += 1;
             
             // calculate width based on duration of current action
             let width = action.duration * pixelSecondRatio;
             
             // create the view that visualizes the duration
-            let view = UIView();
-            view.translatesAutoresizingMaskIntoConstraints = false;
-            sectionViews[section].addSubview(view);
-            if action.action == Strings.inhale {
-                view.backgroundColor = Constants.inhaleIndicatorColor;
-            } else if action.action == Strings.exhale {
-                view.backgroundColor = Constants.exhaleIndicatorColor;
-            } else if action.action == Strings.notAnAction || action.action == Strings.pause {
-                view.backgroundColor = Constants.noDataIndicatorColor;
+            var position: String = "";
+            if counter == 0 {
+                // first action
+                position = ActionPosition.first;
+            } else if action.end == exerciseDuration {
+                // last action
+                position = ActionPosition.last;
             } else {
-                // code shouldn't reach this, so black will indicate error
-                view.backgroundColor = UIColor.black;
+                position = ActionPosition.middle;
             }
+            let view = actionResultView(action: action, baseDuration: baseDuration, position: position);
+            sectionViews[section].addSubview(view);
             
             // constrain the view
             let horizontalViewConstraint: NSLayoutConstraint!
-            if previousLabel == nil {
+            if previousView == nil {
                 // constrain to the left edge of the scrollview
                 horizontalViewConstraint = NSLayoutConstraint(item: sectionViews[section], attribute: .leading, relatedBy: .equal, toItem: view, attribute: .leading, multiplier: 1.0, constant: 0);
                 
             } else {
                 // constrain to the trailing edge of the previous view
-                horizontalViewConstraint = NSLayoutConstraint(item: previousLabel, attribute: .trailing, relatedBy: .equal, toItem: view, attribute: .leading, multiplier: 1.0, constant: 0);
+                horizontalViewConstraint = NSLayoutConstraint(item: previousView, attribute: .trailing, relatedBy: .equal, toItem: view, attribute: .leading, multiplier: 1.0, constant: 0);
             }
             let widthViewConstraint: NSLayoutConstraint = NSLayoutConstraint(item: view, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(width));
             let heightViewConstraint: NSLayoutConstraint = NSLayoutConstraint(item: view, attribute: .height, relatedBy: .equal, toItem: sectionViews[section], attribute: .height, multiplier: 0.5, constant: 0);
             let verticalViewConstraint: NSLayoutConstraint = NSLayoutConstraint(item: titleLabel, attribute: .bottom, relatedBy: .equal, toItem: view, attribute: .top, multiplier: 1.0, constant: 0);
             
-            
-            // create the label that displays duration
-            let label = UILabel();
-            label.translatesAutoresizingMaskIntoConstraints = false;
-            label.font = label.font.withSize(15);
-            label.textAlignment = .center;
-            label.backgroundColor = UIColor.clear;
-            if action.duration >= Constants.resultsViewDurationThreshold && action.action != Strings.notAnAction {
-                // display the duration
-                let formattedText = String.init(format: "%.1f s", action.duration);
-                label.text = formattedText;
-            } else {
-                // not worth showing the duration for such a short breath
-                label.text = "";
-            }
-            view.addSubview(label);
-            
-            // constrain the label to the center of the previously added view
-            let centerHorizontalLabelConstraint: NSLayoutConstraint = NSLayoutConstraint(item: label, attribute: .centerX, relatedBy: .equal, toItem: view, attribute: .centerX, multiplier: 1.0, constant: 0);
-            let centerVerticalLabelConstraint: NSLayoutConstraint = NSLayoutConstraint(item: label, attribute: .centerY, relatedBy: .equal, toItem: view, attribute: .centerY, multiplier: 1.0, constant: 0);
-            let widthLabelConstraint: NSLayoutConstraint = NSLayoutConstraint(item: label, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(width));
-            let heightLabelConstraint: NSLayoutConstraint = NSLayoutConstraint(item: label, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(labelHeight));
-
-            
             // add all of the constraints
-            scrollParentView.addConstraints([centerHorizontalLabelConstraint, widthLabelConstraint, heightLabelConstraint, centerVerticalLabelConstraint, horizontalViewConstraint, widthViewConstraint, heightViewConstraint, verticalViewConstraint]);
+            scrollParentView.addConstraints([horizontalViewConstraint, widthViewConstraint, heightViewConstraint, verticalViewConstraint]);
             
             // set current label as previous label
-            previousLabel = label;
+            previousView = view;
             
         }
         
-        
         // set the end of the last label to the end of the sectionview
-        let endConstraint: NSLayoutConstraint = NSLayoutConstraint(item: previousLabel, attribute: .trailing, relatedBy: .equal, toItem: sectionViews[section], attribute: .trailing, multiplier: 1.0, constant: 0);
+        let endConstraint: NSLayoutConstraint = NSLayoutConstraint(item: previousView, attribute: .trailing, relatedBy: .equal, toItem: sectionViews[section], attribute: .trailing, multiplier: 1.0, constant: 0);
         scrollView.addConstraint(endConstraint);
+        
+        // add borderlines around the views
+        let topBorderLine = UIView();
+        topBorderLine.backgroundColor = borderLineColor;
+        topBorderLine.translatesAutoresizingMaskIntoConstraints = false;
+        sectionViews[section].addSubview(topBorderLine);
+        var constraints: [NSLayoutConstraint] = [];
+        constraints.append(NSLayoutConstraint(item: topBorderLine, attribute: .leading, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .leading, multiplier: 1.0, constant: 0));
+        constraints.append(NSLayoutConstraint(item: topBorderLine, attribute: .trailing, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .trailing, multiplier: 1.0, constant: 0));
+        constraints.append(NSLayoutConstraint(item: topBorderLine, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: borderLineHeight));
+        constraints.append(NSLayoutConstraint(item: previousView, attribute: .top, relatedBy: .equal, toItem: topBorderLine, attribute: .bottom, multiplier: 1.0, constant: borderLineBuffer));
+        
+//        let bottomBorderLine = UIView();
+//        bottomBorderLine.backgroundColor = borderLineColor;
+//        bottomBorderLine.translatesAutoresizingMaskIntoConstraints = false;
+//        sectionViews[section].addSubview(bottomBorderLine);
+//        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .leading, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .leading, multiplier: 1.0, constant: 0));
+//        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .trailing, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .trailing, multiplier: 1.0, constant: 0));
+//        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: borderLineHeight));
+//        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .top, relatedBy: .equal, toItem: previousView, attribute: .bottom, multiplier: 1.0, constant: borderLineBuffer));
 
+        // add the constraints to the section view
+        sectionViews[section].addConstraints(constraints);
     }
     
     func addSectionViews() {
@@ -286,15 +311,18 @@ class DataViewingViewController: UIViewController {
         }
     }
     
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransition(to: size, with: coordinator);
-        coordinator.animate(alongsideTransition: nil, completion: {
-            _ in
-            DispatchQueue.main.async {
-                self.scrollParentView.layoutSubviews()
-            }
-        })
+    func calculateThresholdsAndRatios() {
         
+        baseDuration = exerciseData[0].duration;
+        pixelSecondRatio = Double(self.view.frame.width)/(baseDuration*2);
+        
+    }
+    
+    func printData(data: [breathingAction], heading: String) {
+        print("\n\(heading)");
+        for action in data {
+            print("\(action.action) \(action.duration)s start: \(action.start) end: \(action.end)");
+        }
     }
     
 }

@@ -18,7 +18,10 @@ struct InstructionDisplay {
     var duration: Double = 0.0;
 }
 
-class ExerciseViewController: UIViewController {
+class ExerciseViewController: MRRViewController {
+    
+    // view that house all of the instructions
+    @IBOutlet weak var instructionParentView: UIView!
     
     // label outlets for the instructions
     @IBOutlet weak var fifthInstructionLabel: UILabel!
@@ -68,8 +71,8 @@ class ExerciseViewController: UIViewController {
     // constants
     let queuedInstructionTextSize: CGFloat = 20.0;
     let currentInstructionTextSize: CGFloat = 30.0;
-    let queuedInstructionTextColor: UIColor = UIColor.red;
-    let currentInstructionTextColor: UIColor = UIColor.blue;
+    let queuedInstructionTextColor: UIColor = Constants.electricBlue;
+    let currentInstructionTextColor: UIColor = Constants.basicTextColor;
     let exerciseCompleteIndicator: String = "Complete";
     
     
@@ -120,11 +123,27 @@ class ExerciseViewController: UIViewController {
     // boolean used for determining whether to play the metronome or not
     var playMetronome: Bool = false;
     
+    // values stored for repositioning the instruction views
+    let distanceBetweenQueuedInstructionViews = 50;
+    let addedDistanceToCurrentInstructionView = 20;
+    let topInstructionViewStartingPosition = -25; // this is the invisible view that will be shifted down next
+    let instructionLabelHeight = 38; // make sure this is the same as in IB (Not best design, should be fixed)
+    let currentInstructionBorderLineWidth = 3;
+    let distanceBetweenBorderLineAndCurrentInstruction = 5;
+    
+    // border line views
+    var topBorderLine: UIView!
+    var bottomBorderLine: UIView!
+    
+    // indicate signed in
+    var signedIn: Bool!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // set the title for the nav bar
-        title = "Breathing Exercise";
+        title = "Exercise";
+        self.addBackButton()
         
         // initialize wheel image and add gesture recognizer
         imageView.image = UIImage(named: "pause_wheel.png");
@@ -134,7 +153,6 @@ class ExerciseViewController: UIViewController {
         imageView.isUserInteractionEnabled = true;
         
         alreadyFinished = false;
-        //        exercise = BreathingExercise();
         
         if playMetronome {
             beepSound = URL(fileURLWithPath: Bundle.main.path(forResource: "beep", ofType: "wav")!)
@@ -164,6 +182,12 @@ class ExerciseViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         // store the center of the imageview to be used for detecting distances of taps on the ring
         circleCenter = CGPoint(x: imageView.frame.origin.x + imageView.frame.size.width/2, y: imageView.frame.origin.y + imageView.frame.size.height/2);
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated);
+        
+        self.showNavigationBar();
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -240,15 +264,17 @@ class ExerciseViewController: UIViewController {
                 if exerciseEnded {
                     // exercise is over. record the last action and then prevent other actions from
                     // being captured
-                    lastActionCaptured = true;
-                    if rotatingClockwise == true {
-                        let actionEndTime = Date().timeIntervalSince1970;
-                        let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
-                        ringActions.append(action);
-                    } else {
-                        let actionEndTime = Date().timeIntervalSince1970;
-                        let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
-                        ringActions.append(action);
+                    if rotatingClockwise != nil {
+                        lastActionCaptured = true;
+                        if rotatingClockwise == true {
+                            let actionEndTime = Date().timeIntervalSince1970;
+                            let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
+                            ringActions.append(action);
+                        } else {
+                            let actionEndTime = Date().timeIntervalSince1970;
+                            let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
+                            ringActions.append(action);
+                        }
                     }
                 } else if previousAngle - angle > 0 || previousAngle - angle < -300 {
                     // clockwise
@@ -343,6 +369,9 @@ class ExerciseViewController: UIViewController {
         blurEffectView.removeFromSuperview();
         beginButton.removeFromSuperview();
         
+        // add border lines for current instruction
+        addCurrentInstructionBorderLines();
+        
         // initialize the instruction labels with the instructions and their durations
         // initialize the first/current instruction label with starting exercise indicator
         instructionDisplays[0].label.text = "Starting in: ";
@@ -436,7 +465,7 @@ class ExerciseViewController: UIViewController {
             endTimestamp = Int(date.timeIntervalSince1970*256);
             
             // delay for 2 seconds before going to the results controller
-            Timer.scheduledTimer(timeInterval: 2.0, target: self, selector: #selector(ExerciseViewController.pushResultsController), userInfo: nil, repeats: false);
+            Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ExerciseViewController.addNextButton), userInfo: nil, repeats: false);
             
         }
         
@@ -444,6 +473,7 @@ class ExerciseViewController: UIViewController {
         for index in 0...4 {
             getDisplayInPosition(position: index).labelVerticalConstraint.constant += 50;
         }
+        getDisplayInPosition(position: 1).labelVerticalConstraint.constant += 20; // make the final instruction push down further
         
         // display the appropriate wheel
         let nextAction = self.getDisplayInPosition(position: 1).label.text;
@@ -489,11 +519,80 @@ class ExerciseViewController: UIViewController {
             // the following instruction is different bc modification of the struct requires direct access since function getDisplayInPosition returns a copy
             self.instructionDisplays[self.getDisplayNumber(position: 4)].duration = nextAction.duration;
             
-            self.getDisplayInPosition(position: 4).labelVerticalConstraint.constant += -250;
+            self.getDisplayInPosition(position: 4).labelVerticalConstraint.constant += -270;
             self.view.layoutIfNeeded();
         })
     }
     
+    func addCurrentInstructionBorderLines() {
+        topBorderLine = UIView();
+        self.view.addSubview(topBorderLine);
+        topBorderLine.backgroundColor = Constants.basicButtonBackgroundColor;
+        topBorderLine.translatesAutoresizingMaskIntoConstraints = false;
+        var constraints: [NSLayoutConstraint] = [];
+        constraints.append(NSLayoutConstraint(item: topBorderLine, attribute: .leading, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .leading, multiplier: 1.0, constant: 0));
+        constraints.append(NSLayoutConstraint(item: topBorderLine, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(currentInstructionBorderLineWidth)));
+        constraints.append(NSLayoutConstraint(item: topBorderLine, attribute: .trailing, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .trailing, multiplier: 1.0, constant: 0));
+        let topBorderLineDistanceToTop = CGFloat(4*distanceBetweenQueuedInstructionViews+topInstructionViewStartingPosition+addedDistanceToCurrentInstructionView-currentInstructionBorderLineWidth-distanceBetweenBorderLineAndCurrentInstruction)
+        constraints.append(NSLayoutConstraint(item: topBorderLine, attribute: .top, relatedBy: .equal, toItem: instructionParentView, attribute: .top, multiplier: 1.0, constant: topBorderLineDistanceToTop));
+        
+        bottomBorderLine = UIView();
+        self.view.addSubview(bottomBorderLine);
+        bottomBorderLine.backgroundColor = Constants.basicButtonBackgroundColor;
+        bottomBorderLine.translatesAutoresizingMaskIntoConstraints = false;
+        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .leading, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .leading, multiplier: 1.0, constant: 0));
+        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(currentInstructionBorderLineWidth)));
+        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .trailing, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .trailing, multiplier: 1.0, constant: 0));
+        let bottomBorderLineDistanceToTop = CGFloat(4*distanceBetweenQueuedInstructionViews+topInstructionViewStartingPosition+addedDistanceToCurrentInstructionView+distanceBetweenBorderLineAndCurrentInstruction+instructionLabelHeight)
+        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .top, relatedBy: .equal, toItem: instructionParentView, attribute: .top, multiplier: 1.0, constant: bottomBorderLineDistanceToTop));
+        self.view.addConstraints(constraints);
+    }
+    
+    func removeCurrentInstructionBorderLines() {
+        topBorderLine.removeFromSuperview();
+        bottomBorderLine.removeFromSuperview();
+    }
+    
+    func addNextButton() {
+        
+        // clear the instruction views and indicate completed
+        removeCurrentInstructionBorderLines();
+        self.getDisplayInPosition(position: 0).label.text = "";
+        self.getDisplayInPosition(position: 0).timerLabel.text = "";
+        let completedLabel = UILabel();
+        completedLabel.translatesAutoresizingMaskIntoConstraints = false;
+        completedLabel.numberOfLines = 0;
+        completedLabel.backgroundColor = .clear;
+        completedLabel.textAlignment = .center;
+        completedLabel.textColor = Constants.basicTextColor;
+        completedLabel.text = "Exercise\nCompleted";
+        completedLabel.font = completedLabel.font.withSize(35);
+        instructionParentView.addSubview(completedLabel);
+        var constraints: [NSLayoutConstraint] = [];
+        constraints.append(NSLayoutConstraint(item: completedLabel, attribute: .leading, relatedBy: .equal, toItem: instructionParentView, attribute: .leading, multiplier: 1.0, constant: 0));
+        constraints.append(NSLayoutConstraint(item: completedLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 90));
+        constraints.append(NSLayoutConstraint(item: completedLabel, attribute: .trailing, relatedBy: .equal, toItem: instructionParentView, attribute: .trailing, multiplier: 1.0, constant: 0));
+        constraints.append(NSLayoutConstraint(item: completedLabel, attribute: .bottom, relatedBy: .equal, toItem: instructionParentView, attribute: .centerY, multiplier: 1.0, constant: -10));
+        
+        // add next button right below the completed label
+//        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(ExerciseViewController.pushResultsController));
+        let nextButton = UIButton();
+        nextButton.translatesAutoresizingMaskIntoConstraints = false;
+        nextButton.isUserInteractionEnabled = true;
+        nextButton.addTarget(self, action: #selector(ExerciseViewController.pushResultsController), for: .touchUpInside);
+        instructionParentView.addSubview(nextButton);
+        nextButton.setTitleColor(Constants.basicTextColor, for: .normal);
+        nextButton.backgroundColor = Constants.electricBlue;
+        nextButton.layer.cornerRadius = 8;
+        nextButton.setTitle("Continue", for: .normal);
+        constraints.append(NSLayoutConstraint(item: nextButton, attribute: .centerX, relatedBy: .equal, toItem: instructionParentView, attribute: .centerX, multiplier: 1.0, constant: 0));
+        constraints.append(NSLayoutConstraint(item: nextButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 40));
+        constraints.append(NSLayoutConstraint(item: nextButton, attribute: .top, relatedBy: .equal, toItem: instructionParentView, attribute: .centerY, multiplier: 1.0, constant: 20));
+        constraints.append(NSLayoutConstraint(item: nextButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 120));
+        instructionParentView.addConstraints(constraints);
+
+        
+    }
     
     func pushResultsController() {
         
@@ -507,7 +606,8 @@ class ExerciseViewController: UIViewController {
         viewController?.accessToken = accessToken;
         viewController?.tokenType = tokenType;
         viewController?.exercise = exercise;
-        viewController?.ringActions = ringActions; 
+        viewController?.ringActions = ringActions;
+        viewController?.signedIn = signedIn; 
         self.navigationController?.pushViewController(viewController!, animated: true);
     }
     
@@ -610,18 +710,20 @@ class ExerciseViewController: UIViewController {
     func addBeginButton() {
         // now add a begin button
         beginButton = UIButton(frame: CGRect.zero);
+        self.view.addSubview(beginButton);
+        beginButton.layer.cornerRadius = 8;
+        beginButton.titleLabel?.font = beginButton.titleLabel?.font.withSize(30);
         beginButton.addTarget(self, action: #selector(ExerciseViewController.beginExercise), for: .touchUpInside);
         beginButton.translatesAutoresizingMaskIntoConstraints = false;
         let horizontalConstraint = NSLayoutConstraint(item: beginButton, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1.0, constant: 0);
         let verticalConstraint = NSLayoutConstraint(item: beginButton, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1.0, constant: 0);
-        let widthConstraint = NSLayoutConstraint(item: beginButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 200);
-        let heightConstraint = NSLayoutConstraint(item: beginButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 60);
+        let widthConstraint = NSLayoutConstraint(item: beginButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 150);
+        let heightConstraint = NSLayoutConstraint(item: beginButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 50);
         let constraints = [horizontalConstraint, verticalConstraint, widthConstraint, heightConstraint];
         self.view.addConstraints(constraints);
-        beginButton.setTitle("Begin Exercise", for: .normal);
-        beginButton.setTitleColor(.black, for: .normal)
-        beginButton.backgroundColor = .white;
-        self.view.addSubview(beginButton);
+        beginButton.setTitle("Begin", for: .normal);
+        beginButton.setTitleColor(Constants.basicTextColor, for: .normal)
+        beginButton.backgroundColor = Constants.basicButtonBackgroundColor;
     }
     
     func initInstructionDisplays() {
@@ -640,6 +742,7 @@ class ExerciseViewController: UIViewController {
             instructionDisplays[index].labelHorizontalConstraint.constant = 0;
             instructionDisplays[index].timerLabelHorizontalConstraint.constant = 0;
         }
+        instructionDisplays[0].labelVerticalConstraint.constant += 20; 
         
     }
     
