@@ -8,44 +8,17 @@
 
 import UIKit
 
-struct breathingAction {
-    var action: String = "";
-    var duration: Double = 0.0;
-    var start: Double = 0;
-    var end: Double = 0;
-    var status: String = "";
-    
-    init(action: String, duration: Double, start: Double, end: Double) {
-        self.action = action;
-        self.duration = duration;
-        self.start = start;
-        self.end = end;
-        self.status = Strings.ignored;
-    }
-    
-    init(action: String, duration: Double, start: Double, end: Double, status: String) {
-        self.action = action;
-        self.duration = duration;
-        self.start = start;
-        self.end = end;
-        self.status = status;
-    }
-}
-
 class BreathingExercise: NSObject {
     
     var actionCount: Int!
     var currentAction: Int!
     var actions: [breathingAction]!
+    var exerciseDuration: Double!
     
     override init() {
         actions = []; 
         actionCount = actions.count;
         currentAction = -1;
-        // create a breathing exercise here
-//        actions = [breathingAction(action: Strings.inhale, duration: 4, start: 0, end: 4), breathingAction(action: Strings.exhale, duration: 4, start: 4, end: 8)];
-        
-//        actions = [breathingAction(action: Strings.inhale, duration: 4, start: 0, end: 4), breathingAction(action: Strings.exhale, duration: 4, start: 4, end: 8), breathingAction(action: Strings.inhale, duration: 6, start: 8, end: 14), breathingAction(action: Strings.exhale, duration: 6, start: 14, end: 20), breathingAction(action: Strings.inhale, duration: 8, start: 20, end: 28), breathingAction(action: Strings.exhale, duration: 8, start: 28, end: 36)];
     }
     
     // create an exercise with the specified breath duration and the number of cycles
@@ -53,13 +26,40 @@ class BreathingExercise: NSObject {
         actions = [];
         var lastEnding: Double = 0;
         for _ in 1...cycles {
-            actions.append(breathingAction(action: Strings.inhale, duration: duration, start: 0, end: duration + lastEnding));
+            actions.append(breathingAction(action: Strings.inhale, duration: duration, start: lastEnding, end: duration + lastEnding));
             lastEnding += duration;
             actions.append(breathingAction(action: Strings.exhale, duration: duration, start: lastEnding, end: duration+lastEnding));
             lastEnding += duration;
         }
+        self.exerciseDuration = lastEnding;
+        print("Exercise Duration: \(self.exerciseDuration)"); 
         actionCount = actions.count;
         currentAction = -1;
+    }
+    
+    func addExerciseSets(exerciseSets: [(Double, Int)]) {
+        for set in exerciseSets {
+            addExerciseSet(duration: set.0, cycles: set.1);
+        }
+        actionCount = actions.count;
+    }
+    
+    // add exercise set to the existing exercise
+    func addExerciseSet(duration: Double, cycles: Int) {
+        var lastEnding: Double = 0;
+        if actions.count == 0 {
+            lastEnding = 0;
+        } else {
+            lastEnding = actions[actions.count-1].end;
+        }
+        for _ in 1...cycles {
+            actions.append(breathingAction(action: Strings.inhale, duration: duration, start: lastEnding, end: duration + lastEnding));
+            lastEnding += duration;
+            actions.append(breathingAction(action: Strings.exhale, duration: duration, start: lastEnding, end: duration+lastEnding));
+            lastEnding += duration;
+        }
+        self.exerciseDuration = lastEnding;
+        actionCount = actions.count;
     }
     
     func next() -> breathingAction {
