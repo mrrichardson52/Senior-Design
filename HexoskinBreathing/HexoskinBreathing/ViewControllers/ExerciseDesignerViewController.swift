@@ -28,6 +28,7 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
     @IBOutlet weak var metronomeSwitch: UISwitch!
     @IBOutlet weak var metronomeLabel: UILabel!
     @IBOutlet weak var continueButton: UIButton!
+    @IBOutlet weak var editContainer: UIView!
     
     var editViews: [UIView]!
     var rowBeingEdited: Int = -1;
@@ -39,12 +40,25 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
     // the exercise sets correspond to the entries in the scroll view and
     // the indices should be the same
     var exerciseSets: [(Double, Int)]!;
+    
+    // colors for elements
+    let stepperLabelColor: UIColor = Constants.phoneBoothRed
+    let stepperTitleLabelColor: UIColor = .black;
+    let editContainerTitleColor: UIColor = .black
+    let stepperColor: UIColor = .black;
+    let switchColor: UIColor = Constants.electricBlue
+    let borderColor: UIColor = Constants.avocadoColor;
+    let addRowColor: UIColor = Constants.phoneBoothRed;
+    let exerciseRowColor: UIColor = Constants.electricBlue;
+    let continueButtonBackgroundColor: UIColor = Constants.avocadoColor;
+    let metronomeLabelColor: UIColor = Constants.electricBlue
+    let selectedBackgroundColor = Constants.backgroundColor;
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Create Exercise"
         
-        editViews = [editTitleLabel, durationLabel, durationStepper, durationCountLabel, cyclesLabel, cyclesStepper, cyclesCountLabel];
+        editViews = [editTitleLabel, durationLabel, durationStepper, durationCountLabel, cyclesLabel, cyclesStepper, cyclesCountLabel, editContainer];
         
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
@@ -54,22 +68,25 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         prepareSteppers();
         prepareMetronomeSwitch();
         setTextColorOfLabels();
-        
-        // set color for edit title label
-        editTitleLabel.textColor = Constants.basicTextColor;
 
         continueButton.setTitleColor(Constants.basicTextColor, for: .normal);
-        continueButton.backgroundColor = Constants.basicButtonBackgroundColor;
+        continueButton.backgroundColor = continueButtonBackgroundColor;
         continueButton.layer.cornerRadius = 8;
+        editContainer.layer.cornerRadius = 8;
+        editContainer.backgroundColor = .white;
+        editContainer.layer.borderColor = borderColor.cgColor;
+        editContainer.layer.borderWidth = 2;
         
-        exerciseSets = [];
+        // since the steppers have already been prepared with values, set the first exercise set equal 
+        // to the stepper values
+        exerciseSets = [(durationStepper.value, Int(cyclesStepper.value))];
         
         // set tableview delegates
         tableView.delegate = self;
         tableView.dataSource = self;
         tableView.tableFooterView = UIView()
         tableView.backgroundColor = .white;
-        tableView.layer.borderColor = Constants.basicTextColor.cgColor;
+        tableView.layer.borderColor = borderColor.cgColor;
         tableView.layer.borderWidth = 2;
         tableView.layer.cornerRadius = 8;
         tableView.bounces = false;
@@ -88,12 +105,13 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
     }
 
     func setTextColorOfLabels() {
-        durationLabel.textColor = Constants.basicTextColor;
-        durationCountLabel.textColor = Constants.basicTextColor;
-        cyclesLabel.textColor = Constants.basicTextColor;
-        cyclesCountLabel.textColor = Constants.basicTextColor;
-        metronomeLabel.textColor = Constants.basicTextColor;
-        metronomeTitleLabel.textColor = Constants.basicTextColor;
+        durationLabel.textColor = stepperTitleLabelColor;
+        durationCountLabel.textColor = stepperLabelColor;
+        cyclesLabel.textColor = stepperTitleLabelColor;
+        cyclesCountLabel.textColor = stepperLabelColor;
+        metronomeLabel.textColor = metronomeLabelColor;
+        metronomeTitleLabel.textColor = metronomeLabelColor;
+        editTitleLabel.textColor = editContainerTitleColor;
     }
     
     // initialize steppers
@@ -107,7 +125,7 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         durationStepper.stepValue = 1.0;
         durationStepper.value = 6.0;
         durationCountLabel.text = "\(Int(durationStepper.value))s";
-        durationStepper.tintColor = Constants.electricBlue;
+        durationStepper.tintColor = stepperColor;
         
         // configure cycle stepper
         cyclesStepper.isContinuous = true;
@@ -118,13 +136,13 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         cyclesStepper.stepValue = 1.0;
         cyclesStepper.value = 3.0;
         cyclesCountLabel.text = "\(Int(cyclesStepper.value))x";
-        cyclesStepper.tintColor = Constants.electricBlue;
+        cyclesStepper.tintColor = stepperColor;
     }
     
     func prepareMetronomeSwitch() {
         metronomeSwitch.isOn = true;
         metronomeLabel.text = "On";
-        metronomeSwitch.onTintColor = Constants.electricBlue;
+        metronomeSwitch.onTintColor = switchColor;
 
     }
     
@@ -206,15 +224,16 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         if indexPath.row == exerciseSets.count {
             // make a row that indicates they should press it to add a new instructions
             cell.textLabel?.text = "Add instruction set";
+            cell.textLabel?.textColor = addRowColor;
         } else {
             cell.textLabel?.text = "\(Int(indexPath.row+1)). Inhale \(Int(exerciseSets[indexPath.row].0)) s, Exhale \(Int(exerciseSets[indexPath.row].0)) s   x   \(exerciseSets[indexPath.row].1)";
+            cell.textLabel?.textColor = exerciseRowColor;
         }
-        cell.textLabel?.textColor = .black;
         
         // check to see if this the row that is being edited
         // if so, set is as selected
         if indexPath.row == rowBeingEdited {
-            cell.backgroundColor = UIColor.lightGray;
+            cell.backgroundColor = selectedBackgroundColor;
         } else {
             cell.backgroundColor = UIColor.white;
         }
@@ -275,6 +294,18 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return "Your Exercise";
+    }
+
+//    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+//        let headerCell = tableView.dequeueReusableCell(withIdentifier: "HeaderCell")! as! CustomHeaderCell;
+//        headerCell.backgroundColor = .white;
+//        headerCell.titleLabel.textColor = Constants.navigationBarColor;
+//        headerCell.titleBorderView.backgroundColor = Constants.navigationBarColor;
+//        return headerCell;
+//    }
+    
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return 50;
     }
     
     func removeExerciseSet(indexPath: IndexPath) {

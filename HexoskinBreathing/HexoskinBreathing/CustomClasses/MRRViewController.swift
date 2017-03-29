@@ -13,6 +13,7 @@ class MRRViewController: UIViewController {
 //    var disablesLandscape: Bool = false;
     var depthView: UIView!
     var depthViewVerticalConstraint: NSLayoutConstraint! = nil;
+    var backgroundImageView: UIImageView!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,7 +26,7 @@ class MRRViewController: UIViewController {
  
          */
         
-        self.view.backgroundColor = Constants.backgroundColor;
+        self.view.backgroundColor = Constants.backgroundColor; 
         self.navigationItem.setHidesBackButton(true, animated: false);
 
         // add a view that sits right beneath the navigation bar

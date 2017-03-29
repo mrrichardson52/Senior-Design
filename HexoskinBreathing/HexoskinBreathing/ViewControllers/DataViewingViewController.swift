@@ -8,7 +8,10 @@
 
 import UIKit
 
-class DataViewingViewController: MRRViewController {
+class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
+    
+    // colors for ui elements
+    let sectionTitleColor: UIColor = .black; 
     
     // exercise information and data
     var exerciseData: [breathingAction]!;
@@ -24,6 +27,8 @@ class DataViewingViewController: MRRViewController {
     @IBOutlet weak var inhaleIndicator: UILabel!
     @IBOutlet weak var exhaleIndicator: UILabel!
     @IBOutlet weak var noDataIndicator: UILabel!
+    
+    var caratLabels: [UILabel]!
 
     // section views within scroll view
     // index 0 is the top third
@@ -57,6 +62,8 @@ class DataViewingViewController: MRRViewController {
         
         calculateThresholdsAndRatios();
         
+        caratLabels = [];
+        
         self.addBackButton()
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(DataViewingViewController.donePressed));
         
@@ -76,6 +83,7 @@ class DataViewingViewController: MRRViewController {
         scrollView.backgroundColor = Constants.backgroundColor;
         contentView.backgroundColor = Constants.backgroundColor;
         scrollParentView.backgroundColor = Constants.backgroundColor;
+        scrollView.delegate = self; 
         
         // prepare the data for display
         // only equalize if ring or hexoskin is showing
@@ -190,7 +198,7 @@ class DataViewingViewController: MRRViewController {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false;
         titleLabel.text = title;
         titleLabel.textAlignment = .center;
-        titleLabel.textColor = Constants.basicTextColor;
+        titleLabel.textColor = sectionTitleColor;
         titleLabel.font = titleLabel.font.withSize(25);
         scrollParentView.addSubview(titleLabel);
         
@@ -269,9 +277,28 @@ class DataViewingViewController: MRRViewController {
 //        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .trailing, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .trailing, multiplier: 1.0, constant: 0));
 //        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: borderLineHeight));
 //        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .top, relatedBy: .equal, toItem: previousView, attribute: .bottom, multiplier: 1.0, constant: borderLineBuffer));
-
+        
         // add the constraints to the section view
         sectionViews[section].addConstraints(constraints);
+        
+        // create a UILabel and display it at the right side of the section view to indicate
+        // scrollability
+        if 2*baseDuration < exerciseDuration {
+            let label = UILabel();
+            label.translatesAutoresizingMaskIntoConstraints = false;
+            label.text = ">";
+            label.textColor = .white;
+            label.textAlignment = .right;
+            label.font = label.font.withSize(20);
+            scrollParentView.addSubview(label);
+            constraints = [];
+            constraints.append(NSLayoutConstraint(item: label, attribute: .trailing, relatedBy: .equal, toItem: label.superview, attribute: .trailing, multiplier: 1.0, constant: -10));
+            constraints.append(NSLayoutConstraint(item: label, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 25));
+            constraints.append(NSLayoutConstraint(item: label, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 30));
+            constraints.append(NSLayoutConstraint(item: label, attribute: .top, relatedBy: .equal, toItem: previousView, attribute: .top, multiplier: 1.0, constant: 5));
+            scrollParentView.addConstraints(constraints);
+            caratLabels.append(label);
+        }
     }
     
     func addSectionViews() {
@@ -322,6 +349,13 @@ class DataViewingViewController: MRRViewController {
         print("\n\(heading)");
         for action in data {
             print("\(action.action) \(action.duration)s start: \(action.start) end: \(action.end)");
+        }
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        // Once the scroll view scrolls, hide the carats indicating scroll functionality
+        for label in caratLabels {
+            label.alpha = 0.0;
         }
     }
     
