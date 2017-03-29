@@ -13,9 +13,7 @@
 		3456CF9A1E8234940005B806 /* breathingBuddyLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CF991E8234940005B806 /* breathingBuddyLogo.png */; };
 		3456CF9E1E823CF50005B806 /* BreathingBuddyTitle.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CF9D1E823CF50005B806 /* BreathingBuddyTitle.png */; };
 		3456CFA01E82E56F0005B806 /* ccw_wheel.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CF9F1E82E56F0005B806 /* ccw_wheel.png */; };
-		3456CFA21E8304280005B806 /* BreathingBuddyTitleDark.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CFA11E8304280005B806 /* BreathingBuddyTitleDark.png */; };
 		3456CFA41E83096A0005B806 /* breathingBuddyLogoDark.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CFA31E83096A0005B806 /* breathingBuddyLogoDark.png */; };
-		3456CFA61E8320D70005B806 /* BreathingBuddyTitleLight.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CFA51E8320D70005B806 /* BreathingBuddyTitleLight.png */; };
 		3456CFA81E8333590005B806 /* hexoskinLogo.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 3456CFA71E8333590005B806 /* hexoskinLogo.jpeg */; };
 		3456CFAA1E8343E70005B806 /* hexoskinImage.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 3456CFA91E8343E70005B806 /* hexoskinImage.jpeg */; };
 		3456CFAC1E8358030005B806 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3456CFAB1E8358030005B806 /* Extensions.swift */; };
@@ -42,6 +40,15 @@
 		34A0A9BB1E80B3C5005EAB7B /* redx.png in Resources */ = {isa = PBXBuildFile; fileRef = 34A0A9B51E80B3C5005EAB7B /* redx.png */; };
 		34BE1C1C1E803B3100878574 /* ExerciseDesignerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34BE1C1B1E803B3100878574 /* ExerciseDesignerViewController.swift */; };
 		34C2FC011E88390C00CDFE7D /* BreathingBuddyTitleNoteworthy.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C2FC001E88390C00CDFE7D /* BreathingBuddyTitleNoteworthy.png */; };
+		34C2FC0A1E8A079400CDFE7D /* questionMark.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C2FC081E8A079400CDFE7D /* questionMark.png */; };
+		34C2FC0B1E8A079400CDFE7D /* userIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C2FC091E8A079400CDFE7D /* userIcon.png */; };
+		34C2FC0D1E8A131100CDFE7D /* windIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C2FC0C1E8A131100CDFE7D /* windIcon.png */; };
+		34C2FC0F1E8A150F00CDFE7D /* BreatheTitle.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C2FC0E1E8A150F00CDFE7D /* BreatheTitle.png */; };
+		34C2FC111E8A207200CDFE7D /* CustomHeaderCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34C2FC101E8A207200CDFE7D /* CustomHeaderCell.swift */; };
+		34C2FC131E8B484A00CDFE7D /* BreatheCloud.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C2FC121E8B484A00CDFE7D /* BreatheCloud.png */; };
+		34C2FC171E8B4C1B00CDFE7D /* whiteWindIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C2FC141E8B4C1B00CDFE7D /* whiteWindIcon.png */; };
+		34C2FC181E8B4C1B00CDFE7D /* whiteUserIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C2FC151E8B4C1B00CDFE7D /* whiteUserIcon.png */; };
+		34C2FC191E8B4C1B00CDFE7D /* whiteQuestionMark.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C2FC161E8B4C1B00CDFE7D /* whiteQuestionMark.png */; };
 		34CD11C21E382C3400C838F5 /* JSONHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CD11C11E382C3400C838F5 /* JSONHelper.swift */; };
 		34CD11C41E3A6E8800C838F5 /* DataResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CD11C31E3A6E8800C838F5 /* DataResponse.swift */; };
 /* End PBXBuildFile section */
@@ -53,9 +60,7 @@
 		3456CF991E8234940005B806 /* breathingBuddyLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = breathingBuddyLogo.png; sourceTree = "<group>"; };
 		3456CF9D1E823CF50005B806 /* BreathingBuddyTitle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BreathingBuddyTitle.png; sourceTree = "<group>"; };
 		3456CF9F1E82E56F0005B806 /* ccw_wheel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ccw_wheel.png; sourceTree = "<group>"; };
-		3456CFA11E8304280005B806 /* BreathingBuddyTitleDark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BreathingBuddyTitleDark.png; sourceTree = "<group>"; };
 		3456CFA31E83096A0005B806 /* breathingBuddyLogoDark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = breathingBuddyLogoDark.png; sourceTree = "<group>"; };
-		3456CFA51E8320D70005B806 /* BreathingBuddyTitleLight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BreathingBuddyTitleLight.png; sourceTree = "<group>"; };
 		3456CFA71E8333590005B806 /* hexoskinLogo.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = hexoskinLogo.jpeg; sourceTree = "<group>"; };
 		3456CFA91E8343E70005B806 /* hexoskinImage.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = hexoskinImage.jpeg; sourceTree = "<group>"; };
 		3456CFAB1E8358030005B806 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -85,6 +90,15 @@
 		34A0A9B51E80B3C5005EAB7B /* redx.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = redx.png; sourceTree = "<group>"; };
 		34BE1C1B1E803B3100878574 /* ExerciseDesignerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExerciseDesignerViewController.swift; sourceTree = "<group>"; };
 		34C2FC001E88390C00CDFE7D /* BreathingBuddyTitleNoteworthy.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BreathingBuddyTitleNoteworthy.png; sourceTree = "<group>"; };
+		34C2FC081E8A079400CDFE7D /* questionMark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = questionMark.png; sourceTree = "<group>"; };
+		34C2FC091E8A079400CDFE7D /* userIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = userIcon.png; sourceTree = "<group>"; };
+		34C2FC0C1E8A131100CDFE7D /* windIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = windIcon.png; sourceTree = "<group>"; };
+		34C2FC0E1E8A150F00CDFE7D /* BreatheTitle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BreatheTitle.png; sourceTree = "<group>"; };
+		34C2FC101E8A207200CDFE7D /* CustomHeaderCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomHeaderCell.swift; sourceTree = "<group>"; };
+		34C2FC121E8B484A00CDFE7D /* BreatheCloud.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = BreatheCloud.png; sourceTree = "<group>"; };
+		34C2FC141E8B4C1B00CDFE7D /* whiteWindIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = whiteWindIcon.png; sourceTree = "<group>"; };
+		34C2FC151E8B4C1B00CDFE7D /* whiteUserIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = whiteUserIcon.png; sourceTree = "<group>"; };
+		34C2FC161E8B4C1B00CDFE7D /* whiteQuestionMark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = whiteQuestionMark.png; sourceTree = "<group>"; };
 		34CD11C11E382C3400C838F5 /* JSONHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONHelper.swift; sourceTree = "<group>"; };
 		34CD11C31E3A6E8800C838F5 /* DataResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataResponse.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -138,13 +152,19 @@
 		347502221DD040FC002E6465 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				34C2FC141E8B4C1B00CDFE7D /* whiteWindIcon.png */,
+				34C2FC151E8B4C1B00CDFE7D /* whiteUserIcon.png */,
+				34C2FC161E8B4C1B00CDFE7D /* whiteQuestionMark.png */,
+				34C2FC121E8B484A00CDFE7D /* BreatheCloud.png */,
+				34C2FC0E1E8A150F00CDFE7D /* BreatheTitle.png */,
+				34C2FC0C1E8A131100CDFE7D /* windIcon.png */,
+				34C2FC081E8A079400CDFE7D /* questionMark.png */,
+				34C2FC091E8A079400CDFE7D /* userIcon.png */,
 				34C2FC001E88390C00CDFE7D /* BreathingBuddyTitleNoteworthy.png */,
 				3456CFB71E85BA200005B806 /* downArray.png */,
 				3456CFA91E8343E70005B806 /* hexoskinImage.jpeg */,
 				3456CFA71E8333590005B806 /* hexoskinLogo.jpeg */,
-				3456CFA51E8320D70005B806 /* BreathingBuddyTitleLight.png */,
 				3456CFA31E83096A0005B806 /* breathingBuddyLogoDark.png */,
-				3456CFA11E8304280005B806 /* BreathingBuddyTitleDark.png */,
 				3456CF9F1E82E56F0005B806 /* ccw_wheel.png */,
 				3456CF9D1E823CF50005B806 /* BreathingBuddyTitle.png */,
 				3456CF991E8234940005B806 /* breathingBuddyLogo.png */,
@@ -198,6 +218,7 @@
 				3456CFAD1E836ECA0005B806 /* actionResultView.swift */,
 				3456CFB11E84943D0005B806 /* Structs.swift */,
 				3456CFB31E84946D0005B806 /* Enums.swift */,
+				34C2FC101E8A207200CDFE7D /* CustomHeaderCell.swift */,
 			);
 			path = CustomClasses;
 			sourceTree = "<group>";
@@ -262,25 +283,31 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34C2FC0F1E8A150F00CDFE7D /* BreatheTitle.png in Resources */,
 				34A0A9BA1E80B3C5005EAB7B /* pause_wheel.png in Resources */,
 				3456CFA01E82E56F0005B806 /* ccw_wheel.png in Resources */,
 				34A0A9AF1E80B3AC005EAB7B /* beep.wav in Resources */,
 				34A0A9B71E80B3C5005EAB7B /* cw_wheel.png in Resources */,
-				3456CFA61E8320D70005B806 /* BreathingBuddyTitleLight.png in Resources */,
 				3456CF9A1E8234940005B806 /* breathingBuddyLogo.png in Resources */,
 				3456CFAA1E8343E70005B806 /* hexoskinImage.jpeg in Resources */,
+				34C2FC0D1E8A131100CDFE7D /* windIcon.png in Resources */,
+				34C2FC0A1E8A079400CDFE7D /* questionMark.png in Resources */,
 				34C2FC011E88390C00CDFE7D /* BreathingBuddyTitleNoteworthy.png in Resources */,
 				347502081DCE2C4D002E6465 /* LaunchScreen.storyboard in Resources */,
 				3456CFA41E83096A0005B806 /* breathingBuddyLogoDark.png in Resources */,
 				3456CFB81E85BA200005B806 /* downArray.png in Resources */,
 				347502051DCE2C4D002E6465 /* Assets.xcassets in Resources */,
-				3456CFA21E8304280005B806 /* BreathingBuddyTitleDark.png in Resources */,
 				34A0A9B91E80B3C5005EAB7B /* hexoskinShirtTransparent.png in Resources */,
 				34A0A9BB1E80B3C5005EAB7B /* redx.png in Resources */,
 				3456CF9E1E823CF50005B806 /* BreathingBuddyTitle.png in Resources */,
 				347502031DCE2C4D002E6465 /* Main.storyboard in Resources */,
+				34C2FC171E8B4C1B00CDFE7D /* whiteWindIcon.png in Resources */,
+				34C2FC0B1E8A079400CDFE7D /* userIcon.png in Resources */,
 				34A0A9B81E80B3C5005EAB7B /* greencheck.png in Resources */,
+				34C2FC181E8B4C1B00CDFE7D /* whiteUserIcon.png in Resources */,
 				3456CFA81E8333590005B806 /* hexoskinLogo.jpeg in Resources */,
+				34C2FC191E8B4C1B00CDFE7D /* whiteQuestionMark.png in Resources */,
+				34C2FC131E8B484A00CDFE7D /* BreatheCloud.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,6 +329,7 @@
 				347502151DCE2E17002E6465 /* AuthorizationViewController.swift in Sources */,
 				3456CFAE1E836ECA0005B806 /* actionResultView.swift in Sources */,
 				3475021F1DCFFDB8002E6465 /* BreathingExercise.swift in Sources */,
+				34C2FC111E8A207200CDFE7D /* CustomHeaderCell.swift in Sources */,
 				3456CFB21E84943D0005B806 /* Structs.swift in Sources */,
 				3456CFAC1E8358030005B806 /* Extensions.swift in Sources */,
 				34BE1C1C1E803B3100878574 /* ExerciseDesignerViewController.swift in Sources */,
@@ -428,7 +456,7 @@
 		3475020D1DCE2C4D002E6465 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-2";
 				DEVELOPMENT_TEAM = 3EF98587V9;
 				INFOPLIST_FILE = HexoskinBreathing/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -442,7 +470,7 @@
 		3475020E1DCE2C4D002E6465 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon-2";
 				DEVELOPMENT_TEAM = 3EF98587V9;
 				INFOPLIST_FILE = HexoskinBreathing/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

@@ -53,10 +53,10 @@ class AnalysisPreparationViewController: MRRViewController {
         self.navigationItem.rightBarButtonItem = cancelButton;
         
         // set color for warning label
-        syncWarningLabel.textColor = Constants.basicTextColor;
+        syncWarningLabel.textColor = Constants.phoneBoothRed;
         
-        // initialize the instruction view
-        hideSyncLabel();
+        // hide sync label
+        self.hideSyncLabel()
         
         // filter the ring actions
         filterRingActions();
@@ -102,8 +102,12 @@ class AnalysisPreparationViewController: MRRViewController {
             
             // set the defaults as unselected
             UIView.animate(withDuration: 0.2, animations: {
-                self.setRingSelection(selected: false);
-                self.setHexoskinSelection(selected: false);
+                if self.signedIn == true {
+                    self.setHexoskinSelection(selected: true);
+                } else {
+                    self.setHexoskinSelection(selected: false);
+                }
+                self.setRingSelection(selected: true);
                 self.analyzeButton.alpha = 1.0;
             })
             

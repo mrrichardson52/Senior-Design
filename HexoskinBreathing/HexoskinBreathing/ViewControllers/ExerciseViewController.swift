@@ -20,6 +20,16 @@ struct InstructionDisplay {
 
 class ExerciseViewController: MRRViewController {
     
+    // colors for ui elements
+    let beginButtonColor: UIColor = Constants.avocadoColor;
+    let queuedInstructionTextColor: UIColor = Constants.electricBlue;
+    let currentInstructionTextColor: UIColor = Constants.avocadoColor
+    let borderColor: UIColor = Constants.phoneBoothRed;
+    let continueButtonColor: UIColor = Constants.electricBlue;
+    let exerciseCompletedTextColor: UIColor = Constants.electricBlue;
+    
+    
+    
     // view that house all of the instructions
     @IBOutlet weak var instructionParentView: UIView!
     
@@ -71,8 +81,6 @@ class ExerciseViewController: MRRViewController {
     // constants
     let queuedInstructionTextSize: CGFloat = 20.0;
     let currentInstructionTextSize: CGFloat = 30.0;
-    let queuedInstructionTextColor: UIColor = Constants.electricBlue;
-    let currentInstructionTextColor: UIColor = Constants.basicTextColor;
     let exerciseCompleteIndicator: String = "Complete";
     
     
@@ -527,7 +535,7 @@ class ExerciseViewController: MRRViewController {
     func addCurrentInstructionBorderLines() {
         topBorderLine = UIView();
         self.view.addSubview(topBorderLine);
-        topBorderLine.backgroundColor = Constants.basicButtonBackgroundColor;
+        topBorderLine.backgroundColor = borderColor;
         topBorderLine.translatesAutoresizingMaskIntoConstraints = false;
         var constraints: [NSLayoutConstraint] = [];
         constraints.append(NSLayoutConstraint(item: topBorderLine, attribute: .leading, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .leading, multiplier: 1.0, constant: 0));
@@ -538,7 +546,7 @@ class ExerciseViewController: MRRViewController {
         
         bottomBorderLine = UIView();
         self.view.addSubview(bottomBorderLine);
-        bottomBorderLine.backgroundColor = Constants.basicButtonBackgroundColor;
+        bottomBorderLine.backgroundColor = borderColor;
         bottomBorderLine.translatesAutoresizingMaskIntoConstraints = false;
         constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .leading, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .leading, multiplier: 1.0, constant: 0));
         constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: CGFloat(currentInstructionBorderLineWidth)));
@@ -564,7 +572,7 @@ class ExerciseViewController: MRRViewController {
         completedLabel.numberOfLines = 0;
         completedLabel.backgroundColor = .clear;
         completedLabel.textAlignment = .center;
-        completedLabel.textColor = Constants.basicTextColor;
+        completedLabel.textColor = exerciseCompletedTextColor;
         completedLabel.text = "Exercise\nCompleted";
         completedLabel.font = completedLabel.font.withSize(35);
         instructionParentView.addSubview(completedLabel);
@@ -582,7 +590,7 @@ class ExerciseViewController: MRRViewController {
         nextButton.addTarget(self, action: #selector(ExerciseViewController.pushResultsController), for: .touchUpInside);
         instructionParentView.addSubview(nextButton);
         nextButton.setTitleColor(Constants.basicTextColor, for: .normal);
-        nextButton.backgroundColor = Constants.electricBlue;
+        nextButton.backgroundColor = continueButtonColor;
         nextButton.layer.cornerRadius = 8;
         nextButton.setTitle("Continue", for: .normal);
         constraints.append(NSLayoutConstraint(item: nextButton, attribute: .centerX, relatedBy: .equal, toItem: instructionParentView, attribute: .centerX, multiplier: 1.0, constant: 0));
