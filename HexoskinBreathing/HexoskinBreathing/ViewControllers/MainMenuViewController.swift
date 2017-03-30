@@ -10,43 +10,30 @@ import UIKit
 
 class MainMenuViewController: MRRViewController {
     
+    // Authorization variables
     var accessToken: String!
     var tokenType: String!
     var signedIn: Bool = false;
 
+    // UI Outlets
     @IBOutlet weak var accountConnectedLabel: UILabel!
     @IBOutlet weak var signedInButton: UIButton!
     @IBOutlet weak var performExerciseButton: UIButton!
     @IBOutlet weak var tutorialLabel: UILabel!
-
     @IBOutlet weak var exerciseContainer: UIView!
     @IBOutlet weak var tutorialContainer: UIView!
     @IBOutlet weak var signInContainer: UIView!
-    
     @IBOutlet weak var signInBorder: UIView!
     @IBOutlet weak var tutorialBorder: UIView!
     @IBOutlet weak var tutorialSignInDivider: UIView!
     @IBOutlet weak var exerciseBorder: UIView!
     
-    
+    // MARK: Lifecycle functions
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        setContainerViewColors();
-        setLabelColors();
-        setGestureRecognizersForContainers();
-        setBorderColors();
-        
-        // set up the perform exercise button
-        performExerciseButton.setTitleColor(Constants.basicTextColor, for: .normal);
-        performExerciseButton.backgroundColor = UIColor.clear;
-        performExerciseButton.layer.cornerRadius = 8;
-        performExerciseButton.isUserInteractionEnabled = false;
-        
-        signedInButton.setTitleColor(Constants.basicTextColor, for: .normal);
-        signedInButton.backgroundColor = .clear;
-        signedInButton.layer.cornerRadius = 5;
-        signedInButton.isUserInteractionEnabled = false;
+        // set up the views
+        initializeViews();
 
         // add an observer to receive the message when the app is opened via deep linking
         NotificationCenter.default.addObserver(
@@ -57,6 +44,7 @@ class MainMenuViewController: MRRViewController {
         
         // attempt to authorize user automatically
         authorizeUser();
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -67,16 +55,16 @@ class MainMenuViewController: MRRViewController {
         
     }
     
-    func setContainerViewColors() {
-//        exerciseContainer.backgroundColor = Constants.babyBlue;
-//        tutorialContainer.backgroundColor = Constants.butter;
-//        signInContainer.backgroundColor = Constants.peach;
+    // MARK: View setup function
+    // do all of the set up for the views here
+    func initializeViews() {
+        
+        // set container view colors for 3 large menu buttons
         exerciseContainer.backgroundColor = Constants.electricBlue;
         tutorialContainer.backgroundColor = Constants.avocadoColor;
         signInContainer.backgroundColor = Constants.tomato;
-    }
-    
-    func setLabelColors() {
+        
+        // set label colors
         performExerciseButton.backgroundColor = .clear;
         signedInButton.backgroundColor = .clear;
         tutorialLabel.backgroundColor = .clear;
@@ -85,17 +73,24 @@ class MainMenuViewController: MRRViewController {
         signedInButton.setTitleColor(.white, for: .normal)
         tutorialLabel.textColor = .white;
         accountConnectedLabel.textColor = .black;
-    }
-    
-    func setGestureRecognizersForContainers() {
+        
+        // set border colors
+        let borders = [tutorialBorder, exerciseBorder, tutorialSignInDivider, signInBorder];
+        for border in borders {
+            border?.backgroundColor = .clear;
+        }
+        
+        // set gesture recognizers for 3 large menu views to turn them into buttons
         let exerciseTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(MainMenuViewController.exerciseViewPressed));
         let signInTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(MainMenuViewController.signInViewPressed));
         let tutorialTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(MainMenuViewController.tutorialViewPressed));
         exerciseContainer.addGestureRecognizer(exerciseTapGestureRecognizer);
         signInContainer.addGestureRecognizer(signInTapGestureRecognizer);
         tutorialContainer.addGestureRecognizer(tutorialTapGestureRecognizer);
+        
     }
     
+    // MARK: Menu Button Handlers
     func exerciseViewPressed() {
         // check if signed
         if !signedIn {
@@ -130,27 +125,17 @@ class MainMenuViewController: MRRViewController {
         if signedIn {
             // sign out
             self.indicateNotSignedIn();
-            self.pushAuthorizationViewController();
-        } else {
-            self.pushAuthorizationViewController();
         }
+        self.pushAuthorizationViewController();
     }
     
     func tutorialViewPressed() {
-        print("Tutorial View Pressed");
+        
     }
     
-    func setBorderColors() {
-        // compile border views into an array
-        let borders = [tutorialBorder, exerciseBorder, tutorialSignInDivider, signInBorder];
-        for border in borders {
-            border?.backgroundColor = .clear;
-        }
-    }
-    
-    
+    // MARK: Authorization functions
     func authorizeUser() {
-
+        
         // check user defaults for the access token and type
         let defaults = UserDefaults.standard;
         
@@ -190,12 +175,12 @@ class MainMenuViewController: MRRViewController {
                         }
                         
                     } catch {
-                        print("CASTING ERROR"); 
+                        print("CASTING ERROR");
                     }
                 }
             }
             task.resume()
-
+            
         } else {
             // access tokens have not been stored, so the user needs to sign in
             // indicate not signed in
@@ -242,44 +227,8 @@ class MainMenuViewController: MRRViewController {
         authorizeUser();
     }
     
-//    @IBAction func performExerciseButtonPressed(_ sender: Any) {
-//        // check if signed
-//        if !signedIn {
-//            
-//            // indicate unauthorized
-//            let alert = UIAlertController(title: "Not signed in", message: "Hexoskin data is only accessible when signed in.", preferredStyle: .alert)
-//            alert.addAction(UIAlertAction(title: "Sign in", style: .default, handler: {
-//                _ in
-//                DispatchQueue.main.async {
-//                    // push the authorization view controller to begin sign in process
-//                    self.pushAuthorizationViewController();
-//                }
-//            }));
-//            alert.addAction(UIAlertAction(title: "Continue without signing in", style: .default, handler: {
-//                _ in
-//                DispatchQueue.main.async {
-//                    // continue without signing in
-//                    self.pushExerciseDesignerViewController(signedIn: false);
-//                }
-//            }));
-//            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil));
-//            self.present(alert, animated: true, completion: nil);
-//            
-//        } else {
-//            
-//            //push the exercise design controller
-//            pushExerciseDesignerViewController(signedIn: true);
-//        }
-//    }
     
-//    @IBAction func signInButtonPressed(_ sender: Any) {
-//        if signedIn {
-//            // sign out
-//            self.indicateNotSignedIn();
-//        } else {
-//            self.pushAuthorizationViewController();
-//        }
-//    }
+    // MARK: Push view controller functions
     
     func pushExerciseDesignerViewController(signedIn: Bool) {
         // instantiate the view controller from interface builder

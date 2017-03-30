@@ -122,7 +122,7 @@ class actionResultView: UIView {
             // The label displays the time
             let tickView = UIView();
             tickView.translatesAutoresizingMaskIntoConstraints = false;
-            tickView.backgroundColor = Constants.basicTextColor;
+            tickView.backgroundColor = .black;
             self.addSubview(tickView);
             var constraints: [NSLayoutConstraint] = [];
             constraints.append(NSLayoutConstraint(item: tickView, attribute: .leading, relatedBy: .equal, toItem: self, attribute: .leading, multiplier: 1.0, constant: 0));
@@ -133,7 +133,7 @@ class actionResultView: UIView {
             let timeLabel = UILabel();
             timeLabel.translatesAutoresizingMaskIntoConstraints = false;
             timeLabel.backgroundColor = .clear;
-            timeLabel.textColor = Constants.basicTextColor;
+            timeLabel.textColor = .black;
             timeLabel.text = "\(Int(action.start)) s";
             self.addSubview(timeLabel);
             constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: timeLabelHeight));

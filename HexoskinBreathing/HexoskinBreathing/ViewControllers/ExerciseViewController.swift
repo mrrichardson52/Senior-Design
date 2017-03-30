@@ -9,15 +9,6 @@
 import UIKit
 import AVFoundation
 
-struct InstructionDisplay {
-    var label: UILabel!
-    var timerLabel: UILabel!
-    var labelVerticalConstraint: NSLayoutConstraint!
-    var labelHorizontalConstraint: NSLayoutConstraint!
-    var timerLabelHorizontalConstraint: NSLayoutConstraint!
-    var duration: Double = 0.0;
-}
-
 class ExerciseViewController: MRRViewController {
     
     // colors for ui elements
@@ -25,8 +16,8 @@ class ExerciseViewController: MRRViewController {
     let queuedInstructionTextColor: UIColor = Constants.electricBlue;
     let currentInstructionTextColor: UIColor = Constants.avocadoColor
     let borderColor: UIColor = Constants.phoneBoothRed;
-    let continueButtonColor: UIColor = Constants.electricBlue;
-    let exerciseCompletedTextColor: UIColor = Constants.electricBlue;
+    let continueButtonColor: UIColor = .black;
+    let exerciseCompletedTextColor: UIColor = .black;
     
     
     
@@ -562,6 +553,8 @@ class ExerciseViewController: MRRViewController {
     }
     
     func addNextButton() {
+        
+        
         
         // clear the instruction views and indicate completed
         removeCurrentInstructionBorderLines();

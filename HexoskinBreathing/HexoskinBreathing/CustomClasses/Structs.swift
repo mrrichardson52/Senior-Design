@@ -32,3 +32,11 @@ struct breathingAction {
     }
 }
 
+struct InstructionDisplay {
+    var label: UILabel!
+    var timerLabel: UILabel!
+    var labelVerticalConstraint: NSLayoutConstraint!
+    var labelHorizontalConstraint: NSLayoutConstraint!
+    var timerLabelHorizontalConstraint: NSLayoutConstraint!
+    var duration: Double = 0.0;
+}

@@ -49,9 +49,9 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
     let switchColor: UIColor = Constants.electricBlue
     let borderColor: UIColor = Constants.avocadoColor;
     let addRowColor: UIColor = Constants.phoneBoothRed;
-    let exerciseRowColor: UIColor = Constants.electricBlue;
+    let exerciseRowColor: UIColor = .black;
     let continueButtonBackgroundColor: UIColor = Constants.avocadoColor;
-    let metronomeLabelColor: UIColor = Constants.electricBlue
+    let metronomeLabelColor: UIColor = .black
     let selectedBackgroundColor = Constants.backgroundColor;
 
     override func viewDidLoad() {
@@ -80,6 +80,8 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         // since the steppers have already been prepared with values, set the first exercise set equal 
         // to the stepper values
         exerciseSets = [(durationStepper.value, Int(cyclesStepper.value))];
+        rowBeingEdited = 0;
+        revealAllEditViews();
         
         // set tableview delegates
         tableView.delegate = self;
@@ -90,9 +92,6 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         tableView.layer.borderWidth = 2;
         tableView.layer.cornerRadius = 8;
         tableView.bounces = false;
-        
-        // fade all views initially until a row is selected and the row should be edited
-        fadeAllEditViews();
         
     }
     
