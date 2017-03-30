@@ -14,7 +14,6 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
     var accessToken: String!
     var tokenType: String!
     
-    
     // outlets
     @IBOutlet weak var editTitleLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
@@ -29,12 +28,18 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
     @IBOutlet weak var metronomeLabel: UILabel!
     @IBOutlet weak var continueButton: UIButton!
     @IBOutlet weak var editContainer: UIView!
+    @IBOutlet weak var useRingLabel: UILabel!
+    @IBOutlet weak var useRingAnswerLabel: UILabel!
+    @IBOutlet weak var useRingSwitch: UISwitch!
     
     var editViews: [UIView]!
     var rowBeingEdited: Int = -1;
     
     // indicate signed in status
     var signedIn: Bool!
+    
+    // indicated if this is the tutorial or not
+    var tutorial: Bool!
     
     // exercise sets
     // the exercise sets correspond to the entries in the scroll view and
@@ -110,6 +115,8 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         cyclesCountLabel.textColor = stepperLabelColor;
         metronomeLabel.textColor = metronomeLabelColor;
         metronomeTitleLabel.textColor = metronomeLabelColor;
+        useRingLabel.textColor = metronomeLabelColor;
+        useRingAnswerLabel.textColor = metronomeLabelColor;
         editTitleLabel.textColor = editContainerTitleColor;
     }
     
@@ -142,6 +149,10 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         metronomeSwitch.isOn = true;
         metronomeLabel.text = "On";
         metronomeSwitch.onTintColor = switchColor;
+        
+        useRingSwitch.isOn = true;
+        useRingAnswerLabel.text = "Yes";
+        useRingSwitch.onTintColor = switchColor;
 
     }
     
@@ -150,19 +161,26 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         if exerciseSets.count != 0 {
             let exercise = BreathingExercise();
             exercise.addExerciseSets(exerciseSets: exerciseSets);
-            //        let exercise = BreathingExercise(duration: durationStepper.value, cycles: Int(cyclesStepper.value));
             
             // instantiate the view controller from interface builder
             let storyboard = UIStoryboard(name: "Main", bundle: nil);
-            let viewController = storyboard.instantiateViewController(withIdentifier: "exerciseViewController") as? ExerciseViewController;
             
-            // set the authorization details and exercise members for the exercise view controller
-            viewController?.playMetronome = metronomeSwitch.isOn;
-            viewController?.accessToken = accessToken;
-            viewController?.tokenType = tokenType;
-            viewController?.exercise = exercise;
-            viewController?.signedIn = signedIn;
-            self.navigationController?.pushViewController(viewController!, animated: true);
+            // check if they are using the ring interface
+            if useRingSwitch.isOn {
+                let viewController = storyboard.instantiateViewController(withIdentifier: "exerciseViewController") as? ExerciseViewController;
+                
+                // set the authorization details and exercise members for the exercise view controller
+                viewController?.playMetronome = metronomeSwitch.isOn;
+                viewController?.accessToken = accessToken;
+                viewController?.tokenType = tokenType;
+                viewController?.exercise = exercise;
+                viewController?.signedIn = signedIn;
+                self.navigationController?.pushViewController(viewController!, animated: true);
+            } else {
+                // they are not using the ring interface, so display a different view controller
+                
+            }
+            
         } else {
             let alert = UIAlertController(title: "Exercise is empty", message: "Please add instructions.", preferredStyle: .alert);
             alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil));
@@ -196,6 +214,15 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
             metronomeLabel.text = "Off";
         }
     }
+    
+    @IBAction func useRingSwitchPressed(_ sender: Any) {
+        if useRingSwitch.isOn {
+            useRingAnswerLabel.text = "No";
+        } else {
+            useRingAnswerLabel.text = "Yes";
+        }
+    }
+    
     
     @IBAction func addExerciseSet(_ sender: Any) {
         // here you are adding the exercise specified with the steppers to the scrollview.

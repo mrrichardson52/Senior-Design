@@ -108,7 +108,7 @@ class MainMenuViewController: MRRViewController {
                 _ in
                 DispatchQueue.main.async {
                     // continue without signing in
-                    self.pushExerciseDesignerViewController(signedIn: false);
+                    self.pushExerciseDesignerViewController(signedIn: false, tutorial: false);
                 }
             }));
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil));
@@ -117,7 +117,7 @@ class MainMenuViewController: MRRViewController {
         } else {
             
             //push the exercise design controller
-            pushExerciseDesignerViewController(signedIn: true);
+            pushExerciseDesignerViewController(signedIn: true, tutorial: false);
         }
     }
     
@@ -130,7 +130,7 @@ class MainMenuViewController: MRRViewController {
     }
     
     func tutorialViewPressed() {
-        
+//        self.pushExerciseDesignerViewController(signedIn: false, tutorial: true);
     }
     
     // MARK: Authorization functions
@@ -230,7 +230,7 @@ class MainMenuViewController: MRRViewController {
     
     // MARK: Push view controller functions
     
-    func pushExerciseDesignerViewController(signedIn: Bool) {
+    func pushExerciseDesignerViewController(signedIn: Bool, tutorial: Bool) {
         // instantiate the view controller from interface builder
         let storyboard = UIStoryboard(name: "Main", bundle: nil);
         let viewController = storyboard.instantiateViewController(withIdentifier: "exerciseDesignerViewController") as? ExerciseDesignerViewController;
@@ -240,6 +240,7 @@ class MainMenuViewController: MRRViewController {
         viewController?.tokenType = tokenType;
         // also indicate whether signed in or not
         viewController?.signedIn = signedIn;
+        viewController?.tutorial = tutorial; 
         self.navigationController?.pushViewController(viewController!, animated: true);
     }
 

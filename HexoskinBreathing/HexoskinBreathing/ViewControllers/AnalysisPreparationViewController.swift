@@ -279,27 +279,6 @@ class AnalysisPreparationViewController: MRRViewController {
             return [];
         }
         
-        // check to see if the last action ends before the end of the exercise
-        // it is possible that the user began an action before the exercise ended,
-        // but did not end that action until after 2 seconds past the end of the exercise,
-        // at which point that last action would not be included. If the last action
-        // ends before the end of the exercise, fill in with contrasting action.
-//        let lastAction = hexoskinData[hexoskinData.count - 1];
-//        if lastAction.action == Strings.inhale || lastAction.action == Strings.exhale {
-//            print("Last action ending: \(lastAction.end)");
-//            print("End of exercise: \(Double(endTimestamp)/256 - Double(startTimestamp)/256)");
-//            if lastAction.end < Double(endTimestamp)/256 - Double(startTimestamp)/256 {
-//                // the last action ended before the end of the exercise
-//                if lastAction.action == Strings.inhale {
-//                    print("Appending an exhale");
-//                    hexoskinData.append(breathingAction(action: Strings.exhale, duration: Double(endTimestamp)/256 - Double(startTimestamp)/256 - lastAction.end, start: lastAction.end, end: Double(endTimestamp)/256 - Double(startTimestamp/256)));
-//                } else {
-//                    print("Appending an inhale");
-//                    hexoskinData.append(breathingAction(action: Strings.inhale, duration: Double(endTimestamp)/256 - Double(startTimestamp)/256 - lastAction.end, start: lastAction.end, end: Double(endTimestamp)/256 - Double(startTimestamp/256)));
-//                }
-//            }
-//        }
-        
         // prune the hexoskinData array by removing actions that end before 1 second past the start
         var frontPruningComplete: Bool = false;
         while !frontPruningComplete {

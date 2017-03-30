@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		3418A53F1E81FB210003312C /* MRRViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3418A53E1E81FB210003312C /* MRRViewController.swift */; };
+		3423D7181E8CBF9300CB1B9E /* TutorialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3423D7171E8CBF9300CB1B9E /* TutorialViewController.swift */; };
+		3423D71C1E8CC19400CB1B9E /* CloudLabelHousing.png in Resources */ = {isa = PBXBuildFile; fileRef = 3423D71B1E8CC19400CB1B9E /* CloudLabelHousing.png */; };
+		3423D71E1E8D79CA00CB1B9E /* NoRingExerciseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3423D71D1E8D79CA00CB1B9E /* NoRingExerciseViewController.swift */; };
 		3446A2AD1E7B2DA50036342C /* DataViewingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */; };
 		3446A2C41E7E02860036342C /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3446A2C31E7E02860036342C /* Constants.swift */; };
 		3456CF9A1E8234940005B806 /* breathingBuddyLogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 3456CF991E8234940005B806 /* breathingBuddyLogo.png */; };
@@ -55,6 +58,9 @@
 
 /* Begin PBXFileReference section */
 		3418A53E1E81FB210003312C /* MRRViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MRRViewController.swift; sourceTree = "<group>"; };
+		3423D7171E8CBF9300CB1B9E /* TutorialViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TutorialViewController.swift; sourceTree = "<group>"; };
+		3423D71B1E8CC19400CB1B9E /* CloudLabelHousing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = CloudLabelHousing.png; sourceTree = "<group>"; };
+		3423D71D1E8D79CA00CB1B9E /* NoRingExerciseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoRingExerciseViewController.swift; sourceTree = "<group>"; };
 		3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataViewingViewController.swift; sourceTree = "<group>"; };
 		3446A2C31E7E02860036342C /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		3456CF991E8234940005B806 /* breathingBuddyLogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = breathingBuddyLogo.png; sourceTree = "<group>"; };
@@ -152,6 +158,7 @@
 		347502221DD040FC002E6465 /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				3423D71B1E8CC19400CB1B9E /* CloudLabelHousing.png */,
 				34C2FC141E8B4C1B00CDFE7D /* whiteWindIcon.png */,
 				34C2FC151E8B4C1B00CDFE7D /* whiteUserIcon.png */,
 				34C2FC161E8B4C1B00CDFE7D /* whiteQuestionMark.png */,
@@ -186,6 +193,8 @@
 				347502121DCE2DF6002E6465 /* ExerciseViewController.swift */,
 				3484D25F1E42489800D162B7 /* AnalysisPreparationViewController.swift */,
 				3446A2AC1E7B2DA50036342C /* DataViewingViewController.swift */,
+				3423D7171E8CBF9300CB1B9E /* TutorialViewController.swift */,
+				3423D71D1E8D79CA00CB1B9E /* NoRingExerciseViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -299,6 +308,7 @@
 				347502051DCE2C4D002E6465 /* Assets.xcassets in Resources */,
 				34A0A9B91E80B3C5005EAB7B /* hexoskinShirtTransparent.png in Resources */,
 				34A0A9BB1E80B3C5005EAB7B /* redx.png in Resources */,
+				3423D71C1E8CC19400CB1B9E /* CloudLabelHousing.png in Resources */,
 				3456CF9E1E823CF50005B806 /* BreathingBuddyTitle.png in Resources */,
 				347502031DCE2C4D002E6465 /* Main.storyboard in Resources */,
 				34C2FC171E8B4C1B00CDFE7D /* whiteWindIcon.png in Resources */,
@@ -320,6 +330,8 @@
 			files = (
 				347502111DCE2DBE002E6465 /* ApiHelper.swift in Sources */,
 				347502171DCE2E3A002E6465 /* MainMenuViewController.swift in Sources */,
+				3423D7181E8CBF9300CB1B9E /* TutorialViewController.swift in Sources */,
+				3423D71E1E8D79CA00CB1B9E /* NoRingExerciseViewController.swift in Sources */,
 				34CD11C21E382C3400C838F5 /* JSONHelper.swift in Sources */,
 				3446A2AD1E7B2DA50036342C /* DataViewingViewController.swift in Sources */,
 				3418A53F1E81FB210003312C /* MRRViewController.swift in Sources */,

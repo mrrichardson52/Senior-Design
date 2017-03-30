@@ -15,7 +15,6 @@
         <!--Main Menu View Controller-->
         <scene sceneID="oNw-8Z-vor">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="6Tm-68-yn5" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <viewController id="gGN-hg-KHm" customClass="MainMenuViewController" customModule="HexoskinBreathing" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="xMS-u2-ic0"/>
@@ -215,6 +214,7 @@
                         <outlet property="tutorialSignInDivider" destination="7u8-Xk-GIh" id="WPE-Sz-EFe"/>
                     </connections>
                 </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="6Tm-68-yn5" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="544.79999999999995" y="-124.58770614692655"/>
         </scene>
@@ -249,7 +249,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="BhA-Sb-NWD">
-                                <rect key="frame" x="21" y="350" width="333" height="200"/>
+                                <rect key="frame" x="21" y="316" width="333" height="200"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="5" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3M3-PW-3J7">
                                         <rect key="frame" x="161" y="66" width="62" height="30"/>
@@ -348,13 +348,13 @@
                                 </constraints>
                             </view>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Metronome" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mct-yK-J8T">
-                                <rect key="frame" x="26" y="566" width="88" height="21"/>
+                                <rect key="frame" x="32" y="534" width="88" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="18"/>
                                 <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Off" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cK5-QK-kKz">
-                                <rect key="frame" x="183" y="558" width="52" height="24"/>
+                                <rect key="frame" x="184" y="531" width="52" height="24"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="24" id="lgY-cJ-KXB"/>
                                     <constraint firstAttribute="width" constant="52" id="pKT-Ih-yI1"/>
@@ -380,7 +380,7 @@
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </tableView>
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zfW-1y-bWP">
-                                <rect key="frame" x="300" y="561" width="51" height="31"/>
+                                <rect key="frame" x="300" y="524" width="51" height="31"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="49" id="KkS-Dh-8RD"/>
                                     <constraint firstAttribute="height" constant="31" id="QcN-Vb-ZPb"/>
@@ -389,23 +389,53 @@
                                     <action selector="metronomeSwitch:" destination="FbC-G3-daO" eventType="valueChanged" id="T3T-uh-OJk"/>
                                 </connections>
                             </switch>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Yes" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8Ul-XE-k8W">
+                                <rect key="frame" x="189" y="586" width="37" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cRp-wL-1Ff">
+                                <rect key="frame" x="300" y="576" width="51" height="31"/>
+                                <connections>
+                                    <action selector="useRingSwitchPressed:" destination="FbC-G3-daO" eventType="valueChanged" id="ivp-vX-ahu"/>
+                                </connections>
+                            </switch>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Use Ring" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hA3-jk-sRB">
+                                <rect key="frame" x="32" y="586" width="73" height="22"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="cK5-QK-kKz" firstAttribute="centerY" secondItem="mct-yK-J8T" secondAttribute="centerY" id="04x-5n-BtD"/>
                             <constraint firstItem="cty-MI-uVv" firstAttribute="leading" secondItem="bdj-Io-bEL" secondAttribute="leadingMargin" constant="20" id="0mB-Ld-tO8"/>
+                            <constraint firstItem="cRp-wL-1Ff" firstAttribute="centerY" secondItem="8Ul-XE-k8W" secondAttribute="centerY" id="3Vw-ti-koT"/>
+                            <constraint firstItem="8Ul-XE-k8W" firstAttribute="height" secondItem="cK5-QK-kKz" secondAttribute="height" id="4Bc-Di-9Dn"/>
                             <constraint firstItem="4M6-4s-aMc" firstAttribute="trailing" secondItem="zfW-1y-bWP" secondAttribute="trailing" id="5FU-Du-y2f"/>
+                            <constraint firstItem="cRp-wL-1Ff" firstAttribute="top" secondItem="zfW-1y-bWP" secondAttribute="bottom" constant="20" id="Avi-Y7-f6a"/>
                             <constraint firstItem="mct-yK-J8T" firstAttribute="leading" secondItem="BhA-Sb-NWD" secondAttribute="leading" id="CDF-dN-mZj"/>
+                            <constraint firstItem="4M6-4s-aMc" firstAttribute="top" secondItem="cRp-wL-1Ff" secondAttribute="bottom" constant="20" id="EEC-bI-Fxn"/>
                             <constraint firstItem="zfW-1y-bWP" firstAttribute="top" secondItem="BhA-Sb-NWD" secondAttribute="bottom" constant="20" id="EfM-ku-yfF"/>
                             <constraint firstItem="zfW-1y-bWP" firstAttribute="centerY" secondItem="cK5-QK-kKz" secondAttribute="centerY" id="Ejy-xV-Z3Z"/>
                             <constraint firstAttribute="trailingMargin" secondItem="4M6-4s-aMc" secondAttribute="trailing" constant="20" id="H95-ZJ-OWK"/>
                             <constraint firstItem="cty-MI-uVv" firstAttribute="top" secondItem="qNC-z7-2or" secondAttribute="bottom" constant="20" id="IgM-BS-bHz"/>
                             <constraint firstAttribute="trailingMargin" secondItem="cty-MI-uVv" secondAttribute="trailing" constant="20" id="JYp-bl-fov"/>
+                            <constraint firstItem="hA3-jk-sRB" firstAttribute="leading" secondItem="mct-yK-J8T" secondAttribute="leading" id="L6C-B5-ZRC"/>
                             <constraint firstItem="zfW-1y-bWP" firstAttribute="trailing" secondItem="BhA-Sb-NWD" secondAttribute="trailing" id="LwH-KY-V4q"/>
-                            <constraint firstItem="4M6-4s-aMc" firstAttribute="top" secondItem="zfW-1y-bWP" secondAttribute="bottom" constant="20" id="OAO-BU-Ktx"/>
+                            <constraint firstItem="cRp-wL-1Ff" firstAttribute="height" secondItem="zfW-1y-bWP" secondAttribute="height" id="TAY-IH-Xrf"/>
+                            <constraint firstItem="cRp-wL-1Ff" firstAttribute="centerY" secondItem="hA3-jk-sRB" secondAttribute="centerY" id="Uy0-wW-C2R"/>
+                            <constraint firstItem="cRp-wL-1Ff" firstAttribute="width" secondItem="zfW-1y-bWP" secondAttribute="width" id="cKs-jG-iDQ"/>
                             <constraint firstItem="BhA-Sb-NWD" firstAttribute="top" secondItem="cty-MI-uVv" secondAttribute="bottom" constant="30" id="dnh-4Y-Z4v"/>
+                            <constraint firstItem="8Ul-XE-k8W" firstAttribute="width" secondItem="cK5-QK-kKz" secondAttribute="width" id="gPa-86-tcq"/>
+                            <constraint firstItem="8Ul-XE-k8W" firstAttribute="leading" secondItem="cK5-QK-kKz" secondAttribute="leading" id="iZ0-fg-vO5"/>
                             <constraint firstItem="mct-yK-J8T" firstAttribute="leading" secondItem="bdj-Io-bEL" secondAttribute="leadingMargin" constant="20" id="lwJ-61-YCF"/>
+                            <constraint firstItem="hA3-jk-sRB" firstAttribute="width" secondItem="mct-yK-J8T" secondAttribute="width" id="m2U-R3-Taz"/>
+                            <constraint firstItem="hA3-jk-sRB" firstAttribute="height" secondItem="mct-yK-J8T" secondAttribute="height" id="ouN-fp-cI7"/>
                             <constraint firstItem="tj6-eI-CTw" firstAttribute="top" secondItem="4M6-4s-aMc" secondAttribute="bottom" constant="20" id="q3o-uo-mHk"/>
+                            <constraint firstItem="cRp-wL-1Ff" firstAttribute="trailing" secondItem="zfW-1y-bWP" secondAttribute="trailing" id="uJk-WT-PC1"/>
                             <constraint firstItem="zfW-1y-bWP" firstAttribute="leading" secondItem="cK5-QK-kKz" secondAttribute="trailing" constant="20" id="yj2-jb-HE0"/>
                         </constraints>
                     </view>
@@ -423,6 +453,9 @@
                         <outlet property="metronomeSwitch" destination="zfW-1y-bWP" id="En3-f4-nzv"/>
                         <outlet property="metronomeTitleLabel" destination="mct-yK-J8T" id="cBf-nt-FWw"/>
                         <outlet property="tableView" destination="cty-MI-uVv" id="06V-Jb-RCc"/>
+                        <outlet property="useRingAnswerLabel" destination="8Ul-XE-k8W" id="IuK-bm-zfl"/>
+                        <outlet property="useRingLabel" destination="hA3-jk-sRB" id="iaF-zK-zFm"/>
+                        <outlet property="useRingSwitch" destination="cRp-wL-1Ff" id="8ar-Fr-9c8"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ZFZ-lJ-R2z" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -936,6 +969,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="F9a-rM-u40" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="2169" y="-1100"/>
         </scene>
     </scenes>
     <resources>
