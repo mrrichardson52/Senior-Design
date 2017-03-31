@@ -17,7 +17,7 @@ class ExerciseViewController: DataAnalyzingViewController {
     let currentInstructionTextColor: UIColor = Constants.avocadoColor
     let borderColor: UIColor = Constants.phoneBoothRed;
     let continueButtonColor: UIColor = Constants.electricBlue;
-    let exerciseCompletedTextColor: UIColor = Constants.electricBlue;
+    let exerciseCompletedTextColor: UIColor = .black;
     
     // view that house all of the instructions
     @IBOutlet weak var instructionParentView: UIView!
@@ -560,13 +560,30 @@ class ExerciseViewController: DataAnalyzingViewController {
         completedLabel.textAlignment = .center;
         completedLabel.textColor = exerciseCompletedTextColor;
         completedLabel.text = "Exercise\nCompleted";
-        completedLabel.font = completedLabel.font.withSize(35);
+        completedLabel.font = completedLabel.font.withSize(25);
         instructionParentView.addSubview(completedLabel);
         var constraints: [NSLayoutConstraint] = [];
         constraints.append(NSLayoutConstraint(item: completedLabel, attribute: .leading, relatedBy: .equal, toItem: instructionParentView, attribute: .leading, multiplier: 1.0, constant: 0));
-        constraints.append(NSLayoutConstraint(item: completedLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 90));
+        constraints.append(NSLayoutConstraint(item: completedLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 60));
         constraints.append(NSLayoutConstraint(item: completedLabel, attribute: .trailing, relatedBy: .equal, toItem: instructionParentView, attribute: .trailing, multiplier: 1.0, constant: 0));
-        constraints.append(NSLayoutConstraint(item: completedLabel, attribute: .bottom, relatedBy: .equal, toItem: instructionParentView, attribute: .centerY, multiplier: 1.0, constant: -10));
+        constraints.append(NSLayoutConstraint(item: completedLabel, attribute: .bottom, relatedBy: .equal, toItem: instructionParentView, attribute: .centerY, multiplier: 1.0, constant: -30));
+        
+        let uploadLabel = UILabel();
+        if wearingHexoskin == true {
+            // add the upload label right beneath
+            uploadLabel.translatesAutoresizingMaskIntoConstraints = false;
+            uploadLabel.numberOfLines = 0;
+            uploadLabel.backgroundColor = .clear;
+            uploadLabel.textColor = exerciseCompletedTextColor;
+            uploadLabel.font = uploadLabel.font.withSize(17);
+            uploadLabel.text = "Upload Hexoskin data using HxServices before analyzing";
+            uploadLabel.textAlignment = .center;
+            instructionParentView.addSubview(uploadLabel);
+            constraints.append(NSLayoutConstraint(item: uploadLabel, attribute: .width, relatedBy: .equal, toItem: completedLabel, attribute: .width, multiplier: 1.0, constant: 0));
+            constraints.append(NSLayoutConstraint(item: uploadLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 50));
+            constraints.append(NSLayoutConstraint(item: uploadLabel, attribute: .top, relatedBy: .equal, toItem: completedLabel, attribute: .bottom, multiplier: 1.0, constant: 0));
+            constraints.append(NSLayoutConstraint(item: uploadLabel, attribute: .centerX, relatedBy: .equal, toItem: instructionParentView, attribute: .centerX, multiplier: 1.0, constant: 0));
+        }
         
         // add next button right below the completed label
         let nextButton = UIButton();
@@ -580,7 +597,11 @@ class ExerciseViewController: DataAnalyzingViewController {
         nextButton.setTitle("Analyze", for: .normal);
         constraints.append(NSLayoutConstraint(item: nextButton, attribute: .centerX, relatedBy: .equal, toItem: instructionParentView, attribute: .centerX, multiplier: 1.0, constant: 0));
         constraints.append(NSLayoutConstraint(item: nextButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 40));
-        constraints.append(NSLayoutConstraint(item: nextButton, attribute: .top, relatedBy: .equal, toItem: instructionParentView, attribute: .centerY, multiplier: 1.0, constant: 20));
+        if wearingHexoskin == false {
+            constraints.append(NSLayoutConstraint(item: nextButton, attribute: .top, relatedBy: .equal, toItem: instructionParentView, attribute: .centerY, multiplier: 1.0, constant: 20));
+        } else {
+            constraints.append(NSLayoutConstraint(item: nextButton, attribute: .top, relatedBy: .equal, toItem: uploadLabel, attribute: .bottom, multiplier: 1.0, constant: 20));
+        }
         constraints.append(NSLayoutConstraint(item: nextButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 120));
         instructionParentView.addConstraints(constraints);
 
