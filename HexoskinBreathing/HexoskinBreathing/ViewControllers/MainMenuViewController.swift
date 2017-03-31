@@ -96,7 +96,7 @@ class MainMenuViewController: MRRViewController {
         if !signedIn {
             
             // indicate unauthorized
-            let alert = UIAlertController(title: "Not signed in", message: "Hexoskin data is only accessible when signed in.", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Not signed in", message: "Hexoskin data is only accessible when signed in. Ring interface is only option available.", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Sign in", style: .default, handler: {
                 _ in
                 DispatchQueue.main.async {

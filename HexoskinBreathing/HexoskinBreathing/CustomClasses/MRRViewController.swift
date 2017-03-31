@@ -62,13 +62,9 @@ class MRRViewController: UIViewController {
         depthViewVerticalConstraint.constant = (self.navigationController?.navigationBar.frame.origin.y)! + (self.navigationController?.navigationBar.frame.height)!;
     }
     
-//    func disableLandscape() {
-//        disablesLandscape = true;
-//    }
-//    
-//    func enableLandscape() {
-//        disablesLandscape = false;
-//    }
+    func hideBackButton() {
+        self.navigationItem.leftBarButtonItem = nil;
+    }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator);

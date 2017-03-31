@@ -49,7 +49,7 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
     let borderLineBuffer: CGFloat = 12;
     
     // base duration for exercise
-    var baseDuration: Double = 0;
+    var baseDuration: Double!;
     
     // original exercise duration
     var exerciseDuration: Double = 0;
@@ -64,7 +64,6 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         
         caratLabels = [];
         
-        self.addBackButton()
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(DataViewingViewController.donePressed));
         
         // prepare the views for autolayout
@@ -83,23 +82,7 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         scrollView.backgroundColor = Constants.backgroundColor;
         contentView.backgroundColor = Constants.backgroundColor;
         scrollParentView.backgroundColor = Constants.backgroundColor;
-        scrollView.delegate = self; 
-        
-        // prepare the data for display
-        // only equalize if ring or hexoskin is showing
-        if displayRingData || displayHexData {
-//            print("\nBefore Equalization:\n");
-//            printData(data: exerciseData, heading: "Exercise Data");
-//            printData(data: hexoskinData, heading: "Hexoskin Data");
-//            printData(data: ringData, heading: "Ring Data");
-            
-            equalizeDataSources();
-            
-//            print("After Equalization:\n");
-//            printData(data: exerciseData, heading: "Exercise Data");
-//            printData(data: hexoskinData, heading: "Hexoskin Data");
-//            printData(data: ringData, heading: "Ring Data");
-        }
+        scrollView.delegate = self;
         
     }
     
@@ -149,7 +132,7 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         
         // verify that the hexData array is not empty
         if displayHexData && hexoskinData.count == 0 {
-            ringData.append(breathingAction(action: Strings.notAnAction, duration: 0.0, start: 0.0, end: 0.0));
+            hexoskinData.append(breathingAction(action: Strings.notAnAction, duration: 0.0, start: 0.0, end: 0.0));
         }
         
         // grab the earliest start time and latest end time
@@ -269,15 +252,6 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         constraints.append(NSLayoutConstraint(item: topBorderLine, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: borderLineHeight));
         constraints.append(NSLayoutConstraint(item: previousView, attribute: .top, relatedBy: .equal, toItem: topBorderLine, attribute: .bottom, multiplier: 1.0, constant: borderLineBuffer));
         
-//        let bottomBorderLine = UIView();
-//        bottomBorderLine.backgroundColor = borderLineColor;
-//        bottomBorderLine.translatesAutoresizingMaskIntoConstraints = false;
-//        sectionViews[section].addSubview(bottomBorderLine);
-//        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .leading, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .leading, multiplier: 1.0, constant: 0));
-//        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .trailing, relatedBy: .equal, toItem: topBorderLine.superview, attribute: .trailing, multiplier: 1.0, constant: 0));
-//        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: borderLineHeight));
-//        constraints.append(NSLayoutConstraint(item: bottomBorderLine, attribute: .top, relatedBy: .equal, toItem: previousView, attribute: .bottom, multiplier: 1.0, constant: borderLineBuffer));
-        
         // add the constraints to the section view
         sectionViews[section].addConstraints(constraints);
         
@@ -340,8 +314,11 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
     
     func calculateThresholdsAndRatios() {
         
-        baseDuration = exerciseData[0].duration;
+        if baseDuration == nil {
+            baseDuration = 6;
+        }
         pixelSecondRatio = Double(self.view.frame.width)/(baseDuration*2);
+        print("Base duration: \(baseDuration)");
         
     }
     

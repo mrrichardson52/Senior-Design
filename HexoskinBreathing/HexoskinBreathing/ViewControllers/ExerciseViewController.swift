@@ -9,17 +9,15 @@
 import UIKit
 import AVFoundation
 
-class ExerciseViewController: MRRViewController {
+class ExerciseViewController: DataAnalyzingViewController {
     
     // colors for ui elements
     let beginButtonColor: UIColor = Constants.avocadoColor;
     let queuedInstructionTextColor: UIColor = Constants.electricBlue;
     let currentInstructionTextColor: UIColor = Constants.avocadoColor
     let borderColor: UIColor = Constants.phoneBoothRed;
-    let continueButtonColor: UIColor = .black;
-    let exerciseCompletedTextColor: UIColor = .black;
-    
-    
+    let continueButtonColor: UIColor = Constants.electricBlue;
+    let exerciseCompletedTextColor: UIColor = Constants.electricBlue;
     
     // view that house all of the instructions
     @IBOutlet weak var instructionParentView: UIView!
@@ -59,9 +57,6 @@ class ExerciseViewController: MRRViewController {
     @IBOutlet weak var thirdInstructionTimerHorizontalConstraint: NSLayoutConstraint!
     @IBOutlet weak var secondInstructionTimerHorizontalConstraint: NSLayoutConstraint!
     @IBOutlet weak var firstInstructionTimerHorizontalConstraint: NSLayoutConstraint!
-    
-    // Timer label that sits in the middle of the wheel
-//    @IBOutlet weak var timerLabel: UILabel!
  
     // imageview that stores the wheel
     @IBOutlet weak var imageView: UIImageView!
@@ -86,8 +81,6 @@ class ExerciseViewController: MRRViewController {
     
     var currentLabel: Int!
     
-    var exercise: BreathingExercise!
-    
     var alreadyFinished: Bool!
     
     var currentTimerCounter: Double!
@@ -95,14 +88,6 @@ class ExerciseViewController: MRRViewController {
     var instructionTimer: Timer!
     let countDownInterval: Double = 1.0;
     var metronomeTimer: Timer!
-    
-    // variables that store the start and end timestamps for the exercise
-    var startTimestamp: Int = 0;
-    var endTimestamp: Int = 0;
-    
-    // token information used for REST API calls
-    var accessToken: String!
-    var tokenType: String!
     
     // used for playing beep sound
     var beepSound: URL!
@@ -117,7 +102,6 @@ class ExerciseViewController: MRRViewController {
     var timeOfRingRelease: Double!
     var exerciseEnded: Bool = false;
     var lastActionCaptured: Bool = false;
-    var ringActions: [breathingAction] = []; 
 
     // boolean used for determining whether to play the metronome or not
     var playMetronome: Bool = false;
@@ -136,6 +120,12 @@ class ExerciseViewController: MRRViewController {
     
     // indicate signed in
     var signedIn: Bool!
+    
+    // finalized data
+//    var exerciseData: [breathingAction]! = nil;
+//    var hexoskinData: [breathingAction]! = nil;
+    
+    var wearingHexoskin: Bool! = false; 
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -162,6 +152,11 @@ class ExerciseViewController: MRRViewController {
                 print("Error initializing audio player.");
             }
         }
+        
+        // we are definitely analyzing the ring, but we need to check for hexoskin
+        analyzingRing = true;
+        analyzingHexoskin = signedIn && wearingHexoskin;
+        
     }
     
     override func loadView() {
@@ -244,7 +239,7 @@ class ExerciseViewController: MRRViewController {
                     // this last action was a pause with no indication
                     // save the times and calculate the duration of the pause
                     let action = breathingAction(action: "Pause", duration: startOfCurrentAction - timeOfRingRelease, start: timeOfRingRelease - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
-                    ringActions.append(action);
+                    ringDataRaw.append(action);
                 }
             }
             
@@ -268,11 +263,11 @@ class ExerciseViewController: MRRViewController {
                         if rotatingClockwise == true {
                             let actionEndTime = Date().timeIntervalSince1970;
                             let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
-                            ringActions.append(action);
+                            ringDataRaw.append(action);
                         } else {
                             let actionEndTime = Date().timeIntervalSince1970;
                             let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
-                            ringActions.append(action);
+                            ringDataRaw.append(action);
                         }
                     }
                 } else if previousAngle - angle > 0 || previousAngle - angle < -300 {
@@ -294,7 +289,7 @@ class ExerciseViewController: MRRViewController {
                         let date = Date();
                         let actionEndTime = date.timeIntervalSince1970;
                         let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
-                        ringActions.append(action);
+                        ringDataRaw.append(action);
                         startOfCurrentAction = actionEndTime;
                     }
                     
@@ -316,7 +311,7 @@ class ExerciseViewController: MRRViewController {
                         let date = Date();
                         let actionEndTime = date.timeIntervalSince1970;
                         let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
-                        ringActions.append(action);
+                        ringDataRaw.append(action);
                         startOfCurrentAction = actionEndTime;
                     }
                     
@@ -341,7 +336,7 @@ class ExerciseViewController: MRRViewController {
                     let date = Date();
                     let actionEndTime = date.timeIntervalSince1970;
                     let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
-                    ringActions.append(action);
+                    ringDataRaw.append(action);
                     startOfCurrentAction = actionEndTime;
                     timeOfRingRelease = actionEndTime;
                     
@@ -351,7 +346,7 @@ class ExerciseViewController: MRRViewController {
                     let date = Date();
                     let actionEndTime = date.timeIntervalSince1970;
                     let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
-                    ringActions.append(action);
+                    ringDataRaw.append(action);
                     startOfCurrentAction = actionEndTime;
                     timeOfRingRelease = actionEndTime;
                     
@@ -554,8 +549,6 @@ class ExerciseViewController: MRRViewController {
     
     func addNextButton() {
         
-        
-        
         // clear the instruction views and indicate completed
         removeCurrentInstructionBorderLines();
         self.getDisplayInPosition(position: 0).label.text = "";
@@ -576,16 +569,15 @@ class ExerciseViewController: MRRViewController {
         constraints.append(NSLayoutConstraint(item: completedLabel, attribute: .bottom, relatedBy: .equal, toItem: instructionParentView, attribute: .centerY, multiplier: 1.0, constant: -10));
         
         // add next button right below the completed label
-//        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(ExerciseViewController.pushResultsController));
         let nextButton = UIButton();
         nextButton.translatesAutoresizingMaskIntoConstraints = false;
         nextButton.isUserInteractionEnabled = true;
-        nextButton.addTarget(self, action: #selector(ExerciseViewController.pushResultsController), for: .touchUpInside);
+        nextButton.addTarget(self, action: #selector(ExerciseViewController.nextPressed), for: .touchUpInside);
         instructionParentView.addSubview(nextButton);
         nextButton.setTitleColor(Constants.basicTextColor, for: .normal);
         nextButton.backgroundColor = continueButtonColor;
         nextButton.layer.cornerRadius = 8;
-        nextButton.setTitle("Continue", for: .normal);
+        nextButton.setTitle("Analyze", for: .normal);
         constraints.append(NSLayoutConstraint(item: nextButton, attribute: .centerX, relatedBy: .equal, toItem: instructionParentView, attribute: .centerX, multiplier: 1.0, constant: 0));
         constraints.append(NSLayoutConstraint(item: nextButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 40));
         constraints.append(NSLayoutConstraint(item: nextButton, attribute: .top, relatedBy: .equal, toItem: instructionParentView, attribute: .centerY, multiplier: 1.0, constant: 20));
@@ -595,21 +587,14 @@ class ExerciseViewController: MRRViewController {
         
     }
     
-    func pushResultsController() {
+    func nextPressed() {
         
-        // instantiate the view controller from interface builder
-        let storyboard = UIStoryboard(name: "Main", bundle: nil);
-        let viewController = storyboard.instantiateViewController(withIdentifier: "analysisPreparationViewController") as? AnalysisPreparationViewController;
-                
-        // send the timestamps to the next view controller for result viewing
-        viewController?.startTimestamp = startTimestamp;
-        viewController?.endTimestamp = endTimestamp;
-        viewController?.accessToken = accessToken;
-        viewController?.tokenType = tokenType;
-        viewController?.exercise = exercise;
-        viewController?.ringActions = ringActions;
-        viewController?.signedIn = signedIn; 
-        self.navigationController?.pushViewController(viewController!, animated: true);
+        if signedIn == true && wearingHexoskin == true {
+            self.getRecordID();
+        } else {
+            prepareDataAndSendToDataViewer();
+        }
+        
     }
     
     /*
@@ -746,5 +731,9 @@ class ExerciseViewController: MRRViewController {
         instructionDisplays[0].labelVerticalConstraint.constant += 20; 
         
     }
+
+    
+
+
     
 }

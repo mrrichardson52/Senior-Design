@@ -74,5 +74,15 @@ class BreathingExercise: NSObject {
     func reset() {
         currentAction = -1;
     }
+    
+    func exerciseDescription() -> String {
+        var description: String = "";
+        var counter = 0;
+        for action in actions {
+            counter += 1;
+            description += "\(counter). \(action.action) for \(action.duration) s\n";
+        }
+        return description;
+    }
 
 }

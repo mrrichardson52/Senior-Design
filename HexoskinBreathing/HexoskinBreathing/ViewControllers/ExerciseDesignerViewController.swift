@@ -31,6 +31,9 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
     @IBOutlet weak var useRingLabel: UILabel!
     @IBOutlet weak var useRingAnswerLabel: UILabel!
     @IBOutlet weak var useRingSwitch: UISwitch!
+    @IBOutlet weak var useHexLabel: UILabel!
+    @IBOutlet weak var useHexAnswerLabel: UILabel!
+    @IBOutlet weak var useHexSwitch: UISwitch!
     
     var editViews: [UIView]!
     var rowBeingEdited: Int = -1;
@@ -117,6 +120,8 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         metronomeTitleLabel.textColor = metronomeLabelColor;
         useRingLabel.textColor = metronomeLabelColor;
         useRingAnswerLabel.textColor = metronomeLabelColor;
+        useHexAnswerLabel.textColor = metronomeLabelColor;
+        useHexLabel.textColor = metronomeLabelColor; 
         editTitleLabel.textColor = editContainerTitleColor;
     }
     
@@ -153,10 +158,35 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         useRingSwitch.isOn = true;
         useRingAnswerLabel.text = "Yes";
         useRingSwitch.onTintColor = switchColor;
-
+        
+        if signedIn == true {
+            useHexSwitch.isOn = true;
+            useHexAnswerLabel.text = "Yes";
+            useHexSwitch.onTintColor = switchColor;
+        } else {
+            useRingSwitch.isUserInteractionEnabled = false;
+            useRingSwitch.alpha = 0.0;
+            useRingLabel.alpha = 0.0;
+            useRingAnswerLabel.alpha = 0.0; 
+            
+            useHexSwitch.isOn = false;
+            useHexSwitch.alpha = 0.0;
+            useHexLabel.alpha = 0.0;
+            useHexAnswerLabel.alpha = 0.0;
+            useHexSwitch.isUserInteractionEnabled = false;
+        }
     }
     
     @IBAction func ContinuePressed(_ sender: Any) {
+        
+        if !useHexSwitch.isOn && !useRingSwitch.isOn {
+            // it doesn't make sense to not use both the ring and the hexoskin
+            let alert = UIAlertController(title: "Choose Hexoskin and/or Ring", message: "Not wearing the Hexoskin and not using the ring interface does not make sense.", preferredStyle: .alert);
+            alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil));
+            self.present(alert, animated: true, completion: nil);
+            return; 
+        }
+        
         // create the exercise based on the stepper values and then push to exercise view controller
         if exerciseSets.count != 0 {
             let exercise = BreathingExercise();
@@ -175,10 +205,19 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
                 viewController?.tokenType = tokenType;
                 viewController?.exercise = exercise;
                 viewController?.signedIn = signedIn;
+                viewController?.wearingHexoskin = useHexSwitch.isOn;
                 self.navigationController?.pushViewController(viewController!, animated: true);
+                
             } else {
                 // they are not using the ring interface, so display a different view controller
+                let viewController = storyboard.instantiateViewController(withIdentifier: "noRingExerciseViewController") as? NoRingExerciseViewController;
                 
+                // set the variables
+                viewController?.exercise = exercise;
+                viewController?.accessToken = accessToken;
+                viewController?.tokenType = tokenType;
+                viewController?.metronome = metronomeSwitch.isOn; 
+                self.navigationController?.pushViewController(viewController!, animated: true);
             }
             
         } else {
@@ -217,9 +256,18 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
     
     @IBAction func useRingSwitchPressed(_ sender: Any) {
         if useRingSwitch.isOn {
-            useRingAnswerLabel.text = "No";
-        } else {
             useRingAnswerLabel.text = "Yes";
+        } else {
+            useRingAnswerLabel.text = "No";
+        }
+    }
+    
+    
+    @IBAction func useHexSwitch(_ sender: Any) {
+        if useHexSwitch.isOn {
+            useHexAnswerLabel.text = "Yes";
+        } else {
+            useHexAnswerLabel.text = "No";
         }
     }
     

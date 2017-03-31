@@ -151,7 +151,7 @@ class actionResultView: UIView {
             if position == ActionPosition.last {
                 let endTickView = UIView()
                 endTickView.translatesAutoresizingMaskIntoConstraints = false;
-                endTickView.backgroundColor = Constants.basicTextColor;
+                endTickView.backgroundColor = .black;
                 self.addSubview(endTickView);
                 constraints.append(NSLayoutConstraint(item: endTickView, attribute: .trailing, relatedBy: .equal, toItem: self, attribute: .trailing, multiplier: 1.0, constant: 0));
                 constraints.append(NSLayoutConstraint(item: endTickView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: tickWidth));
@@ -161,7 +161,7 @@ class actionResultView: UIView {
                 let endTimeLabel = UILabel();
                 endTimeLabel.translatesAutoresizingMaskIntoConstraints = false;
                 endTimeLabel.backgroundColor = .clear;
-                endTimeLabel.textColor = Constants.basicTextColor;
+                endTimeLabel.textColor = .black;
                 endTimeLabel.text = "\(Int(action.end)) s";
                 endTimeLabel.textAlignment = .right;
                 self.addSubview(endTimeLabel);
