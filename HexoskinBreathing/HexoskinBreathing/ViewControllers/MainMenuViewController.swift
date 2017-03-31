@@ -17,8 +17,8 @@ class MainMenuViewController: MRRViewController {
 
     // UI Outlets
     @IBOutlet weak var accountConnectedLabel: UILabel!
-    @IBOutlet weak var signedInButton: UIButton!
-    @IBOutlet weak var performExerciseButton: UIButton!
+    @IBOutlet weak var signedInLabel: UILabel!
+    @IBOutlet weak var performExerciseLabel: UILabel!
     @IBOutlet weak var tutorialLabel: UILabel!
     @IBOutlet weak var exerciseContainer: UIView!
     @IBOutlet weak var tutorialContainer: UIView!
@@ -65,12 +65,12 @@ class MainMenuViewController: MRRViewController {
         signInContainer.backgroundColor = Constants.tomato;
         
         // set label colors
-        performExerciseButton.backgroundColor = .clear;
-        signedInButton.backgroundColor = .clear;
+        performExerciseLabel.backgroundColor = .clear;
+        signedInLabel.backgroundColor = .clear;
         tutorialLabel.backgroundColor = .clear;
         accountConnectedLabel.backgroundColor = .clear;
-        performExerciseButton.setTitleColor(.white, for: .normal)
-        signedInButton.setTitleColor(.white, for: .normal)
+        performExerciseLabel.textColor = .white;
+        signedInLabel.textColor = .white;
         tutorialLabel.textColor = .white;
         accountConnectedLabel.textColor = .black;
         
@@ -190,7 +190,7 @@ class MainMenuViewController: MRRViewController {
     
     func indicateSignedIn(name: String) {
         accountConnectedLabel.text = "Welcome \(name)";
-        signedInButton.setTitle("Change user", for: .normal);
+        signedInLabel.text = "Change user";
         
         self.view.setNeedsLayout();
         
@@ -205,7 +205,7 @@ class MainMenuViewController: MRRViewController {
         defaults.synchronize();
         
         accountConnectedLabel.text = "Hexoskin account not connected";
-        signedInButton.setTitle("Sign in", for: .normal);
+        signedInLabel.text = "Sign in"
         
         self.view.setNeedsLayout();
         
