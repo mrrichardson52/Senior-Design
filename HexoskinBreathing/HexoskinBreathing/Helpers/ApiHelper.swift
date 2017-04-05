@@ -129,8 +129,6 @@ class ApiHelper: NSObject {
             request.setValue(value, forHTTPHeaderField: headerLabel);
         }
         
-        print(request.description); 
-        
         return request;
     }
     

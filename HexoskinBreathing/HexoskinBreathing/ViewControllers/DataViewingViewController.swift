@@ -57,9 +57,7 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()        
         self.title = "Analysis";
-        
-        print("Exercise duration: \(exerciseDuration)");
-        
+                
         calculateThresholdsAndRatios();
         
         caratLabels = [];
@@ -318,16 +316,14 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
             baseDuration = 6;
         }
         pixelSecondRatio = Double(self.view.frame.width)/(baseDuration*2);
-        print("Base duration: \(baseDuration)");
-        
     }
     
-    func printData(data: [breathingAction], heading: String) {
-        print("\n\(heading)");
-        for action in data {
-            print("\(action.action) \(action.duration)s start: \(action.start) end: \(action.end)");
-        }
-    }
+//    func printData(data: [breathingAction], heading: String) {
+//        print("\n\(heading)");
+//        for action in data {
+//            print("\(action.action) \(action.duration)s start: \(action.start) end: \(action.end)");
+//        }
+//    }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         // Once the scroll view scrolls, hide the carats indicating scroll functionality

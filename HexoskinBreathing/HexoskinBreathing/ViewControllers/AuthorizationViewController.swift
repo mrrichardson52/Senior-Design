@@ -67,7 +67,6 @@ class AuthorizationViewController: MRRViewController, UITextFieldDelegate, UIGes
     
     @IBAction func nextPressed(_ sender: Any) {
         _ = navigationController?.popViewController(animated: false);
-        print(clientId); 
         ApiHelper.authorizeUser(clientId: clientId);
     }
 

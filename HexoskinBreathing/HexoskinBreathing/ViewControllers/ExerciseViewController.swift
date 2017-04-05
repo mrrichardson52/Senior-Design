@@ -238,7 +238,7 @@ class ExerciseViewController: DataAnalyzingViewController {
                 if timeOfRingRelease != nil {
                     // this last action was a pause with no indication
                     // save the times and calculate the duration of the pause
-                    let action = breathingAction(action: "Pause", duration: startOfCurrentAction - timeOfRingRelease, start: timeOfRingRelease - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
+                    let action = breathingAction(action: "Pause", duration: startOfCurrentAction - timeOfRingRelease, start: timeOfRingRelease - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
                     ringDataRaw.append(action);
                 }
             }
@@ -262,11 +262,11 @@ class ExerciseViewController: DataAnalyzingViewController {
                         lastActionCaptured = true;
                         if rotatingClockwise == true {
                             let actionEndTime = Date().timeIntervalSince1970;
-                            let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
+                            let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
                             ringDataRaw.append(action);
                         } else {
                             let actionEndTime = Date().timeIntervalSince1970;
-                            let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
+                            let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
                             ringDataRaw.append(action);
                         }
                     }
@@ -288,7 +288,7 @@ class ExerciseViewController: DataAnalyzingViewController {
                         rotatingClockwise = true;
                         let date = Date();
                         let actionEndTime = date.timeIntervalSince1970;
-                        let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
+                        let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
                         ringDataRaw.append(action);
                         startOfCurrentAction = actionEndTime;
                     }
@@ -310,7 +310,7 @@ class ExerciseViewController: DataAnalyzingViewController {
                         rotatingClockwise = false;
                         let date = Date();
                         let actionEndTime = date.timeIntervalSince1970;
-                        let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
+                        let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
                         ringDataRaw.append(action);
                         startOfCurrentAction = actionEndTime;
                     }
@@ -335,7 +335,7 @@ class ExerciseViewController: DataAnalyzingViewController {
                     // save the info for clockwise
                     let date = Date();
                     let actionEndTime = date.timeIntervalSince1970;
-                    let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
+                    let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
                     ringDataRaw.append(action);
                     startOfCurrentAction = actionEndTime;
                     timeOfRingRelease = actionEndTime;
@@ -345,7 +345,7 @@ class ExerciseViewController: DataAnalyzingViewController {
                     // save the info for counterclockwise
                     let date = Date();
                     let actionEndTime = date.timeIntervalSince1970;
-                    let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustment);
+                    let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
                     ringDataRaw.append(action);
                     startOfCurrentAction = actionEndTime;
                     timeOfRingRelease = actionEndTime;
@@ -431,7 +431,7 @@ class ExerciseViewController: DataAnalyzingViewController {
         if !exerciseBegan {
             // store start timestamp
             let date = Date();
-            startTimestamp = Int((date.timeIntervalSince1970-Constants.exerciseStartTimeAdjustment)*256);
+            startTimestamp = Int((date.timeIntervalSince1970-Constants.exerciseStartTimeAdjustmentForRing)*256);
             exerciseBegan = true; 
         }
         

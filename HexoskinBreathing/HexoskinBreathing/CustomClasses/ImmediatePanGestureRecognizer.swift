@@ -11,7 +11,6 @@ import UIKit
 class ImmediatePanGestureRecognizer: UIPanGestureRecognizer {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
-        print("touches began");
         if (self.state == UIGestureRecognizerState.began) {
             return
         }

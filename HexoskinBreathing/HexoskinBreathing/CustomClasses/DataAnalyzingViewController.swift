@@ -29,10 +29,35 @@ class DataAnalyzingViewController: MRRViewController {
     var hexoskinDataBase: [breathingAction]!
     var exercise: BreathingExercise!
     
+    // base data with an offset added to line up views
+    var ringDataWithOffset: [breathingAction]!
+    var hexoskinDataWithOffset: [breathingAction]!
+    
     // data to be sent to data viewer and is ready to be graphed
     var ringDataGraph: [breathingAction]!
     var hexoskinDataGraph: [breathingAction]!
     var exerciseDataGraph: [breathingAction]!
+    
+    // variables for the printed report
+    var ringDataReport: [breathingAction]!
+    var hexoskinDataReport: [breathingAction]!
+    var exerciseResultsBasedOnRing: [breathingAction]!
+    var exerciseResultsBasedOnHexoskin: [breathingAction]!
+    var ringPercentageScore: Double!
+    var hexoskinPercentageScore: Double!
+    var percentCompletedInstructionsHexoskin: Double!
+    var percentCompletedInstructionsRing: Double!
+    var ringAverageError: Double!
+    var ringErrors: [(Int, Double)]!
+    var hexoskinAverageError: Double!
+    var hexoskinErrors: [(Int, Double)]!
+    var hexRingComparison: Double!
+    var offsetHexoskinPercentageScore: Double!
+    var offsetHexoskinErrors: [(Int, Double)]!
+    var offsetHexoskinAverageError: Double!;
+    var offsetHexRingComparison: Double!
+    var longestInhaleHexoskin: Double!
+    var longestExhaleHexoskin: Double!
     
     // Booleans for remembering which data will be analyzed
     var analyzingRing: Bool!
@@ -48,6 +73,10 @@ class DataAnalyzingViewController: MRRViewController {
         ringDataGraph = [];
         hexoskinDataGraph = [];
         exerciseDataGraph = [];
+        exerciseResultsBasedOnRing = [];
+        exerciseResultsBasedOnHexoskin = [];
+        ringDataReport = [];
+        hexoskinDataReport = [];
         
     }
     
@@ -68,14 +97,102 @@ class DataAnalyzingViewController: MRRViewController {
         // Prepare for Data Viewing Graph
         if self.analyzingHexoskin == true {
             self.exerciseDataGraph = self.analyzeExercisePerformance(data: self.hexoskinDataBase);
+            self.exerciseResultsBasedOnHexoskin = self.exerciseDataGraph;
+            if analyzingRing == true {
+                self.exerciseResultsBasedOnRing = self.analyzeExercisePerformance(data: self.ringDataBase);
+            }
         } else if analyzingRing == true {
             self.exerciseDataGraph = self.analyzeExercisePerformance(data: self.ringDataBase);
+            self.exerciseResultsBasedOnRing = self.exerciseDataGraph;
         }
+        
+        // calculate average offset for completed instructions
+        let hexoskinOffset: Double = self.calculateAverageOffset(userActions: hexoskinDataBase, exerciseActions: exerciseResultsBasedOnHexoskin);
+        let ringOffset: Double = self.calculateAverageOffset(userActions: ringDataBase, exerciseActions: exerciseResultsBasedOnRing);
+        
+        // using the offset, adjust the start and ends of all hexoskin/ring actions to line it up better
+        // ADD the offsets to the hexoskin/ring actions
+        if self.analyzingHexoskin == true && hexoskinDataBase.count != 0 {
+            hexoskinDataWithOffset = hexoskinDataBase;
+            for index in 0...hexoskinDataBase.count-1 {
+                hexoskinDataWithOffset[index].start = hexoskinDataBase[index].start + hexoskinOffset;
+                hexoskinDataWithOffset[index].end = hexoskinDataBase[index].end + hexoskinOffset;
+
+            }
+        }
+        if self.analyzingRing == true && ringDataBase.count != 0 {
+            ringDataWithOffset = ringDataBase;
+            for index in 0...ringDataBase.count-1 {
+                ringDataWithOffset[index].start = ringDataBase[index].start + ringOffset;
+                ringDataWithOffset[index].end = ringDataBase[index].end + ringOffset;
+            }
+        }
+        
+        // then equalize the graph data sources to make sure all of the data has the same total duration and start time
         self.equalizeGraphDataSources();
         
-        // Do any other filtering or analysis here and create new containers for the 
-        // various kinds of data
+        // Time Percentage Analysis
+        // This analysis requires knowing which instructions were completed successfully, so we need to 
+        // do this analysis after the Data View Graph data has been determined.
+        if self.analyzingRing == true {
+            ringPercentageScore = self.calculatePercentageOfTimeOnCorrectInstruction(userActions: ringDataGraph, exerciseActions: exerciseResultsBasedOnRing)
+        }
+        if self.analyzingHexoskin == true {
+            hexoskinPercentageScore = self.calculatePercentageOfTimeOnCorrectInstruction(userActions: hexoskinDataGraph, exerciseActions: exerciseResultsBasedOnHexoskin);
+            offsetHexoskinPercentageScore = self.calculatePercentageOfTimeOnCorrectInstruction(userActions: hexoskinDataWithOffset, exerciseActions: exerciseResultsBasedOnHexoskin);
+        }
         
+        // Calculate percentage of instructions completed correctly based on hexoskin and ring
+        if analyzingHexoskin == true {
+            percentCompletedInstructionsHexoskin = calculatePercentageOfInstructionsCompleted(results: exerciseResultsBasedOnHexoskin);
+        }
+        if analyzingRing == true {
+            percentCompletedInstructionsRing = calculatePercentageOfInstructionsCompleted(results: exerciseResultsBasedOnRing);
+        }
+        
+        // Calculate the average percent error
+        if self.analyzingRing == true {
+            let ringResult = self.calculatePercentErrorPerCompletedInstruction(userActions: ringDataBase, exerciseActions: exerciseResultsBasedOnRing)
+            ringAverageError = ringResult.0;
+            ringErrors = ringResult.1;
+
+        }
+        if self.analyzingHexoskin == true {
+            let hexoskinResult = self.calculatePercentErrorPerCompletedInstruction(userActions: hexoskinDataBase, exerciseActions: exerciseResultsBasedOnHexoskin);
+            hexoskinAverageError = hexoskinResult.0;
+            hexoskinErrors = hexoskinResult.1;
+            let offsetHexoskinResult = self.calculatePercentErrorPerCompletedInstruction(userActions: hexoskinDataWithOffset, exerciseActions: exerciseResultsBasedOnHexoskin);
+            offsetHexoskinErrors = offsetHexoskinResult.1;
+            offsetHexoskinAverageError = offsetHexoskinResult.0;
+            
+        }
+        
+        // compare the hexoskin and ring data
+        if analyzingRing && analyzingHexoskin {
+            hexRingComparison = compareRingAndHexoskin(ringData: ringDataBase, hexoskinData: hexoskinDataBase);
+            offsetHexRingComparison = compareRingAndHexoskin(ringData: ringDataBase, hexoskinData: hexoskinDataWithOffset);
+        }
+        
+        // set the data report variables
+        hexoskinDataReport = hexoskinDataBase;
+        ringDataReport = ringDataBase;
+        
+        // print the longest breath achieved
+        longestInhaleHexoskin = 0.0;
+        longestExhaleHexoskin = 0.0;
+        if analyzingHexoskin == true {
+            for action in hexoskinDataBase {
+                if action.action == Strings.inhale && longestInhaleHexoskin < action.duration {
+                    longestInhaleHexoskin = action.duration;
+                } else if action.action == Strings.exhale && longestExhaleHexoskin < action.duration {
+                    longestExhaleHexoskin = action.duration;
+                }
+            }
+        }
+        
+        
+        // print the report here
+        printReport();
         
         // create data viewer view controller and assign the data to the controller
         // consolidate the data and prepare to send it to the next controller where
@@ -91,6 +208,446 @@ class DataAnalyzingViewController: MRRViewController {
         viewController?.exerciseDuration = self.exercise.exerciseDuration;
         self.navigationController?.pushViewController(viewController!, animated: true);
         
+    }
+    
+    
+    func printReport() {
+        print("------------------------------------------------------\n")
+        // indicate what type of trial the user did
+        if analyzingRing == true && analyzingHexoskin == true {
+            print("Exercise Report: Using ring interface with Hexoskin");
+        } else if analyzingRing == true {
+            print("Exercise Report: Using ring interface only");
+        } else if analyzingHexoskin == true {
+            print("Exercise Report: Using hexoskin only");
+        } else {
+            print("Exercise Report: Analyzing no data")
+        }
+        
+        // print out the time stamps for this exercise and record ID
+        if analyzingHexoskin == true {
+            print("\nRecord ID: \(recordID)");
+        }
+        print("Start time: \(startTimestamp) (In Hexoskin Timestamp Format)");
+        print("End time: \(endTimestamp) (In Hexoskin Timestamp Format)");
+        
+        
+        // print the target exercise
+        print("\nTarget exercise data: ")
+        var counter: Int = 1;
+        for action in exercise.actions {
+            print("\(counter). \(action.action) for \(action.duration) s start: \(action.start) end: \(action.end)");
+            counter += 1;
+        }
+        
+        // print the hexoskin data
+        counter = 1;
+        if analyzingHexoskin == true {
+            print("\nHexoskin breathing data: ");
+            if hexoskinDataReport.count == 0 {
+                print("ERROR: Hexoskin data is empty.");
+            } else {
+                for action in hexoskinDataReport {
+                    print("\(counter). \(action.action) for \(action.duration) s start: \(action.start) end: \(action.end)");
+                    counter += 1;
+                }
+            }
+        }
+        
+        // print the exercise results based on hexoskin
+        counter = 1;
+        if analyzingHexoskin == true {
+            print("\nExercise results based on hexoskin:");
+            if exerciseResultsBasedOnHexoskin.count == 0 {
+                print("ERROR: Exercise results based on hexoskin are empty.");
+            } else {
+                for action in exerciseResultsBasedOnHexoskin {
+                    if action.metByInstruction != -1 {
+                        print("Exercise instruction #\(counter) was completed by hexoskin action #\(action.metByInstruction+1)");
+                    } else {
+                        print("Exercise instruction #\(counter) was not completed based on hexoskin data");
+                    }
+                    counter += 1;
+                }
+            }
+        }
+        
+        // print the ring data
+        counter = 1;
+        if analyzingRing == true {
+            print("\nRing breathing data: ");
+            if ringDataReport.count == 0 {
+                print("ERROR: Ring data is empty.");
+            } else {
+                for action in ringDataReport {
+                    print("\(counter). \(action.action) for \(action.duration) s start: \(action.start) end: \(action.end)");
+                    counter += 1;
+                }
+            }
+        }
+        
+        // print the exercise results based on ring
+        counter = 1;
+        if analyzingRing == true {
+            print("\nExercise results based on ring:");
+            if exerciseResultsBasedOnRing.count == 0 {
+                print("ERROR: Exercise results based on ring are empty.");
+            } else {
+                for action in exerciseResultsBasedOnRing {
+                    if action.metByInstruction != -1 {
+                        print("Exercise instruction #\(counter) was completed by ring action #\(action.metByInstruction+1)");
+                    } else {
+                        print("Exercise instruction #\(counter) was not completed based on ring data");
+                    }
+                    counter += 1;
+                }
+            }
+        }
+        
+        // Print the percentage scores
+        print("\nPercentage Scores: ");
+        print("* The percent of time that the user was performing the correct instruction during the exercise.");
+        print("* This score assumes the target exercise start and end times as the basis for calculation.");
+        if hexoskinPercentageScore != nil {
+            print("Hexoskin - \(hexoskinPercentageScore!)%");
+        }
+        if ringPercentageScore != nil {
+            print("Ring - \(ringPercentageScore!)%");
+        }
+        
+        // print the percent of instructions completed
+        print("\nPercent of target instructions completed according to data source: ");
+        if percentCompletedInstructionsHexoskin != nil {
+            print("Hexoskin - \(percentCompletedInstructionsHexoskin!)%");
+        }
+        if percentCompletedInstructionsRing != nil {
+            print("Ring - \(percentCompletedInstructionsRing!)%");
+        }
+        
+        // print out error information 
+        print("\nError results:");
+        print("* The error for each instruction is found by calculating the percent difference between each");
+        print("* completed instruction and the user action that completed it.");
+        if analyzingHexoskin == true {
+            print("Hexoskin Errors: ");
+            for error in hexoskinErrors {
+                print("\(error.1)% in exercise instruction #\(error.0)");
+            }
+            print("Average error per completed instruction: \(hexoskinAverageError!)");
+        }
+        if analyzingRing == true {
+            print("Ring Errors:");
+            for error in ringErrors {
+                print("\(error.1)% in exercise instruction #\(error.0)");
+            }
+            print("Average error per completed instruction: \(ringAverageError!)");
+        }
+        
+        // print out the comparison information between ring and hexoskin
+        if hexRingComparison != nil {
+            print("\nHexoskin/Ring Comparison:");
+            print("Percent of time that ring and hexoskin indicate the user is doing the same action: \(hexRingComparison!)");
+        }
+        
+        // print out information using offset hexoskin data
+        counter = 1;
+        if analyzingHexoskin == true {
+            print("\nResults using the Hexoskin Data with the offset included to accound for any latency");
+            print("\nHexoskin breathing data with offset: ");
+            if hexoskinDataReport.count == 0 {
+                print("ERROR: Hexoskin data with offset is empty.");
+            } else {
+                for action in hexoskinDataWithOffset {
+                    print("\(counter). \(action.action) for \(action.duration) s start: \(action.start) end: \(action.end)");
+                    counter += 1;
+                }
+            }
+        }
+        
+        // print out percentage score
+        if offsetHexoskinPercentageScore != nil {
+            print("\nPercentage Score: ");
+            print("* The percent of time that the user was performing the correct instruction during the exercise.");
+            print("* This score assumes the target exercise start and end times as the basis for calculation.");
+            print("Hexoskin data with offset: \(offsetHexoskinPercentageScore!)");
+        }
+        
+        // print out the error data
+        if analyzingHexoskin == true {
+            print("\nError result:");
+            print("* The error for each instruction is found by calculating the percent difference between each");
+            print("* completed instruction and the user action that completed it.");
+            print("Hexoskin Errors using offset hexoskin data: ");
+            for error in offsetHexoskinErrors {
+                print("\(error.1)% in exercise instruction #\(error.0)");
+            }
+            print("Average error per completed instruction: \(offsetHexoskinAverageError!)");
+        }
+        
+        // print out the comparison information between ring and hexoskin
+        if offsetHexRingComparison != nil {
+            print("\nHexoskin/Ring Comparison using offset hexoskin data:");
+            print("Percent of time that ring and hexoskin indicate the user is doing the same action: \(offsetHexRingComparison!)");
+        }
+        
+        // print out longest breaths recorded by hexoskin
+        if analyzingHexoskin == true {
+            print("\nLongest breaths recorded by Hexoskin:");
+            print("Inhale: \(longestInhaleHexoskin!)");
+            print("Exhale: \(longestExhaleHexoskin!)");
+        }
+        
+        print("\nEnd of Exercise Report");
+    }
+    
+    func compareRingAndHexoskin(ringData: [breathingAction], hexoskinData: [breathingAction]) -> Double {
+        // since the ring data duration will almost always be shorter than the hexoskin, we will iterate through the ring
+        
+        var timeCorrect: Double = 0.0; // total time when the instructions are the same
+        var index: Int = 0; // index for userActions
+        var exerciseDuration: Double = 0.0;
+        
+        // iterate through the ringActions
+        for ringAction in ringData {
+            
+            // skip action if it's not inhale or exhale
+            if ringAction.action == Strings.inhale || ringAction.action == Strings.exhale {
+                
+                exerciseDuration += ringAction.duration;
+                var finishedCheckingInstruction: Bool = false;
+                
+                while finishedCheckingInstruction == false {
+                    
+                    if index >= hexoskinData.count {
+                        // there are no more hexoskinData that can satisfy the instruction
+                        finishedCheckingInstruction = true;
+                        
+                    } else {
+                        // check if current userAction overlaps with the action
+                        let userAction = hexoskinData[index];
+                        if userAction.start <= ringAction.start && userAction.end > ringAction.start && userAction.end <= ringAction.end {
+                            // this means the user action starts before the instructon and ends in the middle of the instruction
+                            
+                            if userAction.action == ringAction.action {
+                                // they are the same instruction so it satisfies it
+                                timeCorrect += userAction.end - ringAction.start;
+                            }
+                            index += 1;
+                            
+                        } else if userAction.start >= ringAction.start && userAction.end <= ringAction.end {
+                            // this means the entire action is encompassed by the instruction
+                            
+                            if userAction.action == ringAction.action {
+                                // they are same instruction
+                                timeCorrect += userAction.duration;
+                            }
+                            index += 1;
+                            
+                        } else if userAction.start >= ringAction.start && userAction.end > ringAction.end {
+                            // this means the action starts in the instruction and continues past it
+                            
+                            if userAction.action == ringAction.action {
+                                // they are the same instruction
+                                timeCorrect += ringAction.end - userAction.start;
+                            }
+                            finishedCheckingInstruction = true;
+                            
+                        } else if userAction.start < ringAction.start && userAction.end > ringAction.end {
+                            // the instruction is totally encompassed by the user action
+                            
+                            if userAction.action == ringAction.action {
+                                // they are the same instruction
+                                timeCorrect += ringAction.duration;
+                            }
+                            finishedCheckingInstruction = true;
+                            
+                        } else if userAction.end <= ringAction.start {
+                            // the action ends before the exercise instruction
+                            index += 1;
+                            
+                        } else if userAction.start >= ringAction.end {
+                            // the user action begins after the instruction ends
+                            // move to the next instruction in this case (shouldn't happen though)
+                            finishedCheckingInstruction = true;
+                            
+                        } else {
+                            print("ERROR: Case not handled when scoring performance");
+                            print("Exercise Instruction: start - \(ringAction.start) end - \(ringAction.end)");
+                            print("User Action: start - \(userAction.start) end - \(userAction.end)");
+                            index += 1;
+                        }
+                    }
+                }
+                
+            }
+        }
+        
+        return 100*timeCorrect/exerciseDuration;
+
+    }
+    
+    func calculatePercentErrorPerCompletedInstruction(userActions: [breathingAction], exerciseActions: [breathingAction]) -> (Double, [(Int, Double)]) {
+        var counter: Int = 0; // counter stores the number of instructions we are measuring for the overshoot
+        var instructionCounter: Int = 0; // counter that stores which action this is in the exercise
+        var errors: [(Int, Double)] = [];
+        var cumulativeError: Double = 0.0;
+        for action in exerciseActions {
+            
+            // skip action if it's not an inhale or exhale
+            if action.action == Strings.inhale || action.action == Strings.exhale {
+                instructionCounter += 1;
+                
+                if action.status == Strings.completed {
+                    
+                    // grab the user action that completed it and compare the durations
+                    let userAction = userActions[action.metByInstruction];
+                    let percentError = 100*(userAction.duration - action.duration)/action.duration;
+                    errors.append((instructionCounter, percentError));
+                    cumulativeError += percentError;
+                    counter += 1;
+                }
+                
+            }
+        }
+        
+        if counter == 0 {
+            return (0.0, []);
+        }
+        
+        return (cumulativeError/Double(counter), errors);
+    }
+    
+    func calculatePercentageOfInstructionsCompleted(results: [breathingAction]) -> Double {
+        var completed: Double = 0.0;
+        var totalInstructions: Double = 0.0;
+        for action in results {
+            if action.action == Strings.inhale || action.action == Strings.exhale {
+                totalInstructions += 1;
+                if action.status == Strings.completed {
+                    completed += 1;
+                }
+            }
+        }
+        
+        // if total instructions is 0, just return 0
+        if totalInstructions == 0 {
+            return 0;
+        }
+        
+        // return percent of instructions completed
+        return 100*completed/totalInstructions;
+    }
+    
+    func calculatePercentageOfTimeOnCorrectInstruction(userActions: [breathingAction], exerciseActions: [breathingAction]) -> Double {
+        // at this point, the exercises have already been lined up, so there is no need to calculate
+        // average offset and line them up
+        
+        var timeCorrect: Double = 0.0; // total time spent doing the correct instruction
+        var index: Int = 0; // index for userActions
+        var exerciseDuration: Double = 0.0;
+        
+        // iterate through the exerciseActions
+        for exerciseAction in exerciseActions {
+            
+            // skip action if it's not inhale or exhale
+            if exerciseAction.action == Strings.inhale || exerciseAction.action == Strings.exhale {
+                
+                exerciseDuration += exerciseAction.duration;
+                var finishedCheckingInstruction: Bool = false;
+                
+                while finishedCheckingInstruction == false {
+                    
+                    if index >= userActions.count {
+                        // there are no more userActions that can satisfy the instruction
+                        finishedCheckingInstruction = true;
+                        
+                    } else {
+                        // check if current userAction overlaps with the action
+                        let userAction = userActions[index];
+                        if userAction.start <= exerciseAction.start && userAction.end > exerciseAction.start && userAction.end <= exerciseAction.end {
+                            // this means the user action starts before the instructon and ends in the middle of the instruction
+                            
+                            if userAction.action == exerciseAction.action {
+                                // they are the same instruction so it satisfies it
+                                timeCorrect += userAction.end - exerciseAction.start;
+                            }
+                            index += 1;
+                            
+                        } else if userAction.start >= exerciseAction.start && userAction.end <= exerciseAction.end {
+                            // this means the entire action is encompassed by the instruction
+                            
+                            if userAction.action == exerciseAction.action {
+                                // they are same instruction
+                                timeCorrect += userAction.duration;
+                            }
+                            index += 1;
+                            
+                        } else if userAction.start >= exerciseAction.start && userAction.end > exerciseAction.end {
+                            // this means the action starts in the instruction and continues past it
+                            
+                            if userAction.action == exerciseAction.action {
+                                // they are the same instruction
+                                timeCorrect += exerciseAction.end - userAction.start;
+                            }
+                            finishedCheckingInstruction = true;
+                            
+                        } else if userAction.start < exerciseAction.start && userAction.end > exerciseAction.end {
+                            // the instruction is totally encompassed by the user action
+                            
+                            if userAction.action == exerciseAction.action {
+                                // they are the same instruction
+                                timeCorrect += exerciseAction.duration;
+                            }
+                            finishedCheckingInstruction = true;
+                            
+                        } else if userAction.end <= exerciseAction.start {
+                            // the action ends before the exercise instruction
+                            index += 1;
+                            
+                        } else if userAction.start >= exerciseAction.end {
+                            // the user action begins after the instruction ends
+                            // move to the next instruction in this case (shouldn't happen though)
+                            finishedCheckingInstruction = true;
+                            
+                        } else {
+                            print("ERROR: Case not handled when scoring performance");
+                            print("Exercise Instruction: start - \(exerciseAction.start) end - \(exerciseAction.end)");
+                            print("User Action: start - \(userAction.start) end - \(userAction.end)");
+                            index += 1; 
+                        }
+                    }
+                }
+                
+            }
+        }
+        
+        return 100*timeCorrect/exerciseDuration;
+    }
+    
+    func calculateAverageOffset(userActions: [breathingAction], exerciseActions: [breathingAction]) -> Double {
+        var counter: Int = 0;
+        var totalOffset: Double = 0.0;
+        let totalActions = exerciseActions.count;
+        for action in exerciseActions {
+            // check if the action was met by a particular instruction in the user actions
+            if action.metByInstruction != -1 {
+                // the action was met by a particular instruction
+                // calculate the offset of the two instructions and store it in the running total
+                // WEIGHT EARLIER INSTRUCTIONS HIGHER
+                let weighting = totalActions - counter;
+                totalOffset += Double(weighting) * (action.start - userActions[action.metByInstruction].start);
+                // the counter stores how many offsets we calculated (used for average)
+                counter += weighting;
+            }
+        }
+        
+        // if no instructions were met, then no offset is required
+        if counter == 0 {
+            return 0;
+        }
+        
+        // return the average offset
+        return totalOffset/Double(counter);
     }
     
     func filterRingData() -> [breathingAction] {
@@ -256,7 +813,7 @@ class DataAnalyzingViewController: MRRViewController {
                         // the storedAction's duration needs to be checked to see if it satisfies the instruction
                         if Double(storedAction.duration) > currentAction.duration - Constants.breathLengthAllowableError {
                             // the storedAction satisfies the instruction
-                            results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.completed));
+                            results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.completed, metByInstruction: index-1));
                         } else {
                             // the last candidate's duration was not long enough
                             results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.notCompleted));
@@ -292,7 +849,109 @@ class DataAnalyzingViewController: MRRViewController {
                             // the storedAction's duration needs to be checked to see if it satisfies the instruction
                             if Double(storedAction.duration) > currentAction.duration - Constants.breathLengthAllowableError {
                                 // the storedAction satisfies the instruction
-                                results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.completed));
+                                results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.completed, metByInstruction: index-1));
+                                actionStart = storedAction.end;
+                            } else {
+                                // the candidate action was not the proper duration
+                                results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.notCompleted));
+                                actionStart = currentAction.end;
+                            }
+                        } else {
+                            // no action satisfies the instruction
+                            results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.notCompleted));
+                            actionStart = currentAction.end;
+                        }
+                    } else {
+                        // the action started too early to be considered for the current instruction
+                        // increment the index since we will be moving to the next action
+                        index = index + 1;
+                    }
+                }
+            }
+            
+//            actionStart = actionStart + currentAction.duration;
+            currentAction = exercise.next();
+        }
+        
+        // return the results array which stores the exercise data
+        return results;
+    }
+    
+    // analyze exercise performance where search window is after previous satisfying instruction rather than the 
+    // previous exercise instruction that was met. This is a more dynamic approach to determining if instructions were met. 
+    // It handles the situation where users breathe too long
+    func analyzePerformanceModified(data: [breathingAction]) -> [breathingAction] {
+        // set the start of the first action to 0
+        var actionStart: Double = 0.0;
+        
+        // initialize a container to hold the performance results
+        var results: [breathingAction] = [];
+        
+        // reset the exercise so that we can easily iterate through it
+        exercise.reset();
+        
+        // save the index of the current breathing action
+        var index: Int = 0;
+        
+        // create a variable that will be used to store actions temporarily
+        var storedAction: breathingAction! = nil;
+        
+        // iterate through the exercise
+        var currentAction = exercise.next();
+        while currentAction.action != Strings.notAnAction {
+            
+            // find the breathing action that has the latest start but still starts within 2 seconds +/-
+            // ...of the current instruction
+            // clear the temporary variable that stores the action
+            storedAction = nil;
+            var condition: Bool = true;
+            while condition {
+                if index >= data.count {
+                    // there are no more breathing actions
+                    condition = false;
+                    
+                    // check to see if the previous loop found a candidate
+                    if storedAction != nil {
+                        // the storedAction's duration needs to be checked to see if it satisfies the instruction
+                        if Double(storedAction.duration) > currentAction.duration - Constants.breathLengthAllowableError {
+                            // the storedAction satisfies the instruction
+                            results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.completed, metByInstruction: index-1));
+                        } else {
+                            // the last candidate's duration was not long enough
+                            results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.notCompleted));
+                        }
+                    } else {
+                        // no action satisfies the instruction
+                        results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.notCompleted));
+                    }
+                    
+                } else {
+                    
+                    let action = data[index];
+                    if Double(action.start) < actionStart + Constants.startBreathSearchWindow && Double(action.start) > actionStart - Constants.startBreathSearchWindow {
+                        // this is a candidate to be the action that satisfies the instruction
+                        
+                        // verify that the actions are both inhale or exhale
+                        if action.action == currentAction.action {
+                            // instructions are the same
+                            
+                            // store this action
+                            storedAction = action;
+                        }
+                        
+                        // increment the index since we will be moving to the next action
+                        index = index + 1;
+                        
+                    } else if Double(action.start) > actionStart + Constants.startBreathSearchWindow {
+                        // none of the following actions will satisfy the instruction
+                        condition = false;
+                        
+                        // check to see if the previous loop found a candidate
+                        if storedAction != nil {
+                            // the storedAction's duration needs to be checked to see if it satisfies the instruction
+                            if Double(storedAction.duration) > currentAction.duration - Constants.breathLengthAllowableError {
+                                // the storedAction satisfies the instruction
+                                results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.completed, metByInstruction: index-1));
                             } else {
                                 // the candidate action was not the proper duration
                                 results.append(breathingAction(action: currentAction.action, duration: currentAction.duration, start: currentAction.start, end: currentAction.end, status: Strings.notCompleted));
@@ -309,12 +968,14 @@ class DataAnalyzingViewController: MRRViewController {
                 }
             }
             
-            actionStart = actionStart + currentAction.duration;
+            // set the next action start to the
+            actionStart = currentAction.end;
             currentAction = exercise.next();
         }
         
         // return the results array which stores the exercise data
         return results;
+        
     }
     
     
@@ -381,28 +1042,42 @@ class DataAnalyzingViewController: MRRViewController {
         }
         
         // prune the hexoskinData array by removing actions that start after 1 second before the end of the last instruction
-        var backPruningComplete: Bool = false;
-        var index = 0;
-        while !backPruningComplete {
-            
-            // verify the index is valid
-            if index >= hexoskinData.count {
-                // invalid index
-                // exit the loop
-                backPruningComplete = true;
-            } else {
-                // valid index
-                // verify that the action falls inside the exercise timestamps
-                let action = hexoskinData[index];
-                if Double(action.start) > exercise.exerciseDuration - 1 {
-                    // remove the action since it starts basically at the end of the exercise
-                    hexoskinData.remove(at: index);
-                } else {
-                    // if the action is not removed, increment the index
-                    index = index + 1;
+//        var backPruningComplete: Bool = false;
+//        var index = 0;
+//        while !backPruningComplete {
+//            
+//            // verify the index is valid
+//            if index >= hexoskinData.count {
+//                // invalid index
+//                // exit the loop
+//                backPruningComplete = true;
+//            } else {
+//                // valid index
+//                // verify that the action falls inside the exercise timestamps
+//                let action = hexoskinData[index];
+//                if Double(action.start) > exercise.exerciseDuration - 1 {
+//                    // remove the action since it starts basically at the end of the exercise
+//                    hexoskinData.remove(at: index);
+//                } else {
+//                    // if the action is not removed, increment the index
+//                    index = index + 1;
+//                }
+//            }
+//            
+//        }
+        
+        // if the first instruction starts after the beginning of the exercise, fill in the beginning with the
+        // alternate instruction
+        if hexoskinData.count != 0 {
+            let firstAction = hexoskinData[0];
+            if firstAction.start > 0 {
+                // prepend the alternate instruction before it
+                if firstAction.action == Strings.inhale {
+                    hexoskinData.insert(breathingAction(action: Strings.exhale, duration: firstAction.start, start: 0, end: firstAction.start), at: 0)
+                } else if firstAction.action == Strings.exhale {
+                    hexoskinData.insert(breathingAction(action: Strings.inhale, duration: firstAction.start, start: 0, end: firstAction.start), at: 0)
                 }
             }
-            
         }
         
         return hexoskinData;
@@ -412,8 +1087,8 @@ class DataAnalyzingViewController: MRRViewController {
         
         // copy the base data into the graph data arrays and then modify them in this function
         ringDataGraph = ringDataBase;
-        hexoskinDataGraph = hexoskinDataBase;
-        
+//        hexoskinDataGraph = hexoskinDataBase;
+        hexoskinDataGraph = hexoskinDataWithOffset;
         
         // verify that the ringDataGraph array is not empty
         if analyzingRing && ringDataGraph.count == 0 {
@@ -556,6 +1231,13 @@ class DataAnalyzingViewController: MRRViewController {
         task.resume()
     }
     
+    
+    func printData(data: [breathingAction], heading: String) {
+        print("\n\(heading)");
+        for action in data {
+            print("\(action.action) \(action.duration)s start: \(action.start) end: \(action.end)");
+        }
+    }
 
 
 }

@@ -14,6 +14,7 @@ struct breathingAction {
     var start: Double = 0;
     var end: Double = 0;
     var status: String = "";
+    var metByInstruction: Int = -1;
     
     init(action: String, duration: Double, start: Double, end: Double) {
         self.action = action;
@@ -21,6 +22,7 @@ struct breathingAction {
         self.start = start;
         self.end = end;
         self.status = Strings.ignored;
+        self.metByInstruction = -1;
     }
     
     init(action: String, duration: Double, start: Double, end: Double, status: String) {
@@ -29,6 +31,16 @@ struct breathingAction {
         self.start = start;
         self.end = end;
         self.status = status;
+        self.metByInstruction = -1;
+    }
+    
+    init(action: String, duration: Double, start: Double, end: Double, status: String, metByInstruction: Int) {
+        self.action = action;
+        self.duration = duration;
+        self.start = start;
+        self.end = end;
+        self.status = status;
+        self.metByInstruction = metByInstruction;
     }
 }
 
