@@ -131,7 +131,7 @@ class ExerciseDesignerViewController: MRRViewController, UITableViewDelegate, UI
         durationStepper.isContinuous = true;
         durationStepper.isUserInteractionEnabled = true;
         durationStepper.minimumValue = 4.0;
-        durationStepper.maximumValue = 60.0;
+        durationStepper.maximumValue = 90.0;
         durationStepper.autorepeat = true;
         durationStepper.stepValue = 1.0;
         durationStepper.value = 6.0;
