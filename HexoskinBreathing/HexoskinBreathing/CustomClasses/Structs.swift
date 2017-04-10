@@ -52,3 +52,29 @@ struct InstructionDisplay {
     var timerLabelHorizontalConstraint: NSLayoutConstraint!
     var duration: Double = 0.0;
 }
+
+struct ActionPosition {
+    static let first: String = "actionPositionFirst";
+    static let middle: String = "actionPositionMiddle";
+    static let last: String = "actionPositionLast";
+}
+
+struct ActionCheckingHelper {
+    
+    var checkingState: ActionCheckingState!
+    var lastCandidateActionStart: Double!
+    var deviationStartTime: Double!
+    var deviationStartAngle: Double!
+    let deviationThresholdAngle: Double!
+    var firstActionIsExhale: Bool!
+    
+    init() {
+        checkingState = .none;
+        lastCandidateActionStart = 0.0;
+        deviationStartTime = 0.0;
+        deviationStartAngle = 0.0;
+        deviationThresholdAngle = 8;
+        firstActionIsExhale = false;
+    }
+    
+}

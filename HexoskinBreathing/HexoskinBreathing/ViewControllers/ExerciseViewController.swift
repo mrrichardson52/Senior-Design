@@ -60,6 +60,7 @@ class ExerciseViewController: DataAnalyzingViewController {
  
     // imageview that stores the wheel
     @IBOutlet weak var imageView: UIImageView!
+    @IBOutlet weak var imageViewContainer: UIView!
     
     // array that stores the instructionDisplays with all of the information needed for instructions
     var instructionDisplays: [InstructionDisplay]!
@@ -86,8 +87,11 @@ class ExerciseViewController: DataAnalyzingViewController {
     var currentTimerCounter: Double!
     var counterTimer: Timer!
     var instructionTimer: Timer!
-    let countDownInterval: Double = 1.0;
+    let countUpInterval: Double = 0.1;
     var metronomeTimer: Timer!
+    var beginExerciseTimer: Timer!
+    var countUpTimer: Timer!;
+    var nextInstructionDelayTimer: Timer!;
     
     // used for playing beep sound
     var beepSound: URL!
@@ -96,12 +100,11 @@ class ExerciseViewController: DataAnalyzingViewController {
     // boolean used for checking when the exercise begins
     var exerciseBegan: Bool = false;
     
-    var previousAngle: Float = 0.0;
+    var previousAngle: Double = 0.0;
     var rotatingClockwise: Bool!
     var startOfCurrentAction: Double!
     var timeOfRingRelease: Double!
     var exerciseEnded: Bool = false;
-    var lastActionCaptured: Bool = false;
 
     // boolean used for determining whether to play the metronome or not
     var playMetronome: Bool = false;
@@ -118,14 +121,19 @@ class ExerciseViewController: DataAnalyzingViewController {
     var topBorderLine: UIView!
     var bottomBorderLine: UIView!
     
+    // count up timer label
+    var countUpTimerLabel: UILabel!
+    var countUpCurrentValue: Double = 0.0;
+    
     // indicate signed in
     var signedIn: Bool!
     
-    // finalized data
-//    var exerciseData: [breathingAction]! = nil;
-//    var hexoskinData: [breathingAction]! = nil;
+    var wearingHexoskin: Bool! = false;
     
-    var wearingHexoskin: Bool! = false; 
+    var exerciseState: ExerciseState = .notStarted;
+    var actionCheckingHelper: ActionCheckingHelper!
+    
+    var startIndicatorString: String = "Starting in:";
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -157,25 +165,30 @@ class ExerciseViewController: DataAnalyzingViewController {
         analyzingRing = true;
         analyzingHexoskin = signedIn && wearingHexoskin;
         
+        // initialize the action checking helper
+        actionCheckingHelper = ActionCheckingHelper();
+        
     }
     
     override func loadView() {
         super.loadView();
-        
-        // apply a blur before the exercise begins
-        addBlurView();
-        
-        // add begin button
-        addBeginButton();
     
         // init constraints and text for instruction labels
         initInstructionDisplays();
         
+        // add count up timer label
+        addCountUpTimerLabel();
+        
+        // add border lines for current instruction
+        addCurrentInstructionBorderLines();
     }
     
-    override func viewDidLayoutSubviews() {
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated);
+        
         // store the center of the imageview to be used for detecting distances of taps on the ring
-        circleCenter = CGPoint(x: imageView.frame.origin.x + imageView.frame.size.width/2, y: imageView.frame.origin.y + imageView.frame.size.height/2);
+        circleCenter = CGPoint(x: imageViewContainer.frame.origin.x + imageViewContainer.frame.size.width/2, y: imageViewContainer.frame.origin.y + imageViewContainer.frame.size.height/2);
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -210,8 +223,8 @@ class ExerciseViewController: DataAnalyzingViewController {
     func imageViewPanned(sender:UIPanGestureRecognizer) {
         switch(sender.state) {
         case UIGestureRecognizerState.began:
+            
             // Store the starting vertical position for the pan so we can find the vertical change
-            //            let point: CGPoint = sender.translation(in: self.view);
             let point: CGPoint = sender.location(in: view);
             let dist = distance(firstPoint: point, secondPoint: self.circleCenter);
             var angle = getAngle(centralPoint: self.circleCenter, secondPoint: point);
@@ -231,16 +244,47 @@ class ExerciseViewController: DataAnalyzingViewController {
                 })
             }
             
-            // save the time when the action began
-            if !exerciseEnded {
+            switch exerciseState {
+            case .notStarted:
+                // start the exercise
+                // the exercise will begin in 3 seconds
+                beginExerciseTimer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(ExerciseViewController.beginExercise), userInfo: nil, repeats: false);
+                
+                
+                // begin another timer that plays the beep sound every second
+                if playMetronome {
+                    metronomeTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ExerciseViewController.playBeep), userInfo: nil, repeats: true);
+                }
+                
+                // indicate the exercise is starting
+                exerciseState = .starting;
+                
+                // show the starting instruction
+                print("Began: .notStarted");
+                displayNextInstruction();
+                
+                break;
+            case .started:
+                
+                // since the exercise has already started, the last action must have been a pause
                 let date = Date();
                 startOfCurrentAction = date.timeIntervalSince1970;
+                actionCheckingHelper.checkingState = .deviatingAfterPause;
+                actionCheckingHelper.lastCandidateActionStart = startOfCurrentAction;
+                actionCheckingHelper.deviationStartTime = startOfCurrentAction;
+                actionCheckingHelper.deviationStartAngle = angle;
+                
+                // this last action was a pause
+                // save the times and calculate the duration of the pause
                 if timeOfRingRelease != nil {
-                    // this last action was a pause with no indication
-                    // save the times and calculate the duration of the pause
                     let action = breathingAction(action: "Pause", duration: startOfCurrentAction - timeOfRingRelease, start: timeOfRingRelease - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
                     ringDataRaw.append(action);
                 }
+                
+                break;
+            default:
+                // do nothing if the exercise has already ended and .starting shouldn't be reachable
+                break;
             }
             
             break;
@@ -253,104 +297,336 @@ class ExerciseViewController: DataAnalyzingViewController {
                 angle = angle + 360;
             }
             
-            // check if moving cw or ccw
-            if !lastActionCaptured {
-                if exerciseEnded {
-                    // exercise is over. record the last action and then prevent other actions from
-                    // being captured
-                    if rotatingClockwise != nil {
-                        lastActionCaptured = true;
-                        if rotatingClockwise == true {
-                            let actionEndTime = Date().timeIntervalSince1970;
-                            let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
-                            ringDataRaw.append(action);
-                        } else {
-                            let actionEndTime = Date().timeIntervalSince1970;
-                            let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
-                            ringDataRaw.append(action);
+            // filter out massive changes that are more than likely mistakes
+            if abs(previousAngle - angle) > 150 && abs(previousAngle - angle) < 210 {
+                // this was most likely a mistake and should be ignored
+                if rotatingClockwise != nil {
+                    if rotatingClockwise == true {
+                        
+                        angle = previousAngle - 0.1;
+                        if angle < 0 {
+                            angle += 360;
+                        }
+                    } else {
+                        angle = previousAngle + 0.1;
+                        if angle >= 360 {
+                            angle -= 360;
                         }
                     }
-                } else if previousAngle - angle > 0 || previousAngle - angle < -300 {
+                }
+            }
+            
+            let angleChange = previousAngle - angle;
+            
+            switch exerciseState {
+            case .started:
+                if angleChange < 300 && (angleChange > 0 || angleChange < -300) {
                     // clockwise
                     if rotatingClockwise == nil {
-                        // check to see if the exercise has started yet
-                        if exerciseBegan {
-                            // this is the first action
-                            rotatingClockwise = true;
+                        
+                        if actionCheckingHelper.checkingState == .none {
                             
-                            // save the start time here
-                            startOfCurrentAction = Date().timeIntervalSince1970;
+                            // this is the beginning state, so initialize the deviation angle
+                            actionCheckingHelper.deviationStartAngle = angle;
+                            actionCheckingHelper.checkingState = .checkingFirstAction;
+                            actionCheckingHelper.lastCandidateActionStart = Date().timeIntervalSince1970;
+                            actionCheckingHelper.deviationStartTime = actionCheckingHelper.lastCandidateActionStart;
+                            
+                        } else if actionCheckingHelper.checkingState == .checkingFirstAction {
+                            
+                            // calculate the total angle change since the beginning
+                            var angleDeviation = actionCheckingHelper.deviationStartAngle - angle;
+                            if angleDeviation < 0 {
+                                angleDeviation += 360;
+                            }
+                            
+                            // see if the difference overcame the difference threshold
+                            if angleDeviation > actionCheckingHelper.deviationThresholdAngle {
+                                // the first instruction is an inhale
+                                rotatingClockwise = true;
+                                actionCheckingHelper.checkingState = .currentActionInhale;
+                                actionCheckingHelper.deviationStartAngle = angle;
+                            }
+                            
                         }
                         
                     } else if rotatingClockwise == false {
-                        // the previous counter clockwise action just ended
-                        // save the times and calculate the duration
-                        rotatingClockwise = true;
-                        let date = Date();
-                        let actionEndTime = date.timeIntervalSince1970;
-                        let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
-                        ringDataRaw.append(action);
-                        startOfCurrentAction = actionEndTime;
+                        // Since we only change rotatingClockwise when we officially begin a new action, we can be sure that we are currently deviating in some way in this block
+                        // Determine what state of deviation we are in
+                        switch actionCheckingHelper.checkingState! {
+                        case .lastActionPause:
+                            actionCheckingHelper.checkingState = .deviatingAfterPause;
+                            break;
+                        case .currentActionExhale:
+                            actionCheckingHelper.checkingState = .deviatingAfterExhale;
+                            break;
+                        case .currentActionInhale:
+                            actionCheckingHelper.checkingState = .deviatingAfterInhale;
+                            break;
+                        default:
+                            // otherwise, we are already in a deviating state - do nothing
+                            break;
+                        }
+                        
+                        // check to see if this clockwise rotation was enough to be a new action
+                        var angleDeviation = actionCheckingHelper.deviationStartAngle - angle;
+                        if angleDeviation < 0 {
+                            angleDeviation += 360;
+                        }
+                        
+                        // see if the difference overcame the difference threshold
+                        if angleDeviation > actionCheckingHelper.deviationThresholdAngle {
+                            // this instruction is an inhale
+                            
+                            // now that we know a new instruction has begun, check the state
+                            switch actionCheckingHelper.checkingState! {
+                            case .deviatingAfterExhale:
+                                // we are ending the exhale and beginning a new inhale
+                                ringDataRaw.append(breathingAction(action: Strings.exhale, duration: actionCheckingHelper.deviationStartTime - actionCheckingHelper.lastCandidateActionStart, start: actionCheckingHelper.lastCandidateActionStart - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionCheckingHelper.deviationStartTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing));
+                                actionCheckingHelper.lastCandidateActionStart = actionCheckingHelper.deviationStartTime;
+                                print("Changed: .started cw deviating after exhale");
+                                
+                                if actionCheckingHelper.firstActionIsExhale != true {
+                                    print("Displaying next instruction even though first action is exhale");
+                                    displayNextInstruction();
+                                }
+                                actionCheckingHelper.firstActionIsExhale = false;
+                                
+                                break;
+                            case .deviatingAfterPause:
+                                if getDisplayInPosition(position: 0).label.text == Strings.exhale {
+                                    // if the current instruction is showing exhale, then we should display the next one
+                                    print("Changed: .started cw deviating after pause");
+                                    displayNextInstruction();
+                                }
+                                break;
+                            default:
+                                // we do nothing in the other scenarios
+                                break;
+                            }
+                            
+                            // set the values for the next round
+                            rotatingClockwise = true;
+                            actionCheckingHelper.checkingState = .currentActionInhale;
+                            actionCheckingHelper.deviationStartAngle = angle;
+                            actionCheckingHelper.deviationStartTime = NSDate().timeIntervalSince1970;
+                        }
+                        
+                    } else {
+                        // continuing rotating clockwise - check if we are deviating
+                        if actionCheckingHelper.checkingState != .deviatingAfterInhale && actionCheckingHelper.checkingState != .deviatingAfterExhale && actionCheckingHelper.checkingState != .deviatingAfterPause {
+                            // since we are not deviating, we should update the deviation values
+                            actionCheckingHelper.deviationStartTime = NSDate().timeIntervalSince1970;
+                            actionCheckingHelper.deviationStartAngle = angle;
+                        } else {
+                            // if we are deviating, it is important to determine if the inhale resumes and update the deviation values
+                            
+                            // check to see if this clockwise rotation was enough to continue the inhale
+                            var angleDeviation = actionCheckingHelper.deviationStartAngle - angle;
+                            if angleDeviation < 0 {
+                                angleDeviation += 360;
+                            }
+                            
+                            // see if the difference overcame the difference threshold
+                            if angleDeviation > actionCheckingHelper.deviationThresholdAngle {
+                                actionCheckingHelper.checkingState = .currentActionInhale;
+                                actionCheckingHelper.deviationStartAngle = angle;
+                                actionCheckingHelper.deviationStartTime = NSDate().timeIntervalSince1970;
+                            }
+                        }
+                        
                     }
                     
                 } else {
                     // counter clockwise
                     if rotatingClockwise == nil {
-                        if exerciseBegan {
-                            // this is the first action
-                            rotatingClockwise = false;
+                        
+                        if actionCheckingHelper.checkingState == .none {
                             
-                            // save the start time here
-                            startOfCurrentAction = Date().timeIntervalSince1970;
+                            // this is the beginning state, so initialize the deviation angle
+                            actionCheckingHelper.deviationStartAngle = angle;
+                            actionCheckingHelper.checkingState = .checkingFirstAction;
+                            actionCheckingHelper.lastCandidateActionStart = Date().timeIntervalSince1970;
+                            actionCheckingHelper.deviationStartTime = actionCheckingHelper.lastCandidateActionStart;
+                            
+                        } else if actionCheckingHelper.checkingState == .checkingFirstAction {
+                            
+                            // calculate the total angle change since the beginning
+                            var angleDeviation = actionCheckingHelper.deviationStartAngle - angle;
+                            if angleDeviation > 0 {
+                                angleDeviation -= 360;
+                            }
+                            
+                            // see if the difference overcame the difference threshold
+                            if angleDeviation < -actionCheckingHelper.deviationThresholdAngle {
+                                // the first instruction is an exhale
+                                rotatingClockwise = false;
+                                actionCheckingHelper.checkingState = .currentActionExhale;
+                                actionCheckingHelper.deviationStartAngle = angle;
+                                actionCheckingHelper.firstActionIsExhale = true;
+                                print("First action marked as exhale");
+                            }
+                            
+                        }
+                    } else if rotatingClockwise == true {
+                        // Since we only change rotatingClockwise when we officially begin a new action, we can be sure that we are currently deviating in some way in this block
+                        // Determine what state of deviation we are in
+                        switch actionCheckingHelper.checkingState! {
+                        case .lastActionPause:
+                            actionCheckingHelper.checkingState = .deviatingAfterPause;
+                            break;
+                        case .currentActionExhale:
+                            actionCheckingHelper.checkingState = .deviatingAfterExhale;
+                            break;
+                        case .currentActionInhale:
+                            actionCheckingHelper.checkingState = .deviatingAfterInhale;
+                            break;
+                        default:
+                            // otherwise, we are already in a deviating state - do nothing
+                            break;
                         }
                         
-                    } else if rotatingClockwise == true {
-                        // the previous clockwise action just ended
-                        // save the times and calculate the duration
-                        rotatingClockwise = false;
-                        let date = Date();
-                        let actionEndTime = date.timeIntervalSince1970;
-                        let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
-                        ringDataRaw.append(action);
-                        startOfCurrentAction = actionEndTime;
+                        // check to see if this clockwise rotation was enough to be a new action
+                        var angleDeviation = actionCheckingHelper.deviationStartAngle - angle;
+                        if angleDeviation > 0 {
+                            angleDeviation -= 360;
+                        }
+                        
+                        // see if the difference overcame the difference threshold
+                        if angleDeviation < -actionCheckingHelper.deviationThresholdAngle {
+                            // this instruction is an exhale
+                            
+                            // now that we know a new instruction has begun, check the state
+                            switch actionCheckingHelper.checkingState! {
+                            case .deviatingAfterInhale:
+                                // we are ending the inhale and beginning a new exhale
+                                ringDataRaw.append(breathingAction(action: Strings.inhale, duration: actionCheckingHelper.deviationStartTime - actionCheckingHelper.lastCandidateActionStart, start: actionCheckingHelper.lastCandidateActionStart - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionCheckingHelper.deviationStartTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing));
+                                actionCheckingHelper.lastCandidateActionStart = actionCheckingHelper.deviationStartTime;
+                                print("Changed: .started ccw - deviating after inhale")
+                                displayNextInstruction();
+                                break;
+                            case .deviatingAfterPause:
+                                if getDisplayInPosition(position: 0).label.text == Strings.inhale {
+                                    // if the current instruction is showing inhale, then we should display the next one
+                                    print("Changed: .started ccw - deviating after pause");
+                                    displayNextInstruction();
+                                }
+                                break;
+                            default:
+                                // we do nothing in the other scenarios
+                                break;
+                            }
+                            
+                            // set the values for the next round
+                            rotatingClockwise = false;
+                            actionCheckingHelper.checkingState = .currentActionExhale;
+                            actionCheckingHelper.deviationStartAngle = angle;
+                            actionCheckingHelper.deviationStartTime = NSDate().timeIntervalSince1970;
+                        }
+                        
+                    } else {
+                        // continuing rotating counterclockwise - check if we are deviating
+                        if actionCheckingHelper.checkingState != .deviatingAfterInhale && actionCheckingHelper.checkingState != .deviatingAfterExhale && actionCheckingHelper.checkingState != .deviatingAfterPause {
+                            // since we are not deviating, we should reset the deviation values
+                            actionCheckingHelper.deviationStartTime = NSDate().timeIntervalSince1970;
+                            actionCheckingHelper.deviationStartAngle = angle;
+                        } else {
+                            // if we are deviating, it is important to determine if the inhale resumes and update the deviation values
+                            
+                            // check to see if this clockwise rotation was enough to continue the inhale
+                            var angleDeviation = actionCheckingHelper.deviationStartAngle - angle;
+                            if angleDeviation > 0 {
+                                angleDeviation -= 360;
+                            }
+                            
+                            // see if the difference overcame the difference threshold
+                            if angleDeviation < -actionCheckingHelper.deviationThresholdAngle {
+                                actionCheckingHelper.checkingState = .currentActionExhale;
+                                actionCheckingHelper.deviationStartAngle = angle;
+                                actionCheckingHelper.deviationStartTime = NSDate().timeIntervalSince1970;
+                            }
+                        }
+                        
                     }
                     
                 }
+                
+                break;
+            default:
+                // do nothing if the exercise is starting, not started, or ended
+                break;
             }
+            
             previousAngle = angle;
             
             UIView.animate(withDuration: 0.1, animations: {
                 self.imageView.transform = CGAffineTransform(rotationAngle: -(CGFloat(angle) * CGFloat(M_PI) / 180.0))
             })
+            
             break;
         default:
             // this default should catch state ended and cancelled
-            
-            // determine which action just terminated and save the info
-            if !lastActionCaptured {
+            switch exerciseState {
+            case .starting:
+                
+                // if the exercise is starting and the user removed their finger from the wheel, reset
+                exerciseState = .notStarted;
+                
+                // invalidate the timer that is beginning the exercise
+                beginExerciseTimer.invalidate();
+                if metronomeTimer != nil {
+                    metronomeTimer.invalidate();
+                }
+                countUpTimer.invalidate();
+                countUpTimerLabel.text = "0.0";
+                countUpCurrentValue = 0.0;
+                
+                // reset the instruction displays
+                initInstructionDisplays();
+                
+                break;
+            case .started:
+                
+                // determine which action just terminated and save the info
                 if rotatingClockwise == nil {
-                    // enters here if the action is ending before the exercise even started
-                } else if rotatingClockwise == true {
-                    // the last action was clockwise
-                    // save the info for clockwise
-                    let date = Date();
-                    let actionEndTime = date.timeIntervalSince1970;
-                    let action = breathingAction(action: "Inhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
-                    ringDataRaw.append(action);
+                    // enters here if the action is begun and ends in the same position on the ring - do nothing
+                } else {
+                    
+                    let actionEndTime = Date().timeIntervalSince1970;
+                    let duration = actionEndTime - startOfCurrentAction;
+                    let start = startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing;
+                    let end = actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing
                     startOfCurrentAction = actionEndTime;
                     timeOfRingRelease = actionEndTime;
                     
-                } else if rotatingClockwise == false {
-                    // the last action was counterclockwise
-                    // save the info for counterclockwise
-                    let date = Date();
-                    let actionEndTime = date.timeIntervalSince1970;
-                    let action = breathingAction(action: "Exhale", duration: actionEndTime - startOfCurrentAction, start: startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
-                    ringDataRaw.append(action);
-                    startOfCurrentAction = actionEndTime;
-                    timeOfRingRelease = actionEndTime;
+                    if rotatingClockwise == true {
+                        
+                        // the last action was clockwise
+                        // save the info for clockwise
+                        ringDataRaw.append(breathingAction(action: "Inhale", duration: duration, start: start, end: end));
+                        
+                    } else if rotatingClockwise == false {
+                        
+                        // the last action was counterclockwise
+                        // save the info for counterclockwise
+                        ringDataRaw.append(breathingAction(action: "Exhale", duration: duration, start: start, end: end));
+
+                    }
+                    
+                    // check if this action satisfies the current instruction and move to the next if it does
+                    if duration > getDisplayInPosition(position: 0).duration {
+                        // proceed to the next instruction
+                        print("Cancelled: .started");
+                        displayNextInstruction();
+                        
+                    }
                     
                 }
+                
+                break;
+            default:
+                // do nothing if the exercise is not started yet or if the exercise already ended
+                break;
             }
             
             break;
@@ -358,108 +634,42 @@ class ExerciseViewController: DataAnalyzingViewController {
         
     }
     
-    func beginExercise() {
-        // remove blurring view and begin button
-        blurEffectView.removeFromSuperview();
-        beginButton.removeFromSuperview();
+    func displayNextInstruction() {
         
-        // add border lines for current instruction
-        addCurrentInstructionBorderLines();
-        
-        // initialize the instruction labels with the instructions and their durations
-        // initialize the first/current instruction label with starting exercise indicator
-        instructionDisplays[0].label.text = "Starting in: ";
-        instructionDisplays[0].timerLabel.text = "3.0 s";
-        instructionDisplays[0].duration = 3.0;
-        instructionDisplays[0].label.font = instructionDisplays[0].label.font.withSize(currentInstructionTextSize);
-        instructionDisplays[0].timerLabel.font = instructionDisplays[0].timerLabel.font.withSize(currentInstructionTextSize);
-        instructionDisplays[0].label.textColor = currentInstructionTextColor;
-        instructionDisplays[0].timerLabel.textColor = currentInstructionTextColor;
-
-        
-        var action: breathingAction!
-        for index in 1...4 {
-            // get the next instruction from the exercise
-            action = exercise.next();
-            
-            instructionDisplays[index].label.font = instructionDisplays[index].label.font.withSize(queuedInstructionTextSize);
-            instructionDisplays[index].timerLabel.font = instructionDisplays[index].timerLabel.font.withSize(queuedInstructionTextSize);
-            instructionDisplays[index].label.textColor = queuedInstructionTextColor;
-            instructionDisplays[index].timerLabel.textColor = queuedInstructionTextColor;
-            if action.action != Strings.notAnAction {
-                instructionDisplays[index].label.text = action.action;
-                instructionDisplays[index].timerLabel.text = String(format: "%.1f s", action.duration);
-                instructionDisplays[index].duration = action.duration;
-            } else {
-                instructionDisplays[index].label.text = exerciseCompleteIndicator;
-                instructionDisplays[index].timerLabel.text = "--";
-                self.alreadyFinished = true; 
-                break; 
-            }
-        }
-        
-        // the fifth instruction display should be invisible to begin with
-        instructionDisplays[4].label.alpha = 0;
-        instructionDisplays[4].timerLabel.alpha = 0;
-        
-        // set the current label to be the one in position 0 in the instructionDisplays array
-        currentLabel = 0;
-        
-        // make the fifth label invisible
-        instructionDisplays[4].label.alpha = 0;
-                
-        // begin timer
-        instructionTimer = Timer.scheduledTimer(timeInterval: 3, target: self, selector: #selector(ExerciseViewController.timerEnded), userInfo: nil, repeats: false);
-        currentTimerCounter = 3.0;
-        counterTimer = Timer.scheduledTimer(timeInterval: TimeInterval(countDownInterval), target: self, selector: #selector(ExerciseViewController.countdown), userInfo: nil, repeats: true);
-        
-        // begin another timer that plays the beep sound every second
-        if playMetronome {
-            metronomeTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ExerciseViewController.playBeep), userInfo: nil, repeats: true);
-        }
-    }
-    
-    func playBeep() {
-        // play the beep sound
-        audioPlayer.play()
-    }
-    
-    func timerEnded() {
-        
-        // check if this is the first time entering. if so, the exercise is just beginning, 
-        // so save the timestamp
-        if !exerciseBegan {
-            // store start timestamp
-            let date = Date();
-            startTimestamp = Int((date.timeIntervalSince1970-Constants.exerciseStartTimeAdjustmentForRing)*256);
-            exerciseBegan = true; 
-        }
-        
-        // start next timer here
-        if getDisplayInPosition(position: 1).label.text != exerciseCompleteIndicator {
-            self.currentTimerCounter = getDisplayInPosition(position: 1).duration;
-            instructionTimer = Timer.scheduledTimer(timeInterval: TimeInterval(getDisplayInPosition(position: 1).duration), target: self, selector: #selector(ExerciseViewController.timerEnded), userInfo: nil, repeats: false);
-            
-            // reset the countdown timer here
-            counterTimer.invalidate();
-            getDisplayInPosition(position: 0).timerLabel.text = "0.0 s";
-            counterTimer = Timer.scheduledTimer(timeInterval: TimeInterval(countDownInterval), target: self, selector: #selector(ExerciseViewController.countdown), userInfo: nil, repeats: true);
-            
-        } else {
+        // check if the next instruction is the starting indicator
+        if getDisplayInPosition(position: 1).label.text == self.startIndicatorString {
+            // start the count up timer
+            self.countUpTimerLabel.text = "0.0";
+            countUpTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(self.countUpInterval), repeats: true, block: {
+                _ in
+                self.countUpCurrentValue += self.countUpInterval;
+                let formattedValue = String.init(format: "%.1f", self.countUpCurrentValue);
+                self.countUpTimerLabel.text = formattedValue;
+            })
+        } else if getDisplayInPosition(position: 1).label.text == exerciseCompleteIndicator {
             // Exercise has ended
-            exerciseEnded = true;
-            counterTimer.invalidate();
+            exerciseState = .ended;
             
+            // stop the count up timer
+            countUpTimer.invalidate();
+            countUpTimerLabel.text = "";
+            
+            // kill the metronome
             if playMetronome {
                 metronomeTimer.invalidate();
             }
             
             // store the end time
-            let date = Date();
-            endTimestamp = Int(date.timeIntervalSince1970*256);
+            endTimestamp = Int(Date().timeIntervalSince1970*256);
             
-            // delay for 2 seconds before going to the results controller
+            // delay for 1 seconds before adding the next button - this allows for the animations to complete
             Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ExerciseViewController.addNextButton), userInfo: nil, repeats: false);
+            
+        } else {
+            // the exercise is continuing to the next instruction
+            // reset the count up label to 0.0
+            countUpTimerLabel.text = "0.0";
+            countUpCurrentValue = 0.0;
             
         }
         
@@ -479,7 +689,7 @@ class ExerciseViewController: DataAnalyzingViewController {
             self.imageView.image = UIImage(named: "pause_wheel.png");
         }
         
-        UIView.animate(withDuration: 0.3, animations: {
+        UIView.animate(withDuration: 0.2, animations: {
             self.getDisplayInPosition(position: 0).label.alpha = 0.0;
             self.getDisplayInPosition(position: 0).timerLabel.alpha = 0.0;
             self.getDisplayInPosition(position: 1).label.textColor = self.currentInstructionTextColor;
@@ -491,6 +701,7 @@ class ExerciseViewController: DataAnalyzingViewController {
             self.incCurrentLabel();
             self.view.layoutIfNeeded();
         }, completion: { (myBool) in
+            
             // load up the hidden display with the next instruction and move it into the correct position at the top
             let nextAction = self.exercise.next();
             if self.alreadyFinished == true {
@@ -516,6 +727,7 @@ class ExerciseViewController: DataAnalyzingViewController {
             self.getDisplayInPosition(position: 4).labelVerticalConstraint.constant += -270;
             self.view.layoutIfNeeded();
         })
+        
     }
     
     func addCurrentInstructionBorderLines() {
@@ -545,6 +757,24 @@ class ExerciseViewController: DataAnalyzingViewController {
     func removeCurrentInstructionBorderLines() {
         topBorderLine.removeFromSuperview();
         bottomBorderLine.removeFromSuperview();
+    }
+    
+    func addCountUpTimerLabel() {
+        countUpTimerLabel = UILabel();
+        countUpTimerLabel.translatesAutoresizingMaskIntoConstraints = false;
+        countUpTimerLabel.font = countUpTimerLabel.font.withSize(20);
+        countUpTimerLabel.textColor = .black;
+        countUpTimerLabel.text = "0.0";
+        countUpTimerLabel.textAlignment = .center;
+        imageViewContainer.addSubview(countUpTimerLabel);
+        
+        // add constraints
+        var constraints: [NSLayoutConstraint] = [];
+        constraints.append(NSLayoutConstraint(item: countUpTimerLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 100));
+        constraints.append(NSLayoutConstraint(item: countUpTimerLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 30));
+        constraints.append(NSLayoutConstraint(item: countUpTimerLabel, attribute: .centerY, relatedBy: .equal, toItem: imageViewContainer, attribute: .centerY, multiplier: 1.0, constant: 0));
+        constraints.append(NSLayoutConstraint(item: countUpTimerLabel, attribute: .centerX, relatedBy: .equal, toItem: imageViewContainer, attribute: .centerX, multiplier: 1.0, constant: 0));
+        imageViewContainer.addConstraints(constraints);
     }
     
     func addNextButton() {
@@ -608,6 +838,17 @@ class ExerciseViewController: DataAnalyzingViewController {
         
     }
     
+    func beginExercise() {
+        // indicate that the exercise has started
+        self.exerciseState = .started;
+        self.startOfCurrentAction = Date().timeIntervalSince1970;
+        self.startTimestamp = Int(self.startOfCurrentAction*256);
+        displayNextInstruction();
+        print("Begin Exercise: Display next instruction");
+    }
+    
+    
+    
     func nextPressed() {
         
         if signedIn == true && wearingHexoskin == true {
@@ -618,40 +859,22 @@ class ExerciseViewController: DataAnalyzingViewController {
         
     }
     
-    /*
-     Function that executes whenever the countdownTimer fires. This function calculates
-     the time left during the execution of the current instruction and displays it as
-     feedback for the user.
-    */
-    func countdown() {
-        if currentTimerCounter - countDownInterval < 0.0 {
-            // The intruction has been completed and the clock should show 0 seconds left
-            getDisplayInPosition(position: 0).timerLabel.text = "0.0 s";
-        } else {
-            // The instruction has not been completed and the clock should be updated to
-            // the time remaining
-            getDisplayInPosition(position: 0).timerLabel.text = String(format: "%.1f s", currentTimerCounter - countDownInterval);
-            currentTimerCounter = currentTimerCounter - countDownInterval;
-        }
+    func distance(firstPoint: CGPoint, secondPoint: CGPoint) -> Double {
+        let x1 = Double(firstPoint.x);
+        let x2 = Double(secondPoint.x);
+        let y1 = Double(firstPoint.y);
+        let y2 = Double(secondPoint.y);
+        return sqrt(pow(x2-x1,2) + pow(y2-y1,2));
     }
     
-    
-    func distance(firstPoint: CGPoint, secondPoint: CGPoint) -> Float {
-        let x1 = Float(firstPoint.x);
-        let x2 = Float(secondPoint.x);
-        let y1 = Float(firstPoint.y);
-        let y2 = Float(secondPoint.y);
-        return sqrt(powf(x2-x1,2) + powf(y2-y1,2));
-    }
-    
-    func getAngle(centralPoint: CGPoint, secondPoint: CGPoint) -> Float {
-        let x1 = Float(centralPoint.x);
-        let x2 = Float(secondPoint.x);
-        let y1 = Float(centralPoint.y);
-        let y2 = Float(secondPoint.y);
+    func getAngle(centralPoint: CGPoint, secondPoint: CGPoint) -> Double {
+        let x1 = Double(centralPoint.x);
+        let x2 = Double(secondPoint.x);
+        let y1 = Double(centralPoint.y);
+        let y2 = Double(secondPoint.y);
         let xdelta = x2-x1;
         let ydelta = y2-y1;
-        let pi = Float(M_PI);
+        let pi = Double(M_PI);
         let baseAngle = atan(ydelta/xdelta)*180/pi;
         
         if xdelta > 0 {
@@ -696,65 +919,84 @@ class ExerciseViewController: DataAnalyzingViewController {
         return returnPosition;
     }
     
-    func addBlurView() {
-        //only apply the blur if the user hasn't disabled transparency effects
-        if !UIAccessibilityIsReduceTransparencyEnabled() {
-            self.view.backgroundColor = UIColor.white
-            
-            let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.dark)
-            blurEffectView = UIVisualEffectView(effect: blurEffect)
-            //always fill the view
-            blurEffectView.frame = self.view.bounds
-            blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            
-            self.view.addSubview(blurEffectView)
-            
-        } else {
-            self.view.backgroundColor = UIColor.black
-        }
-    }
-    
-    func addBeginButton() {
-        // now add a begin button
-        beginButton = UIButton(frame: CGRect.zero);
-        self.view.addSubview(beginButton);
-        beginButton.layer.cornerRadius = 8;
-        beginButton.titleLabel?.font = beginButton.titleLabel?.font.withSize(30);
-        beginButton.addTarget(self, action: #selector(ExerciseViewController.beginExercise), for: .touchUpInside);
-        beginButton.translatesAutoresizingMaskIntoConstraints = false;
-        let horizontalConstraint = NSLayoutConstraint(item: beginButton, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1.0, constant: 0);
-        let verticalConstraint = NSLayoutConstraint(item: beginButton, attribute: .centerY, relatedBy: .equal, toItem: self.view, attribute: .centerY, multiplier: 1.0, constant: 0);
-        let widthConstraint = NSLayoutConstraint(item: beginButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 150);
-        let heightConstraint = NSLayoutConstraint(item: beginButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 50);
-        let constraints = [horizontalConstraint, verticalConstraint, widthConstraint, heightConstraint];
-        self.view.addConstraints(constraints);
-        beginButton.setTitle("Begin", for: .normal);
-        beginButton.setTitleColor(Constants.basicTextColor, for: .normal)
-        beginButton.backgroundColor = Constants.basicButtonBackgroundColor;
-    }
-    
     func initInstructionDisplays() {
-        // initialize the array of instruction labels
-        let display1 = InstructionDisplay(label: firstInstructionLabel, timerLabel: firstTimerLabel, labelVerticalConstraint: firstVerticalConstraint, labelHorizontalConstraint: firstHorizontalConstraint, timerLabelHorizontalConstraint: firstInstructionTimerHorizontalConstraint, duration: 0.0);
-        let display2 = InstructionDisplay(label: secondInstructionLabel, timerLabel: secondTimerLabel, labelVerticalConstraint: secondVerticalConstraint, labelHorizontalConstraint: secondHorizontalConstraint, timerLabelHorizontalConstraint: secondInstructionTimerHorizontalConstraint, duration: 0.0);
-        let display3 = InstructionDisplay(label: thirdInstructionLabel, timerLabel: thirdTimerLabel, labelVerticalConstraint: thirdVerticalConstraint, labelHorizontalConstraint: thirdHorizontalConstraint, timerLabelHorizontalConstraint: thirdInstructionTimerHorizontalConstraint, duration: 0.0);
-        let display4 = InstructionDisplay(label: fourthInstructionLabel, timerLabel: fourthTimerLabel, labelVerticalConstraint: fourthVerticalConstraint, labelHorizontalConstraint: fourthHorizontalConstraint, timerLabelHorizontalConstraint: fourthInstructionTimerHorizontalConstraint, duration: 0.0);
-        let display5 = InstructionDisplay(label: fifthInstructionLabel, timerLabel: fifthTimerLabel, labelVerticalConstraint: fifthVerticalConstraint, labelHorizontalConstraint: fifthHorizontalConstraint, timerLabelHorizontalConstraint: fifthInstructionTimerHorizontalConstraint, duration: 0.0);
-        instructionDisplays = [display1, display2, display3, display4, display5];
+        
+        if instructionDisplays == nil {
+            // initialize the array of instruction labels
+            let display1 = InstructionDisplay(label: firstInstructionLabel, timerLabel: firstTimerLabel, labelVerticalConstraint: firstVerticalConstraint, labelHorizontalConstraint: firstHorizontalConstraint, timerLabelHorizontalConstraint: firstInstructionTimerHorizontalConstraint, duration: 0.0);
+            let display2 = InstructionDisplay(label: secondInstructionLabel, timerLabel: secondTimerLabel, labelVerticalConstraint: secondVerticalConstraint, labelHorizontalConstraint: secondHorizontalConstraint, timerLabelHorizontalConstraint: secondInstructionTimerHorizontalConstraint, duration: 0.0);
+            let display3 = InstructionDisplay(label: thirdInstructionLabel, timerLabel: thirdTimerLabel, labelVerticalConstraint: thirdVerticalConstraint, labelHorizontalConstraint: thirdHorizontalConstraint, timerLabelHorizontalConstraint: thirdInstructionTimerHorizontalConstraint, duration: 0.0);
+            let display4 = InstructionDisplay(label: fourthInstructionLabel, timerLabel: fourthTimerLabel, labelVerticalConstraint: fourthVerticalConstraint, labelHorizontalConstraint: fourthHorizontalConstraint, timerLabelHorizontalConstraint: fourthInstructionTimerHorizontalConstraint, duration: 0.0);
+            let display5 = InstructionDisplay(label: fifthInstructionLabel, timerLabel: fifthTimerLabel, labelVerticalConstraint: fifthVerticalConstraint, labelHorizontalConstraint: fifthHorizontalConstraint, timerLabelHorizontalConstraint: fifthInstructionTimerHorizontalConstraint, duration: 0.0);
+            instructionDisplays = [display1, display2, display3, display4, display5];
+        }
         
         for index in 0...4 {
-            instructionDisplays[index].label.text = "";
-            instructionDisplays[index].timerLabel.text = "";
             instructionDisplays[index].labelVerticalConstraint.constant = CGFloat(-25 + 50 * (4-index));
             instructionDisplays[index].labelHorizontalConstraint.constant = 0;
             instructionDisplays[index].timerLabelHorizontalConstraint.constant = 0;
         }
-        instructionDisplays[0].labelVerticalConstraint.constant += 20; 
+        instructionDisplays[0].labelVerticalConstraint.constant += 20;
+        
+        
+        // initialize the instruction labels with the instructions and their durations
+        // initialize the first/current instruction label with starting exercise indicator
+        instructionDisplays[0].label.text = "Hold wheel to begin";
+        instructionDisplays[0].timerLabel.text = "";
+        instructionDisplays[0].duration = 0.0;
+        instructionDisplays[0].label.font = instructionDisplays[0].label.font.withSize(queuedInstructionTextSize);
+        instructionDisplays[0].timerLabel.font = instructionDisplays[0].timerLabel.font.withSize(queuedInstructionTextSize);
+        instructionDisplays[0].label.textColor = currentInstructionTextColor;
+        instructionDisplays[0].timerLabel.textColor = currentInstructionTextColor;
+        instructionDisplays[0].timerLabel.alpha = 1.0;
+        instructionDisplays[0].label.alpha = 1.0;
+        
+        instructionDisplays[1].label.text = self.startIndicatorString;
+        instructionDisplays[1].timerLabel.text = "3.0 s";
+        instructionDisplays[1].duration = 3.0;
+        instructionDisplays[1].label.font = instructionDisplays[1].label.font.withSize(queuedInstructionTextSize);
+        instructionDisplays[1].timerLabel.font = instructionDisplays[1].timerLabel.font.withSize(queuedInstructionTextSize);
+        instructionDisplays[1].label.textColor = queuedInstructionTextColor;
+        instructionDisplays[1].timerLabel.textColor = queuedInstructionTextColor;
+        
+        
+        exercise.reset();
+        var action: breathingAction!
+        for index in 2...4 {
+            // get the next instruction from the exercise
+            action = exercise.next();
+            
+            instructionDisplays[index].label.font = instructionDisplays[index].label.font.withSize(queuedInstructionTextSize);
+            instructionDisplays[index].timerLabel.font = instructionDisplays[index].timerLabel.font.withSize(queuedInstructionTextSize);
+            instructionDisplays[index].label.textColor = queuedInstructionTextColor;
+            instructionDisplays[index].timerLabel.textColor = queuedInstructionTextColor;
+            if action.action != Strings.notAnAction {
+                instructionDisplays[index].label.text = action.action;
+                instructionDisplays[index].timerLabel.text = String(format: "%.1f s", action.duration);
+                instructionDisplays[index].duration = action.duration;
+            } else {
+                instructionDisplays[index].label.text = exerciseCompleteIndicator;
+                instructionDisplays[index].timerLabel.text = "--";
+                self.alreadyFinished = true;
+                break;
+            }
+        }
+        
+        // the fifth instruction display should be invisible to begin with
+        instructionDisplays[4].label.alpha = 0;
+        instructionDisplays[4].timerLabel.alpha = 0;
+        
+        // set the current label to be the one in position 0 in the instructionDisplays array
+        currentLabel = 0;
         
     }
 
     
-
+    func playBeep() {
+        // play the beep sound
+        audioPlayer.play()
+    }
+    
 
     
 }

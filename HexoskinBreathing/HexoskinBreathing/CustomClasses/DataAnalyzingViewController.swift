@@ -1029,41 +1029,16 @@ class DataAnalyzingViewController: MRRViewController {
             return [];
         }
         
-        // prune the hexoskinData array by removing actions that end before 1 second past the start
-        var frontPruningComplete: Bool = false;
-        while !frontPruningComplete {
-            let action = hexoskinData[0];
-            if Double(action.end) < 1 {
-                // remove the action since it ends before the exercise really starts
-                hexoskinData.remove(at: 0);
-            } else {
-                frontPruningComplete = true;
-            }
-        }
-        
-        // prune the hexoskinData array by removing actions that start after 1 second before the end of the last instruction
-//        var backPruningComplete: Bool = false;
-//        var index = 0;
-//        while !backPruningComplete {
-//            
-//            // verify the index is valid
-//            if index >= hexoskinData.count {
-//                // invalid index
-//                // exit the loop
-//                backPruningComplete = true;
+//        // prune the hexoskinData array by removing actions that end before 1 second past the start
+//        var frontPruningComplete: Bool = false;
+//        while !frontPruningComplete {
+//            let action = hexoskinData[0];
+//            if Double(action.end) < 1 {
+//                // remove the action since it ends before the exercise really starts
+//                hexoskinData.remove(at: 0);
 //            } else {
-//                // valid index
-//                // verify that the action falls inside the exercise timestamps
-//                let action = hexoskinData[index];
-//                if Double(action.start) > exercise.exerciseDuration - 1 {
-//                    // remove the action since it starts basically at the end of the exercise
-//                    hexoskinData.remove(at: index);
-//                } else {
-//                    // if the action is not removed, increment the index
-//                    index = index + 1;
-//                }
+//                frontPruningComplete = true;
 //            }
-//            
 //        }
         
         // if the first instruction starts after the beginning of the exercise, fill in the beginning with the
@@ -1076,6 +1051,19 @@ class DataAnalyzingViewController: MRRViewController {
                     hexoskinData.insert(breathingAction(action: Strings.exhale, duration: firstAction.start, start: 0, end: firstAction.start), at: 0)
                 } else if firstAction.action == Strings.exhale {
                     hexoskinData.insert(breathingAction(action: Strings.inhale, duration: firstAction.start, start: 0, end: firstAction.start), at: 0)
+                }
+            }
+        }
+        
+        // if the last instruction ends before the end of the exercise, fill in the end with the alternate instruction
+        if hexoskinData.count != 0 {
+            let lastAction = hexoskinData[hexoskinData.count-1];
+            if lastAction.end < Double(endTimestamp) {
+                // append the alternate instruction
+                if lastAction.action == Strings.inhale {
+                    hexoskinData.append(breathingAction(action: Strings.exhale, duration: Double(endTimestamp) - lastAction.end, start: lastAction.end, end: Double(endTimestamp - startTimestamp)));
+                } else if lastAction.action == Strings.exhale {
+                    hexoskinData.append(breathingAction(action: Strings.inhale, duration: Double(endTimestamp) - lastAction.end, start: lastAction.end, end: Double(endTimestamp - startTimestamp)));
                 }
             }
         }
@@ -1187,7 +1175,7 @@ class DataAnalyzingViewController: MRRViewController {
     func fetchResults() {
         
         // construct the request
-        let request = ApiHelper.generateRequest(url: "https://api.hexoskin.com/api/data/", query: ["datatype__in" : "34,35", "record" : String(recordID), "start" : String(startTimestamp-512), "end" : String(endTimestamp+512)], headers: ["Authorization" : "\(tokenType!) \(accessToken!)"]);
+        let request = ApiHelper.generateRequest(url: "https://api.hexoskin.com/api/data/", query: ["datatype__in" : "34,35", "record" : String(recordID), "start" : String(startTimestamp), "end" : String(endTimestamp)], headers: ["Authorization" : "\(tokenType!) \(accessToken!)"]);
         
         // make the request
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
