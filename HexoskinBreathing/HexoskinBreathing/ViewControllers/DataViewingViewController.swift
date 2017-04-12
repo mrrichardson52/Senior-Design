@@ -120,57 +120,6 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         scrollView.contentSize = CGSize(width: totalDisplayedPixels, height: Double(scrollParentView.frame.height));
         
     }
-    
-    func equalizeDataSources() {
-        
-        // verify that the ringData array is not empty
-        if displayRingData && ringData.count == 0 {
-            ringData.append(breathingAction(action: Strings.notAnAction, duration: 0.0, start: 0.0, end: 0.0));
-        }
-        
-        // verify that the hexData array is not empty
-        if displayHexData && hexoskinData.count == 0 {
-            hexoskinData.append(breathingAction(action: Strings.notAnAction, duration: 0.0, start: 0.0, end: 0.0));
-        }
-        
-        // grab the earliest start time and latest end time
-        let earliestStart: Double!
-        let latestEnding: Double!
-        if displayHexData && displayRingData {
-            earliestStart = min(exerciseData[0].start, hexoskinData[0].start, ringData[0].start);
-            latestEnding = max(exerciseData[exerciseData.count-1].end, hexoskinData[hexoskinData.count-1].end, ringData[ringData.count-1].end);
-        } else if displayRingData {
-            earliestStart = min(exerciseData[0].start, ringData[0].start);
-            latestEnding = max(exerciseData[exerciseData.count-1].end, ringData[ringData.count-1].end);
-        } else {
-            earliestStart = min(exerciseData[0].start, hexoskinData[0].start);
-            latestEnding = max(exerciseData[exerciseData.count-1].end, hexoskinData[hexoskinData.count-1].end);
-        }
-        
-        // check if the data source has a beginning equal to that of the earliest start.
-        // if not, add a "not an action" action to the beginning of it.
-        if exerciseData[0].start != earliestStart {
-            exerciseData.insert(breathingAction(action: Strings.notAnAction, duration: exerciseData[0].start - earliestStart, start: earliestStart, end: exerciseData[0].start), at: 0);
-        }
-        if displayHexData && hexoskinData[0].start != earliestStart {
-            hexoskinData.insert(breathingAction(action: Strings.notAnAction, duration: hexoskinData[0].start - earliestStart, start: earliestStart, end: hexoskinData[0].start), at: 0);
-        }
-        if displayRingData && ringData[0].start != earliestStart {
-            ringData.insert(breathingAction(action: Strings.notAnAction, duration: ringData[0].start - earliestStart, start: earliestStart, end: ringData[0].start), at: 0);
-        }
-        
-        // do the similar thing for the endings
-        if exerciseData[exerciseData.count-1].end != latestEnding {
-            exerciseData.append(breathingAction(action: Strings.notAnAction, duration: latestEnding - exerciseData[exerciseData.count-1].end, start: exerciseData[exerciseData.count-1].end, end: latestEnding));
-        }
-        if displayHexData && hexoskinData[hexoskinData.count-1].end != latestEnding {
-            hexoskinData.append(breathingAction(action: Strings.notAnAction, duration: latestEnding - hexoskinData[hexoskinData.count-1].end, start: hexoskinData[hexoskinData.count-1].end, end: latestEnding));
-        }
-        if displayRingData && ringData[ringData.count-1].end != latestEnding {
-            ringData.append(breathingAction(action: Strings.notAnAction, duration: latestEnding - ringData[ringData.count-1].end, start: ringData[ringData.count-1].end, end: latestEnding));
-        }
-        
-    }
 
     func addViewsForDataSource(actions: [breathingAction], section: Int, title: String) {
         

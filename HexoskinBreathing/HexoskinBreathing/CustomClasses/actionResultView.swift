@@ -115,67 +115,67 @@ class actionResultView: UIView {
         self.addConstraints(constraints);
         
         // add a timerstamp label here if this is the exercise data
-        if action.status != Strings.ignored {
+//        if action.status != Strings.ignored {
             // this action belongs to the exercise
             // create a view and a label. 
             // The view is a vertical tick that points to the spot in time
             // The label displays the time
-            let tickView = UIView();
-            tickView.translatesAutoresizingMaskIntoConstraints = false;
-            tickView.backgroundColor = .black;
-            self.addSubview(tickView);
-            var constraints: [NSLayoutConstraint] = [];
-            constraints.append(NSLayoutConstraint(item: tickView, attribute: .leading, relatedBy: .equal, toItem: self, attribute: .leading, multiplier: 1.0, constant: 0));
-            constraints.append(NSLayoutConstraint(item: tickView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: tickWidth));
-            constraints.append(NSLayoutConstraint(item: tickView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: tickHeight));
-            constraints.append(NSLayoutConstraint(item: tickView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: 2));
+        let tickView = UIView();
+        tickView.translatesAutoresizingMaskIntoConstraints = false;
+        tickView.backgroundColor = .black;
+        self.addSubview(tickView);
+        constraints = [];
+        constraints.append(NSLayoutConstraint(item: tickView, attribute: .leading, relatedBy: .equal, toItem: self, attribute: .leading, multiplier: 1.0, constant: 0));
+        constraints.append(NSLayoutConstraint(item: tickView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: tickWidth));
+        constraints.append(NSLayoutConstraint(item: tickView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: tickHeight));
+        constraints.append(NSLayoutConstraint(item: tickView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: 2));
+        
+        let timeLabel = UILabel();
+        timeLabel.translatesAutoresizingMaskIntoConstraints = false;
+        timeLabel.backgroundColor = .clear;
+        timeLabel.textColor = .black;
+        timeLabel.text = "\(Int(action.start)) s";
+        self.addSubview(timeLabel);
+        constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: timeLabelHeight));
+        constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: timeLabelWidth));
+        if position == ActionPosition.first {
+            constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .leading, relatedBy: .equal, toItem: tickView, attribute: .trailing, multiplier: 1.0, constant: tickViewToLabelDistance));
+            timeLabel.textAlignment = .left;
+        } else {
+            constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .centerX, relatedBy: .equal, toItem: tickView, attribute: .centerX, multiplier: 1.0, constant: 0));
+            timeLabel.textAlignment = .center;
+        }
+        constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .top, relatedBy: .equal, toItem: tickView, attribute: .bottom, multiplier: 1.0, constant: tickViewLabelOffset));
+        
+        // if this is the last view, add another time label and tick for the end
+        if position == ActionPosition.last {
+            let endTickView = UIView()
+            endTickView.translatesAutoresizingMaskIntoConstraints = false;
+            endTickView.backgroundColor = .black;
+            self.addSubview(endTickView);
+            constraints.append(NSLayoutConstraint(item: endTickView, attribute: .trailing, relatedBy: .equal, toItem: self, attribute: .trailing, multiplier: 1.0, constant: 0));
+            constraints.append(NSLayoutConstraint(item: endTickView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: tickWidth));
+            constraints.append(NSLayoutConstraint(item: endTickView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: tickHeight));
+            constraints.append(NSLayoutConstraint(item: endTickView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: 2));
             
-            let timeLabel = UILabel();
-            timeLabel.translatesAutoresizingMaskIntoConstraints = false;
-            timeLabel.backgroundColor = .clear;
-            timeLabel.textColor = .black;
-            timeLabel.text = "\(Int(action.start)) s";
-            self.addSubview(timeLabel);
-            constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: timeLabelHeight));
-            constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: timeLabelWidth));
-            if position == ActionPosition.first {
-                constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .leading, relatedBy: .equal, toItem: tickView, attribute: .trailing, multiplier: 1.0, constant: tickViewToLabelDistance));
-                timeLabel.textAlignment = .left;
-            } else {
-                constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .centerX, relatedBy: .equal, toItem: tickView, attribute: .centerX, multiplier: 1.0, constant: 0));
-                timeLabel.textAlignment = .center;
-            }
-            constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .top, relatedBy: .equal, toItem: tickView, attribute: .bottom, multiplier: 1.0, constant: tickViewLabelOffset));
-            
-            // if this is the last view, add another time label and tick for the end 
-            if position == ActionPosition.last {
-                let endTickView = UIView()
-                endTickView.translatesAutoresizingMaskIntoConstraints = false;
-                endTickView.backgroundColor = .black;
-                self.addSubview(endTickView);
-                constraints.append(NSLayoutConstraint(item: endTickView, attribute: .trailing, relatedBy: .equal, toItem: self, attribute: .trailing, multiplier: 1.0, constant: 0));
-                constraints.append(NSLayoutConstraint(item: endTickView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: tickWidth));
-                constraints.append(NSLayoutConstraint(item: endTickView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: tickHeight));
-                constraints.append(NSLayoutConstraint(item: endTickView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: 2));
-                
-                let endTimeLabel = UILabel();
-                endTimeLabel.translatesAutoresizingMaskIntoConstraints = false;
-                endTimeLabel.backgroundColor = .clear;
-                endTimeLabel.textColor = .black;
-                endTimeLabel.text = "\(Int(action.end)) s";
-                endTimeLabel.textAlignment = .right;
-                self.addSubview(endTimeLabel);
-                constraints.append(NSLayoutConstraint(item: endTimeLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: timeLabelHeight));
-                constraints.append(NSLayoutConstraint(item: endTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: timeLabelWidth));
-                constraints.append(NSLayoutConstraint(item: endTimeLabel, attribute: .trailing, relatedBy: .equal, toItem: endTickView, attribute: .leading, multiplier: 1.0, constant: -tickViewToLabelDistance));
-                constraints.append(NSLayoutConstraint(item: endTimeLabel, attribute: .top, relatedBy: .equal, toItem: tickView, attribute: .bottom, multiplier: 1.0, constant: tickViewLabelOffset));
-                
-            }
-            
-            // add the constraints to this view
-            self.addConstraints(constraints);
+            let endTimeLabel = UILabel();
+            endTimeLabel.translatesAutoresizingMaskIntoConstraints = false;
+            endTimeLabel.backgroundColor = .clear;
+            endTimeLabel.textColor = .black;
+            endTimeLabel.text = "\(Int(action.end)) s";
+            endTimeLabel.textAlignment = .right;
+            self.addSubview(endTimeLabel);
+            constraints.append(NSLayoutConstraint(item: endTimeLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: timeLabelHeight));
+            constraints.append(NSLayoutConstraint(item: endTimeLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: timeLabelWidth));
+            constraints.append(NSLayoutConstraint(item: endTimeLabel, attribute: .trailing, relatedBy: .equal, toItem: endTickView, attribute: .leading, multiplier: 1.0, constant: -tickViewToLabelDistance));
+            constraints.append(NSLayoutConstraint(item: endTimeLabel, attribute: .top, relatedBy: .equal, toItem: tickView, attribute: .bottom, multiplier: 1.0, constant: tickViewLabelOffset));
             
         }
+        
+        // add the constraints to this view
+        self.addConstraints(constraints);
+        
+//        }
     }
     
     required init?(coder aDecoder: NSCoder) {

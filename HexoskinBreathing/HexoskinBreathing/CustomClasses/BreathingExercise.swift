@@ -14,11 +14,13 @@ class BreathingExercise: NSObject {
     var currentAction: Int!
     var actions: [breathingAction]!
     var exerciseDuration: Double!
+    var exerciseSets: [(Double, Int)]!;
     
     override init() {
         actions = []; 
         actionCount = actions.count;
         currentAction = -1;
+        exerciseSets = [];
     }
     
     // create an exercise with the specified breath duration and the number of cycles
@@ -46,6 +48,10 @@ class BreathingExercise: NSObject {
     
     // add exercise set to the existing exercise
     func addExerciseSet(duration: Double, cycles: Int) {
+        
+        // store the set
+        exerciseSets.append((duration, cycles));
+        
         var lastEnding: Double = 0;
         if actions.count == 0 {
             lastEnding = 0;
@@ -78,9 +84,9 @@ class BreathingExercise: NSObject {
     func exerciseDescription() -> String {
         var description: String = "";
         var counter = 0;
-        for action in actions {
+        for set in exerciseSets {
             counter += 1;
-            description += "\(counter). \(action.action) for \(action.duration) s\n";
+            description += "\(counter): Inhale \(set.0), Exhale \(set.0) - \(set.1)x\n";
         }
         return description;
     }

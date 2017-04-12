@@ -87,7 +87,7 @@ class ExerciseViewController: DataAnalyzingViewController {
     var currentTimerCounter: Double!
     var counterTimer: Timer!
     var instructionTimer: Timer!
-    let countUpInterval: Double = 0.1;
+    let countUpInterval: Double = 1.0;
     var metronomeTimer: Timer!
     var beginExerciseTimer: Timer!
     var countUpTimer: Timer!;
@@ -149,7 +149,6 @@ class ExerciseViewController: DataAnalyzingViewController {
         imageView.addGestureRecognizer(panRecognizer);
         imageView.isUserInteractionEnabled = true;
         
-        alreadyFinished = false;
         
         if playMetronome {
             beepSound = URL(fileURLWithPath: Bundle.main.path(forResource: "beep", ofType: "wav")!)
@@ -172,6 +171,10 @@ class ExerciseViewController: DataAnalyzingViewController {
     
     override func loadView() {
         super.loadView();
+        
+        // set this value before initializing instruction displays - it otherwise overwrites the value 
+        // given in the initialization function
+        alreadyFinished = false;
     
         // init constraints and text for instruction labels
         initInstructionDisplays();
@@ -217,6 +220,9 @@ class ExerciseViewController: DataAnalyzingViewController {
             if audioPlayer.isPlaying {
                 audioPlayer.stop()
             }
+        }
+        if countUpTimer != nil {
+            countUpTimer.invalidate();
         }
     }
     
@@ -269,7 +275,9 @@ class ExerciseViewController: DataAnalyzingViewController {
                 // since the exercise has already started, the last action must have been a pause
                 let date = Date();
                 startOfCurrentAction = date.timeIntervalSince1970;
-                actionCheckingHelper.checkingState = .deviatingAfterPause;
+                if rotatingClockwise != nil {
+                    actionCheckingHelper.checkingState = .deviatingAfterPause;
+                }
                 actionCheckingHelper.lastCandidateActionStart = startOfCurrentAction;
                 actionCheckingHelper.deviationStartTime = startOfCurrentAction;
                 actionCheckingHelper.deviationStartAngle = angle;
@@ -317,14 +325,19 @@ class ExerciseViewController: DataAnalyzingViewController {
             }
             
             let angleChange = previousAngle - angle;
+//            print("\nPrevious Angle: \(previousAngle) minus Angle: \(angle) equals Angle Change: \(angleChange)");
             
             switch exerciseState {
             case .started:
-                if angleChange < 300 && (angleChange > 0 || angleChange < -300) {
+                if angleChange == 0 {
+                    // if the angle change is zero, do nothing
+                } else if angleChange < 300 && (angleChange > 0 || angleChange < -300) {
                     // clockwise
                     if rotatingClockwise == nil {
                         
                         if actionCheckingHelper.checkingState == .none {
+                            
+                            print("Action checking state is NONE");
                             
                             // this is the beginning state, so initialize the deviation angle
                             actionCheckingHelper.deviationStartAngle = angle;
@@ -389,15 +402,17 @@ class ExerciseViewController: DataAnalyzingViewController {
                                 if actionCheckingHelper.firstActionIsExhale != true {
                                     print("Displaying next instruction even though first action is exhale");
                                     displayNextInstruction();
+                                    actionCheckingHelper.firstActionIsExhale = false;
                                 }
                                 actionCheckingHelper.firstActionIsExhale = false;
                                 
                                 break;
                             case .deviatingAfterPause:
+                                print("Changed: .started cw deviating after pause");
                                 if getDisplayInPosition(position: 0).label.text == Strings.exhale {
                                     // if the current instruction is showing exhale, then we should display the next one
-                                    print("Changed: .started cw deviating after pause");
                                     displayNextInstruction();
+                                    actionCheckingHelper.firstActionIsExhale = false;
                                 }
                                 break;
                             default:
@@ -442,6 +457,7 @@ class ExerciseViewController: DataAnalyzingViewController {
                     if rotatingClockwise == nil {
                         
                         if actionCheckingHelper.checkingState == .none {
+                            print("Action checking state is NONE");
                             
                             // this is the beginning state, so initialize the deviation angle
                             actionCheckingHelper.deviationStartAngle = angle;
@@ -504,12 +520,14 @@ class ExerciseViewController: DataAnalyzingViewController {
                                 actionCheckingHelper.lastCandidateActionStart = actionCheckingHelper.deviationStartTime;
                                 print("Changed: .started ccw - deviating after inhale")
                                 displayNextInstruction();
+                                actionCheckingHelper.firstActionIsExhale = false;
                                 break;
                             case .deviatingAfterPause:
+                                print("Changed: .started ccw - deviating after pause");
                                 if getDisplayInPosition(position: 0).label.text == Strings.inhale {
                                     // if the current instruction is showing inhale, then we should display the next one
-                                    print("Changed: .started ccw - deviating after pause");
                                     displayNextInstruction();
+                                    actionCheckingHelper.firstActionIsExhale = false;
                                 }
                                 break;
                             default:
@@ -578,7 +596,7 @@ class ExerciseViewController: DataAnalyzingViewController {
                     metronomeTimer.invalidate();
                 }
                 countUpTimer.invalidate();
-                countUpTimerLabel.text = "0.0";
+                countUpTimerLabel.text = "0.0 s";
                 countUpCurrentValue = 0.0;
                 
                 // reset the instruction displays
@@ -587,41 +605,39 @@ class ExerciseViewController: DataAnalyzingViewController {
                 break;
             case .started:
                 
-                // determine which action just terminated and save the info
+                let actionEndTime = Date().timeIntervalSince1970;
+                let duration = actionEndTime - startOfCurrentAction;
+                let start = startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing;
+                let end = actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing
+                startOfCurrentAction = actionEndTime;
+                timeOfRingRelease = actionEndTime;
+                
                 if rotatingClockwise == nil {
-                    // enters here if the action is begun and ends in the same position on the ring - do nothing
-                } else {
+                    // enters if there was no movement in the last action
+                    ringDataRaw.append(breathingAction(action: "Pause", duration: duration, start: start, end: end));
                     
-                    let actionEndTime = Date().timeIntervalSince1970;
-                    let duration = actionEndTime - startOfCurrentAction;
-                    let start = startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing;
-                    let end = actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing
-                    startOfCurrentAction = actionEndTime;
-                    timeOfRingRelease = actionEndTime;
+                } else if rotatingClockwise == true {
                     
-                    if rotatingClockwise == true {
-                        
-                        // the last action was clockwise
-                        // save the info for clockwise
-                        ringDataRaw.append(breathingAction(action: "Inhale", duration: duration, start: start, end: end));
-                        
-                    } else if rotatingClockwise == false {
-                        
-                        // the last action was counterclockwise
-                        // save the info for counterclockwise
-                        ringDataRaw.append(breathingAction(action: "Exhale", duration: duration, start: start, end: end));
-
-                    }
+                    // the last action was clockwise
+                    // save the info for clockwise
+                    ringDataRaw.append(breathingAction(action: "Inhale", duration: duration, start: start, end: end));
                     
-                    // check if this action satisfies the current instruction and move to the next if it does
-                    if duration > getDisplayInPosition(position: 0).duration {
-                        // proceed to the next instruction
-                        print("Cancelled: .started");
-                        displayNextInstruction();
-                        
-                    }
+                } else if rotatingClockwise == false {
+                    
+                    // the last action was counterclockwise
+                    // save the info for counterclockwise
+                    ringDataRaw.append(breathingAction(action: "Exhale", duration: duration, start: start, end: end));
                     
                 }
+                
+                // check if this action satisfies the current instruction and move to the next if it does
+                if duration > getDisplayInPosition(position: 0).duration {
+                    // proceed to the next instruction
+                    print("Cancelled: .started");
+                    displayNextInstruction();
+                    actionCheckingHelper.firstActionIsExhale = false;
+                }
+                
                 
                 break;
             default:
@@ -639,11 +655,11 @@ class ExerciseViewController: DataAnalyzingViewController {
         // check if the next instruction is the starting indicator
         if getDisplayInPosition(position: 1).label.text == self.startIndicatorString {
             // start the count up timer
-            self.countUpTimerLabel.text = "0.0";
+            self.countUpTimerLabel.text = "0.0 s";
             countUpTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(self.countUpInterval), repeats: true, block: {
                 _ in
                 self.countUpCurrentValue += self.countUpInterval;
-                let formattedValue = String.init(format: "%.1f", self.countUpCurrentValue);
+                let formattedValue = String.init(format: "%.1f s", self.countUpCurrentValue);
                 self.countUpTimerLabel.text = formattedValue;
             })
         } else if getDisplayInPosition(position: 1).label.text == exerciseCompleteIndicator {
@@ -668,6 +684,13 @@ class ExerciseViewController: DataAnalyzingViewController {
         } else {
             // the exercise is continuing to the next instruction
             // reset the count up label to 0.0
+            countUpTimer.invalidate();
+            countUpTimer = Timer.scheduledTimer(withTimeInterval: TimeInterval(self.countUpInterval), repeats: true, block: {
+                _ in
+                self.countUpCurrentValue += self.countUpInterval;
+                let formattedValue = String.init(format: "%.1f s", self.countUpCurrentValue);
+                self.countUpTimerLabel.text = formattedValue;
+            });
             countUpTimerLabel.text = "0.0";
             countUpCurrentValue = 0.0;
             
@@ -705,13 +728,16 @@ class ExerciseViewController: DataAnalyzingViewController {
             // load up the hidden display with the next instruction and move it into the correct position at the top
             let nextAction = self.exercise.next();
             if self.alreadyFinished == true {
+                print("Already finished in display new");
                 self.getDisplayInPosition(position: 4).label.text = "";
                 self.getDisplayInPosition(position: 4).timerLabel.text = "";
             } else if nextAction.action == Strings.notAnAction {
+                print("Loading complete indicator in display new");
                 self.getDisplayInPosition(position: 4).label.text = self.exerciseCompleteIndicator;
                 self.getDisplayInPosition(position: 4).timerLabel.text = "--";
                 self.alreadyFinished = true;
             } else {
+                print("Loading new instruction in display new");
                 self.getDisplayInPosition(position: 4).label.text = nextAction.action;
                 self.getDisplayInPosition(position: 4).timerLabel.text = String(format: "%.1f s", nextAction.duration);
             }
@@ -762,17 +788,17 @@ class ExerciseViewController: DataAnalyzingViewController {
     func addCountUpTimerLabel() {
         countUpTimerLabel = UILabel();
         countUpTimerLabel.translatesAutoresizingMaskIntoConstraints = false;
-        countUpTimerLabel.font = countUpTimerLabel.font.withSize(20);
+        countUpTimerLabel.font = countUpTimerLabel.font.withSize(30);
         countUpTimerLabel.textColor = .black;
-        countUpTimerLabel.text = "0.0";
+        countUpTimerLabel.text = "0.0 s";
         countUpTimerLabel.textAlignment = .center;
         imageViewContainer.addSubview(countUpTimerLabel);
         
         // add constraints
         var constraints: [NSLayoutConstraint] = [];
-        constraints.append(NSLayoutConstraint(item: countUpTimerLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 100));
-        constraints.append(NSLayoutConstraint(item: countUpTimerLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 30));
-        constraints.append(NSLayoutConstraint(item: countUpTimerLabel, attribute: .centerY, relatedBy: .equal, toItem: imageViewContainer, attribute: .centerY, multiplier: 1.0, constant: 0));
+        constraints.append(NSLayoutConstraint(item: countUpTimerLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 150));
+        constraints.append(NSLayoutConstraint(item: countUpTimerLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 50));
+        constraints.append(NSLayoutConstraint(item: countUpTimerLabel, attribute: .bottom, relatedBy: .equal, toItem: imageViewContainer, attribute: .top, multiplier: 1.0, constant: -10));
         constraints.append(NSLayoutConstraint(item: countUpTimerLabel, attribute: .centerX, relatedBy: .equal, toItem: imageViewContainer, attribute: .centerX, multiplier: 1.0, constant: 0));
         imageViewContainer.addConstraints(constraints);
     }
@@ -978,6 +1004,7 @@ class ExerciseViewController: DataAnalyzingViewController {
                 instructionDisplays[index].label.text = exerciseCompleteIndicator;
                 instructionDisplays[index].timerLabel.text = "--";
                 self.alreadyFinished = true;
+                print("Already finished in initialization");
                 break;
             }
         }
