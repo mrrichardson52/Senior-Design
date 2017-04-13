@@ -8,8 +8,9 @@
 
 import UIKit
 
-class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
+class DataViewingViewController: MRRViewController, UIScrollViewDelegate, UITableViewDelegate, UITableViewDataSource {
     
+    @IBOutlet weak var tableView: UITableView!
     // colors for ui elements
     let sectionTitleColor: UIColor = .black; 
     
@@ -29,12 +30,12 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
     @IBOutlet weak var noDataIndicator: UILabel!
     
     // statistics views
-    @IBOutlet weak var instructionsCompletedTitleLabel: UILabel!
-    @IBOutlet weak var errorTitleLabel: UILabel!
-    @IBOutlet weak var instructionsCompletedLabel: UILabel!
-    @IBOutlet weak var errorLabel: UILabel!
-    @IBOutlet weak var errorContainer: UIView!
-    @IBOutlet weak var instructionsCompletedContainer: UIView!
+//    @IBOutlet weak var instructionsCompletedTitleLabel: UILabel!
+//    @IBOutlet weak var errorTitleLabel: UILabel!
+//    @IBOutlet weak var instructionsCompletedLabel: UILabel!
+//    @IBOutlet weak var errorLabel: UILabel!
+//    @IBOutlet weak var errorContainer: UIView!
+//    @IBOutlet weak var instructionsCompletedContainer: UIView!
     
     // stats
     var percentInstructionsCompleted: Double!
@@ -98,62 +99,65 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         scrollView.delegate = self;
         
         // set the colors for the statistics views
-        instructionsCompletedTitleLabel.textColor = .black;
-        errorTitleLabel.textColor = .black;
-        if percentInstructionsCompleted > 90 {
-            // great, they got above 90%
-            instructionsCompletedLabel.textColor = Constants.avocadoColor;
-            instructionsCompletedContainer.layer.borderColor = Constants.avocadoColor.cgColor;
-        } else if percentInstructionsCompleted > 70 {
-            // ehhh, they did ok
-            instructionsCompletedLabel.textColor = Constants.banana;
-            instructionsCompletedContainer.layer.borderColor = Constants.banana.cgColor;
-        } else {
-            // you're terrible at this - mark it red
-            instructionsCompletedLabel.textColor = Constants.phoneBoothRed;
-            instructionsCompletedContainer.layer.borderColor = Constants.phoneBoothRed.cgColor;
-        }
-        if abs(percentErrorPerInstruction) < 1 {
-            // great, they got above 90%
-            errorLabel.textColor = Constants.avocadoColor;
-            errorContainer.layer.borderColor = Constants.avocadoColor.cgColor;
-        } else if abs(percentErrorPerInstruction) < 5 {
-            // ehhh, they did ok
-            errorLabel.textColor = Constants.banana;
-            errorContainer.layer.borderColor = Constants.banana.cgColor;
-        } else {
-            // you're terrible at this - mark it red
-            errorLabel.textColor = Constants.phoneBoothRed;
-            errorContainer.layer.borderColor = Constants.phoneBoothRed.cgColor;
-        }
+//        instructionsCompletedTitleLabel.textColor = .black;
+//        errorTitleLabel.textColor = .black;
+//        if percentInstructionsCompleted > 90 {
+//            // great, they got above 90%
+//            instructionsCompletedLabel.textColor = Constants.avocadoColor;
+//            instructionsCompletedContainer.layer.borderColor = Constants.avocadoColor.cgColor;
+//        } else if percentInstructionsCompleted > 70 {
+//            // ehhh, they did ok
+//            instructionsCompletedLabel.textColor = Constants.banana;
+//            instructionsCompletedContainer.layer.borderColor = Constants.banana.cgColor;
+//        } else {
+//            // you're terrible at this - mark it red
+//            instructionsCompletedLabel.textColor = Constants.phoneBoothRed;
+//            instructionsCompletedContainer.layer.borderColor = Constants.phoneBoothRed.cgColor;
+//        }
+//        if abs(percentErrorPerInstruction) < 1 {
+//            // great, they got above 90%
+//            errorLabel.textColor = Constants.avocadoColor;
+//            errorContainer.layer.borderColor = Constants.avocadoColor.cgColor;
+//        } else if abs(percentErrorPerInstruction) < 5 {
+//            // ehhh, they did ok
+//            errorLabel.textColor = Constants.banana;
+//            errorContainer.layer.borderColor = Constants.banana.cgColor;
+//        } else {
+//            // you're terrible at this - mark it red
+//            errorLabel.textColor = Constants.phoneBoothRed;
+//            errorContainer.layer.borderColor = Constants.phoneBoothRed.cgColor;
+//        }
+//        
+//        // set the text for the statistics views\
+//        var formattedString = "";
+//        if percentInstructionsCompleted == 100 {
+//            formattedString = String.init(format: "%.0f%%", percentInstructionsCompleted);
+//        } else {
+//            formattedString = String.init(format: "%.1f%%", percentInstructionsCompleted);
+//        }
+//        instructionsCompletedLabel.text = formattedString;
+//        if abs(percentErrorPerInstruction) < 1 {
+//            formattedString = String.init(format: "%0.3f%%", percentErrorPerInstruction);
+//        } else if abs(percentErrorPerInstruction) < 10 {
+//            formattedString = String.init(format: "%1.2f%%", percentErrorPerInstruction);
+//        } else if abs(percentErrorPerInstruction) < 100 {
+//            formattedString = String.init(format: "%2.1f%%", percentErrorPerInstruction);
+//        } else {
+//            formattedString = String.init(format: "%.0f%%", percentErrorPerInstruction);
+//        }
+//        errorLabel.text = formattedString;
+//        
+//        instructionsCompletedContainer.backgroundColor = .clear;
+//        instructionsCompletedContainer.layer.borderWidth = 3;
+//        instructionsCompletedContainer.layer.cornerRadius = 8;
+//        errorContainer.backgroundColor = .clear;
+//        errorContainer.layer.borderWidth = 3;
+//        errorContainer.layer.cornerRadius = 8; 
         
-        // set the text for the statistics views\
-        var formattedString = "";
-        if percentInstructionsCompleted == 100 {
-            formattedString = String.init(format: "%.0f%%", percentInstructionsCompleted);
-        } else {
-            formattedString = String.init(format: "%.1f%%", percentInstructionsCompleted);
-        }
-        instructionsCompletedLabel.text = formattedString;
-        if abs(percentErrorPerInstruction) < 1 {
-            formattedString = String.init(format: "%0.3f%%", percentErrorPerInstruction);
-        } else if abs(percentErrorPerInstruction) < 10 {
-            formattedString = String.init(format: "%1.2f%%", percentErrorPerInstruction);
-        } else if abs(percentErrorPerInstruction) < 100 {
-            formattedString = String.init(format: "%2.1f%%", percentErrorPerInstruction);
-        } else {
-            formattedString = String.init(format: "%.0f%%", percentErrorPerInstruction);
-        }
-        errorLabel.text = formattedString;
-        
-        instructionsCompletedContainer.backgroundColor = .clear;
-        instructionsCompletedContainer.layer.borderWidth = 3;
-        instructionsCompletedContainer.layer.cornerRadius = 8;
-        errorContainer.backgroundColor = .clear;
-        errorContainer.layer.borderWidth = 3;
-        errorContainer.layer.cornerRadius = 8; 
-        
-        
+        // set up the tableview
+        tableView.dataSource = self;
+        tableView.delegate = self;
+        tableView.reloadData(); 
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -358,4 +362,40 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         }
     }
     
+    // MARK: Table View Functions
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "dataViewingCell") as! DataViewingTableViewCell;
+        cell.contentView.backgroundColor = .white;
+        let sectionValues = dataToBeViewed[indexPath.section].1;
+        cell.descriptionLabel.text = sectionValues[indexPath.row].0;
+        
+        // format the value label
+        let value = sectionValues[indexPath.row].1;
+        var formattedString = "";
+        if abs(value) < 1 {
+            formattedString = String.init(format: "%.3f", value);
+        } else if abs(value) < 10 {
+            formattedString = String.init(format: "%.2f", value);
+        } else if abs(value) < 100 {
+            formattedString = String.init(format: "%.1f", value);
+        } else {
+            formattedString = String.init(format: "%.0f", value);
+        }
+        
+        cell.valueLabel.text = formattedString;
+        return cell;
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return dataToBeViewed.count;
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return dataToBeViewed[section].1.count;
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return dataToBeViewed[section].0;
+    }
 }
