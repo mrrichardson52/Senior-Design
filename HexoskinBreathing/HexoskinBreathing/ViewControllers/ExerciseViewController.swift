@@ -266,7 +266,6 @@ class ExerciseViewController: DataAnalyzingViewController {
                 exerciseState = .starting;
                 
                 // show the starting instruction
-                print("Began: .notStarted");
                 displayNextInstruction();
                 
                 break;
@@ -325,7 +324,6 @@ class ExerciseViewController: DataAnalyzingViewController {
             }
             
             let angleChange = previousAngle - angle;
-//            print("\nPrevious Angle: \(previousAngle) minus Angle: \(angle) equals Angle Change: \(angleChange)");
             
             switch exerciseState {
             case .started:
@@ -336,8 +334,6 @@ class ExerciseViewController: DataAnalyzingViewController {
                     if rotatingClockwise == nil {
                         
                         if actionCheckingHelper.checkingState == .none {
-                            
-                            print("Action checking state is NONE");
                             
                             // this is the beginning state, so initialize the deviation angle
                             actionCheckingHelper.deviationStartAngle = angle;
@@ -397,21 +393,20 @@ class ExerciseViewController: DataAnalyzingViewController {
                                 // we are ending the exhale and beginning a new inhale
                                 ringDataRaw.append(breathingAction(action: Strings.exhale, duration: actionCheckingHelper.deviationStartTime - actionCheckingHelper.lastCandidateActionStart, start: actionCheckingHelper.lastCandidateActionStart - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionCheckingHelper.deviationStartTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing));
                                 actionCheckingHelper.lastCandidateActionStart = actionCheckingHelper.deviationStartTime;
-                                print("Changed: .started cw deviating after exhale");
                                 
                                 if actionCheckingHelper.firstActionIsExhale != true {
-                                    print("Displaying next instruction even though first action is exhale");
                                     displayNextInstruction();
+                                    endTimesOfActions.append(actionCheckingHelper.deviationStartTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing)
                                     actionCheckingHelper.firstActionIsExhale = false;
                                 }
                                 actionCheckingHelper.firstActionIsExhale = false;
                                 
                                 break;
                             case .deviatingAfterPause:
-                                print("Changed: .started cw deviating after pause");
                                 if getDisplayInPosition(position: 0).label.text == Strings.exhale {
                                     // if the current instruction is showing exhale, then we should display the next one
                                     displayNextInstruction();
+                                    endTimesOfActions.append(actionCheckingHelper.deviationStartTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing)
                                     actionCheckingHelper.firstActionIsExhale = false;
                                 }
                                 break;
@@ -457,7 +452,6 @@ class ExerciseViewController: DataAnalyzingViewController {
                     if rotatingClockwise == nil {
                         
                         if actionCheckingHelper.checkingState == .none {
-                            print("Action checking state is NONE");
                             
                             // this is the beginning state, so initialize the deviation angle
                             actionCheckingHelper.deviationStartAngle = angle;
@@ -480,7 +474,6 @@ class ExerciseViewController: DataAnalyzingViewController {
                                 actionCheckingHelper.checkingState = .currentActionExhale;
                                 actionCheckingHelper.deviationStartAngle = angle;
                                 actionCheckingHelper.firstActionIsExhale = true;
-                                print("First action marked as exhale");
                             }
                             
                         }
@@ -518,15 +511,15 @@ class ExerciseViewController: DataAnalyzingViewController {
                                 // we are ending the inhale and beginning a new exhale
                                 ringDataRaw.append(breathingAction(action: Strings.inhale, duration: actionCheckingHelper.deviationStartTime - actionCheckingHelper.lastCandidateActionStart, start: actionCheckingHelper.lastCandidateActionStart - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing, end: actionCheckingHelper.deviationStartTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing));
                                 actionCheckingHelper.lastCandidateActionStart = actionCheckingHelper.deviationStartTime;
-                                print("Changed: .started ccw - deviating after inhale")
                                 displayNextInstruction();
+                                endTimesOfActions.append(actionCheckingHelper.deviationStartTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing)
                                 actionCheckingHelper.firstActionIsExhale = false;
                                 break;
                             case .deviatingAfterPause:
-                                print("Changed: .started ccw - deviating after pause");
                                 if getDisplayInPosition(position: 0).label.text == Strings.inhale {
                                     // if the current instruction is showing inhale, then we should display the next one
                                     displayNextInstruction();
+                                    endTimesOfActions.append(actionCheckingHelper.deviationStartTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing);
                                     actionCheckingHelper.firstActionIsExhale = false;
                                 }
                                 break;
@@ -606,8 +599,8 @@ class ExerciseViewController: DataAnalyzingViewController {
             case .started:
                 
                 let actionEndTime = Date().timeIntervalSince1970;
-                let duration = actionEndTime - startOfCurrentAction;
-                let start = startOfCurrentAction - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing;
+                let duration = actionEndTime - actionCheckingHelper.lastCandidateActionStart;
+                let start = actionCheckingHelper.lastCandidateActionStart - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing;
                 let end = actionEndTime - Double(startTimestamp)/256 - Constants.exerciseStartTimeAdjustmentForRing
                 startOfCurrentAction = actionEndTime;
                 timeOfRingRelease = actionEndTime;
@@ -631,10 +624,10 @@ class ExerciseViewController: DataAnalyzingViewController {
                 }
                 
                 // check if this action satisfies the current instruction and move to the next if it does
-                if duration > getDisplayInPosition(position: 0).duration {
+                if countUpCurrentValue >= getDisplayInPosition(position: 0).duration {
                     // proceed to the next instruction
-                    print("Cancelled: .started");
                     displayNextInstruction();
+                    endTimesOfActions.append(end);
                     actionCheckingHelper.firstActionIsExhale = false;
                 }
                 
@@ -677,6 +670,7 @@ class ExerciseViewController: DataAnalyzingViewController {
             
             // store the end time
             endTimestamp = Int(Date().timeIntervalSince1970*256);
+//            endTimesOfActions.append(Double(endTimestamp)/256 - Double(startTimestamp)/256);
             
             // delay for 1 seconds before adding the next button - this allows for the animations to complete
             Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(ExerciseViewController.addNextButton), userInfo: nil, repeats: false);
@@ -728,16 +722,13 @@ class ExerciseViewController: DataAnalyzingViewController {
             // load up the hidden display with the next instruction and move it into the correct position at the top
             let nextAction = self.exercise.next();
             if self.alreadyFinished == true {
-                print("Already finished in display new");
                 self.getDisplayInPosition(position: 4).label.text = "";
                 self.getDisplayInPosition(position: 4).timerLabel.text = "";
             } else if nextAction.action == Strings.notAnAction {
-                print("Loading complete indicator in display new");
                 self.getDisplayInPosition(position: 4).label.text = self.exerciseCompleteIndicator;
                 self.getDisplayInPosition(position: 4).timerLabel.text = "--";
                 self.alreadyFinished = true;
             } else {
-                print("Loading new instruction in display new");
                 self.getDisplayInPosition(position: 4).label.text = nextAction.action;
                 self.getDisplayInPosition(position: 4).timerLabel.text = String(format: "%.1f s", nextAction.duration);
             }
@@ -870,7 +861,6 @@ class ExerciseViewController: DataAnalyzingViewController {
         self.startOfCurrentAction = Date().timeIntervalSince1970;
         self.startTimestamp = Int(self.startOfCurrentAction*256);
         displayNextInstruction();
-        print("Begin Exercise: Display next instruction");
     }
     
     
@@ -1004,7 +994,6 @@ class ExerciseViewController: DataAnalyzingViewController {
                 instructionDisplays[index].label.text = exerciseCompleteIndicator;
                 instructionDisplays[index].timerLabel.text = "--";
                 self.alreadyFinished = true;
-                print("Already finished in initialization");
                 break;
             }
         }

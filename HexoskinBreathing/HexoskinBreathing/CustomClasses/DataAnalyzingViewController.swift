@@ -38,6 +38,11 @@ class DataAnalyzingViewController: MRRViewController {
     var hexoskinDataGraph: [breathingAction]!
     var exerciseDataGraph: [breathingAction]!
     
+    // grouping data
+    var endTimesOfActions: [Double] = [];
+    var ringDataGroupings: [(Int, [Int])] = [];
+    var hexoskinDataGroupings: [(Int, [Int])] = [];
+    
     // variables for the printed report
     var ringDataReport: [breathingAction]!
     var hexoskinDataReport: [breathingAction]!
@@ -47,10 +52,8 @@ class DataAnalyzingViewController: MRRViewController {
     var hexoskinPercentageScore: Double!
     var percentCompletedInstructionsHexoskin: Double!
     var percentCompletedInstructionsRing: Double!
-    var ringAverageError: Double!
-    var ringErrors: [(Int, Double)]!
-    var hexoskinAverageError: Double!
-    var hexoskinErrors: [(Int, Double)]!
+    var ringErrorResult: ErrorResult!
+    var hexoskinErrorResult: ErrorResult!;
     var hexRingComparison: Double!
     var offsetHexoskinPercentageScore: Double!
     var offsetHexoskinErrors: [(Int, Double)]!
@@ -93,7 +96,6 @@ class DataAnalyzingViewController: MRRViewController {
         if self.analyzingRing == true {
             self.ringDataBase = self.ringDataRaw;
         }
-        self.exerciseDataGraph = exercise.actions;
         
         // At this point, we have:
         // 1: exerciseDataGraph - stores target exercise information
@@ -104,10 +106,6 @@ class DataAnalyzingViewController: MRRViewController {
         if self.analyzingHexoskin == true {
             adjustHexoskinDataStartTimes();
         }
-        
-        // make sure all of the data sources have the same start and end times to make graphing simpler
-        // stores changes to the Graph data member variables so that the base members are not changed
-        self.equalizeGraphDataSources();
         
         // compare the hexoskin and ring data
         if analyzingRing && analyzingHexoskin {
@@ -129,50 +127,82 @@ class DataAnalyzingViewController: MRRViewController {
         
         // group Hexoskin data by grouping really short actions with it's surrounding actions
         if analyzingHexoskin == true {
-            let groupedHexoskinData = groupHexoskinData();
             
-            print("Hexoskin Data: ");
-            for action in hexoskinDataBase {
-                print("\(action.action) for \(action.duration) start: \(action.start) end: \(action.end)");
-            }
-            
-            print("\nGroup Data:");
-            for group in groupedHexoskinData {
-                var groupString = "Action \(group.0):";
-                for instruction in group.1 {
-                    groupString += " \(instruction)"
-                }
-                print(groupString);
-            }
+            // group the hexoskin data
+            hexoskinDataGroupings = groupHexoskinData();
             
             // Percent of instructions completed analysis
-            percentCompletedInstructionsHexoskin = calculatePercentageOfInstructionsCompleted(exerciseActions: exercise.actions, userActions: hexoskinDataBase, groupings: groupedHexoskinData);
+            percentCompletedInstructionsHexoskin = calculatePercentageOfInstructionsCompleted(exerciseActions: exercise.actions, userActions: hexoskinDataBase, groupings: hexoskinDataGroupings);
             
             // Find the average error on all attempted instructions
-            let hexoskinResult = self.calculatePercentErrorPerAttemptedInstruction(userActions: hexoskinDataBase, exerciseActions: exercise.actions, groupings: groupedHexoskinData);
-            hexoskinAverageError = hexoskinResult.0;
-            hexoskinErrors = hexoskinResult.1;
+            hexoskinErrorResult = self.calculateErrorInfo(userActions: hexoskinDataBase, exerciseActions: exercise.actions, groupings: hexoskinDataGroupings);
             
-            print("Percent of instructions completed: \(percentCompletedInstructionsHexoskin)");
-            print("Average error per attempted instruction: \(hexoskinAverageError)");
-            print("Errors on instructions:");
-            for error in hexoskinErrors {
-                print("Instruction \(error.0): \(error.1)");
-            }
+        }
+        
+        if analyzingRing == true {
+
+            // group the ring data
+            groupRingData();
             
+            // Percent of instructions completed analysis
+            percentCompletedInstructionsRing = calculatePercentageOfInstructionsCompleted(exerciseActions: exercise.actions, userActions: ringDataBase, groupings: ringDataGroupings);
+            
+            // Find the average error on all attempted instructions
+            ringErrorResult = self.calculateErrorInfo(userActions: ringDataBase, exerciseActions: exercise.actions, groupings: ringDataGroupings);
+
         }
         
 
         
+
+        // make sure all of the data sources have the same start and end times to make graphing simpler
+        // stores changes to the Graph data member variables so that the base members are not changed
+        self.equalizeGraphDataSources();
         
         // print the report here
-//        printReport();
+        printReport();
+        
+        // load data into a container to be sent to the data viewer
+        var dataToBeViewed: [(String, [(String, Double)])] = [];
+        if analyzingHexoskin == true {
+            dataToBeViewed.append(("Hexoskin Data", [("Instructions completed (%)", percentCompletedInstructionsHexoskin),
+                                                     ("Error per instruction (s)", hexoskinErrorResult.averageError),
+                                                     ("Error per instruction (%)", hexoskinErrorResult.averagePercentError),
+                                                     ("Instructions undershot", hexoskinErrorResult.undershootInstructions),
+                                                     ("Instructions undershot (%)", hexoskinErrorResult.percentUndershootInstructions),
+                                                     ("Average undershoot (s)", hexoskinErrorResult.averageUndershootError),
+                                                     ("Average undershoot (%)", hexoskinErrorResult.averagePercentUndershootError),
+                                                     ("Instructions overshot", hexoskinErrorResult.overshootInstructions),
+                                                     ("Instructions overshot (%)", hexoskinErrorResult.percentOvershootInstructions),
+                                                     ("Average overshoot (s)", hexoskinErrorResult.averageOvershootError),
+                                                     ("Average overshoot (%)", hexoskinErrorResult.averagePercentOvershootError)]));
+        }
+        
+        if analyzingRing == true {
+            dataToBeViewed.append(("Ring Data", [("Instructions completed (%)", percentCompletedInstructionsRing),
+                                                     ("Error per instruction (s)", ringErrorResult.averageError),
+                                                     ("Error per instruction (%)", ringErrorResult.averagePercentError),
+                                                     ("Instructions undershot", hexoskinErrorResult.undershootInstructions),
+                                                     ("Instructions undershot (%)", hexoskinErrorResult.percentUndershootInstructions),
+                                                     ("Average undershoot (s)", ringErrorResult.averageUndershootError),
+                                                     ("Average undershoot (%)", ringErrorResult.averagePercentUndershootError),
+                                                     ("Instructions overshot", hexoskinErrorResult.overshootInstructions),
+                                                     ("Instructions overshot (%)", hexoskinErrorResult.percentOvershootInstructions),
+                                                     ("Average overshoot (s)", ringErrorResult.averageOvershootError),
+                                                     ("Average overshoot (%)", ringErrorResult.averagePercentOvershootError)]));
+        }
+        
+        if analyzingHexoskin == true {
+            dataToBeViewed.append(("Longest Breaths", [("Inhale", longestInhaleHexoskin),
+                                                       ("Exhale", longestExhaleHexoskin)]));
+        }
         
         // create data viewer view controller and assign the data to the controller
         // consolidate the data and prepare to send it to the next controller where
         // the data will be displayed in a table
         let storyboard = UIStoryboard(name: "Main", bundle: nil);
         let viewController = storyboard.instantiateViewController(withIdentifier: "dataViewController") as? DataViewingViewController;
+        viewController?.dataToBeViewed = dataToBeViewed;
         viewController?.baseDuration = self.exercise.actions[0].duration; 
         viewController?.exerciseData = self.exerciseDataGraph;
         viewController?.hexoskinData = self.hexoskinDataGraph;
@@ -180,6 +210,16 @@ class DataAnalyzingViewController: MRRViewController {
         viewController?.displayHexData = self.analyzingHexoskin;
         viewController?.displayRingData = self.analyzingRing;
         viewController?.exerciseDuration = self.exercise.exerciseDuration;
+        if analyzingHexoskin == true {
+            viewController?.percentErrorPerInstruction = hexoskinErrorResult.averageError;
+            viewController?.percentInstructionsCompleted = percentCompletedInstructionsHexoskin;
+        } else if analyzingRing == true {
+            viewController?.percentErrorPerInstruction = ringErrorResult.averageError;
+            viewController?.percentInstructionsCompleted = percentCompletedInstructionsRing;
+        } else {
+            viewController?.percentErrorPerInstruction = 0.0;
+            viewController?.percentInstructionsCompleted = 0.0;
+        }
         self.navigationController?.pushViewController(viewController!, animated: true);
         
     }
@@ -258,32 +298,176 @@ class DataAnalyzingViewController: MRRViewController {
         return groupings;
     }
     
+    func groupRingData() {
+        
+        // iterate through the action ends times
+        var ringDataIndex = 0;
+        var groupNumber = 0;
+        var actionsInGroup: [Int] = [];
+        var endReached = false;
+        
+        for endTime in endTimesOfActions {
+            endReached = false;
+            // find all of the ring actions that start before the endtime
+            while endReached == false {
+                
+                if ringDataIndex < ringDataBase.count {
+                    
+                    // check to see if the ring action ends after the endtime
+                    if ringDataBase[ringDataIndex].end > endTime {
+                        // store the group and increment the group
+                        ringDataGroupings.append((groupNumber, actionsInGroup));
+                        actionsInGroup = [];
+                        groupNumber += 1;
+                        endReached = true;
+                    }
+                    
+                    // add the current action to the group
+                    actionsInGroup.append(ringDataIndex);
+                    
+                } else {
+                    
+                    // we've reached the end of the ring data
+                    endReached = true;
+                    
+                }
+                
+                // move to the next ring action
+                ringDataIndex += 1;
+                
+            }
+            
+            if ringDataIndex >= ringDataBase.count {
+                break;
+            }
+        }
+        
+        // store the last group
+        ringDataGroupings.append((groupNumber, actionsInGroup));
+        
+    }
+    
     func printReport() {
         print("------------------------------------------------------\n")
+        
         // indicate what type of trial the user did
         if analyzingRing == true && analyzingHexoskin == true {
-            print("Exercise Report: Using ring interface with Hexoskin");
+            print("EXERCISE REPORT: USING RING INTERFACE AND HEXOSKIN");
         } else if analyzingRing == true {
-            print("Exercise Report: Using ring interface only");
+            print("EXERCISE REPORT: USING RING INTERFACE");
         } else if analyzingHexoskin == true {
-            print("Exercise Report: Using hexoskin only");
+            print("EXERCISE REPORT: USING HEXOSKIN");
         } else {
-            print("Exercise Report: Analyzing no data")
+            print("EXERCISE REPORT: USING NOTHING")
         }
         
         // print out the time stamps for this exercise and record ID
         if analyzingHexoskin == true {
             print("\nRecord ID: \(recordID)");
         }
-        print("Start time: \(startTimestamp) (In Hexoskin Timestamp Format)");
+        print("\nStart time: \(startTimestamp) (In Hexoskin Timestamp Format)");
         print("End time: \(endTimestamp) (In Hexoskin Timestamp Format)");
         
+        // Section that prints out all of the calculated/useful value
+        // print out the Hexoskin values
+        if analyzingHexoskin == true {
+            print("\nHEXOSKIN CALCULATED VALUES:");
+            
+            // print out completed instructions
+            print("Percent of instructions completed: \(percentCompletedInstructionsHexoskin!)");
+            
+            // print out average error
+            print("Average error per attempted instruction: \(hexoskinErrorResult.averageError!) seconds");
+            print("Average percent error per attempted instruction: \(hexoskinErrorResult.averagePercentError!)");
+            
+            // print out average undershoot
+            print("Average undershoot: \(hexoskinErrorResult.averageUndershootError!) seconds");
+            print("Average percent undershoot error: \(hexoskinErrorResult.averagePercentUndershootError!)");
+        
+            // print out average overshoot
+            print("Average overshoot: \(hexoskinErrorResult.averageOvershootError!) seconds");
+            print("Average percent overshoot error: \(hexoskinErrorResult.averagePercentOvershootError!)");
+            
+        }
+        
+        // print out the Ring values
+        if analyzingRing == true {
+            print("\nRING CALCULATED VALUES:");
+            
+            // print out completed instructions
+            print("Percent of instructions completed: \(percentCompletedInstructionsRing!)");
+            
+            // print out average error
+            print("Average error per attempted instruction: \(ringErrorResult.averageError!) seconds");
+            print("Average percent error per attempted instruction: \(ringErrorResult.averagePercentError!)");
+            
+            // print out average undershoot
+            print("Average undershoot: \(ringErrorResult.averageUndershootError!) seconds");
+            print("Average percent undershoot error: \(ringErrorResult.averagePercentUndershootError!)");
+            
+            // print out average overshoot
+            print("Average overshoot: \(ringErrorResult.averageOvershootError!) seconds");
+            print("Average percent overshoot error: \(ringErrorResult.averagePercentOvershootError!)");
+            
+        }
+        
+        
+        // print out the comparison information between ring and hexoskin
+        if hexRingComparison != nil {
+            print("\nHEXOSKIN/RING COMPARISON:");
+            print("Percent of time that ring and hexoskin indicate the user is doing the same action: \(hexRingComparison!)");
+        }
+        
+        // print out longest breaths recorded by hexoskin
+        if analyzingHexoskin == true {
+            print("\nHEXOSKIN LONGEST BREATHS:");
+            print("Inhale: \(longestInhaleHexoskin!)");
+            print("Exhale: \(longestExhaleHexoskin!)");
+        }
+        
+        
+        // Section that prints out the error information
+        var counter = 0;
+        if analyzingHexoskin == true {
+            print("\nHEXOSKIN ERROR DATA:");
+            print("\nErrors in seconds:");
+            for error in hexoskinErrorResult.errors {
+                counter += 1;
+                print("\(counter). \(error)");
+            }
+            print("\nPercent errors:");
+            counter = 0;
+            for error in hexoskinErrorResult.percentErrors {
+                counter += 1;
+                print("\(counter). \(error)");
+            }
+        }
+        
+        counter = 0;
+        if analyzingRing == true {
+            print("\nRing ERROR DATA:");
+            print("\nErrors in seconds:");
+            for error in ringErrorResult.errors {
+                counter += 1;
+                print("\(counter). \(error)");
+            }
+            print("\nPercent errors:");
+            counter = 0;
+            for error in ringErrorResult.percentErrors {
+                counter += 1;
+                print("\(counter). \(error)");
+            }
+        }
+        
+        
+        // Section that prints out all of the containers of breathing actions
+        print("\nBREATHING DATA:");
         
         // print the target exercise
         print("\nTarget exercise data: ")
-        var counter: Int = 1;
+        counter = 1;
         for action in exercise.actions {
-            print("\(counter). \(action.action) for \(action.duration) s start: \(action.start) end: \(action.end)");
+            print("\(counter). \(action.action) for \(action.duration) s start: \(action.start) end: \(action.end) status: \(action.status)");
             counter += 1;
         }
         
@@ -291,7 +475,7 @@ class DataAnalyzingViewController: MRRViewController {
         counter = 1;
         if analyzingHexoskin == true {
             print("\nHexoskin breathing data: ");
-            if hexoskinDataReport.count == 0 {
+            if hexoskinDataBase.count == 0 {
                 print("ERROR: Hexoskin data is empty.");
             } else {
                 for action in hexoskinDataReport {
@@ -301,29 +485,11 @@ class DataAnalyzingViewController: MRRViewController {
             }
         }
         
-        // print the exercise results based on hexoskin
-        counter = 1;
-        if analyzingHexoskin == true {
-            print("\nExercise results based on hexoskin:");
-            if exerciseResultsBasedOnHexoskin.count == 0 {
-                print("ERROR: Exercise results based on hexoskin are empty.");
-            } else {
-                for action in exerciseResultsBasedOnHexoskin {
-                    if action.metByInstruction != -1 {
-                        print("Exercise instruction #\(counter) was completed by hexoskin action #\(action.metByInstruction+1)");
-                    } else {
-                        print("Exercise instruction #\(counter) was not completed based on hexoskin data");
-                    }
-                    counter += 1;
-                }
-            }
-        }
-        
         // print the ring data
         counter = 1;
         if analyzingRing == true {
             print("\nRing breathing data: ");
-            if ringDataReport.count == 0 {
+            if ringDataBase.count == 0 {
                 print("ERROR: Ring data is empty.");
             } else {
                 for action in ringDataReport {
@@ -333,74 +499,29 @@ class DataAnalyzingViewController: MRRViewController {
             }
         }
         
-        // print the exercise results based on ring
-        counter = 1;
-        if analyzingRing == true {
-            print("\nExercise results based on ring:");
-            if exerciseResultsBasedOnRing.count == 0 {
-                print("ERROR: Exercise results based on ring are empty.");
-            } else {
-                for action in exerciseResultsBasedOnRing {
-                    if action.metByInstruction != -1 {
-                        print("Exercise instruction #\(counter) was completed by ring action #\(action.metByInstruction+1)");
-                    } else {
-                        print("Exercise instruction #\(counter) was not completed based on ring data");
-                    }
-                    counter += 1;
+        // print the grouping data used for analysis
+        print("\nGROUPING DATA USED FOR ANALYSIS:");
+        
+        if analyzingHexoskin == true {
+            print("\nHexoskin Group Data:");
+            for group in hexoskinDataGroupings {
+                var groupString = "Action \(group.0):";
+                for instruction in group.1 {
+                    groupString += " \(instruction)"
                 }
+                print(groupString);
             }
         }
         
-        // Print the percentage scores
-        print("\nPercentage Scores: ");
-        print("* The percent of time that the user was performing the correct instruction during the exercise.");
-        print("* This score assumes the target exercise start and end times as the basis for calculation.");
-        if hexoskinPercentageScore != nil {
-            print("Hexoskin - \(hexoskinPercentageScore!)%");
-        }
-        if ringPercentageScore != nil {
-            print("Ring - \(ringPercentageScore!)%");
-        }
-        
-        // print the percent of instructions completed
-        print("\nPercent of target instructions completed according to data source: ");
-        if percentCompletedInstructionsHexoskin != nil {
-            print("Hexoskin - \(percentCompletedInstructionsHexoskin!)%");
-        }
-        if percentCompletedInstructionsRing != nil {
-            print("Ring - \(percentCompletedInstructionsRing!)%");
-        }
-        
-        // print out error information 
-        print("\nError results:");
-        print("* The error for each instruction is found by calculating the percent difference between each");
-        print("* completed instruction and the user action that completed it.");
-        if analyzingHexoskin == true {
-            print("Hexoskin Errors: ");
-            for error in hexoskinErrors {
-                print("\(error.1)% in exercise instruction #\(error.0)");
-            }
-            print("Average error per completed instruction: \(hexoskinAverageError!)");
-        }
         if analyzingRing == true {
-            print("Ring Errors:");
-            for error in ringErrors {
-                print("\(error.1)% in exercise instruction #\(error.0)");
+            print("\nRing Group Data:");
+            for group in ringDataGroupings {
+                var groupString = "Action \(group.0):";
+                for instruction in group.1 {
+                    groupString += " \(instruction)"
+                }
+                print(groupString);
             }
-            print("Average error per completed instruction: \(ringAverageError!)");
-        }
-        
-        // print out the comparison information between ring and hexoskin
-        if hexRingComparison != nil {
-            print("\nHexoskin/Ring Comparison:");
-            print("Percent of time that ring and hexoskin indicate the user is doing the same action: \(hexRingComparison!)");
-        }
-        
-        // print out longest breaths recorded by hexoskin
-        if analyzingHexoskin == true {
-            print("\nLongest breaths recorded by Hexoskin:");
-            print("Inhale: \(longestInhaleHexoskin!)");
-            print("Exhale: \(longestExhaleHexoskin!)");
         }
         
         print("\nEnd of Exercise Report");
@@ -519,11 +640,11 @@ class DataAnalyzingViewController: MRRViewController {
 
     }
     
-    func calculatePercentErrorPerAttemptedInstruction(userActions: [breathingAction], exerciseActions: [breathingAction], groupings: [(Int, [Int])]) -> (Double, [(Int, Double)]) {
+    func calculateErrorInfo(userActions: [breathingAction], exerciseActions: [breathingAction], groupings: [(Int, [Int])]) -> ErrorResult {
         
         // variables that will store error information as we iterate through and compare
-        var errors: [(Int, Double)] = [];
-        var cumulativeError: Double = 0.0;
+        var percentErrors: [Double] = [];
+        var errors: [Double] = [];
         
         // store the count of the smaller array (groupings and exercise actions)
         let count = min(exerciseActions.count, groupings.count);
@@ -538,17 +659,22 @@ class DataAnalyzingViewController: MRRViewController {
             }
             
             // using the longest duration for a correct instruction, find the error
-            let percentError = 100*(longestDuration - exerciseActions[index].duration) / exerciseActions[index].duration;
-            errors.append((index, percentError));
-            cumulativeError += percentError;
+            let error = longestDuration - exerciseActions[index].duration;
+            let percentError = 100*(error) / exerciseActions[index].duration;
+            errors.append(error);
+            percentErrors.append(percentError);
             
         }
         
+        var errorResult = ErrorResult(percentErrors: percentErrors, errors: errors);
+        
         if count == 0 {
-            return (0, []);
+            return errorResult;
+        } else {
+            errorResult.analyzeErrors();
         }
         
-        return (cumulativeError/Double(count), errors);
+        return errorResult;
         
     }
     
@@ -574,6 +700,12 @@ class DataAnalyzingViewController: MRRViewController {
             if longestDuration > exerciseActions[index].duration - 2 {
                 // the action is satisfied - increment the completed counter
                 completed += 1;
+                
+                // mark the target action as completed
+                exercise.actions[index].status = Strings.completed;
+            } else {
+                // the longest action does not satisfy the target action - mark target action as not completed
+                exercise.actions[index].status = Strings.notCompleted;
             }
             
         }
@@ -982,6 +1114,7 @@ class DataAnalyzingViewController: MRRViewController {
         // copy the base data into the graph data arrays and then modify them in this function
         ringDataGraph = ringDataBase;
         hexoskinDataGraph = hexoskinDataBase;
+        exerciseDataGraph = exercise.actions;
         
         // verify that the ringDataGraph array is not empty
         if analyzingRing && ringDataGraph.count == 0 {

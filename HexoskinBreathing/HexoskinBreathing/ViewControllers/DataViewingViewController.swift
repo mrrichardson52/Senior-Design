@@ -28,6 +28,18 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
     @IBOutlet weak var exhaleIndicator: UILabel!
     @IBOutlet weak var noDataIndicator: UILabel!
     
+    // statistics views
+    @IBOutlet weak var instructionsCompletedTitleLabel: UILabel!
+    @IBOutlet weak var errorTitleLabel: UILabel!
+    @IBOutlet weak var instructionsCompletedLabel: UILabel!
+    @IBOutlet weak var errorLabel: UILabel!
+    @IBOutlet weak var errorContainer: UIView!
+    @IBOutlet weak var instructionsCompletedContainer: UIView!
+    
+    // stats
+    var percentInstructionsCompleted: Double!
+    var percentErrorPerInstruction: Double!
+    
     var caratLabels: [UILabel]!
 
     // section views within scroll view
@@ -53,6 +65,9 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
     
     // original exercise duration
     var exerciseDuration: Double = 0;
+    
+    // data used to load up the tableview
+    var dataToBeViewed: [(String, [(String, Double)])] = []; 
     
     override func viewDidLoad() {
         super.viewDidLoad()        
@@ -81,6 +96,63 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         contentView.backgroundColor = Constants.backgroundColor;
         scrollParentView.backgroundColor = Constants.backgroundColor;
         scrollView.delegate = self;
+        
+        // set the colors for the statistics views
+        instructionsCompletedTitleLabel.textColor = .black;
+        errorTitleLabel.textColor = .black;
+        if percentInstructionsCompleted > 90 {
+            // great, they got above 90%
+            instructionsCompletedLabel.textColor = Constants.avocadoColor;
+            instructionsCompletedContainer.layer.borderColor = Constants.avocadoColor.cgColor;
+        } else if percentInstructionsCompleted > 70 {
+            // ehhh, they did ok
+            instructionsCompletedLabel.textColor = Constants.banana;
+            instructionsCompletedContainer.layer.borderColor = Constants.banana.cgColor;
+        } else {
+            // you're terrible at this - mark it red
+            instructionsCompletedLabel.textColor = Constants.phoneBoothRed;
+            instructionsCompletedContainer.layer.borderColor = Constants.phoneBoothRed.cgColor;
+        }
+        if abs(percentErrorPerInstruction) < 1 {
+            // great, they got above 90%
+            errorLabel.textColor = Constants.avocadoColor;
+            errorContainer.layer.borderColor = Constants.avocadoColor.cgColor;
+        } else if abs(percentErrorPerInstruction) < 5 {
+            // ehhh, they did ok
+            errorLabel.textColor = Constants.banana;
+            errorContainer.layer.borderColor = Constants.banana.cgColor;
+        } else {
+            // you're terrible at this - mark it red
+            errorLabel.textColor = Constants.phoneBoothRed;
+            errorContainer.layer.borderColor = Constants.phoneBoothRed.cgColor;
+        }
+        
+        // set the text for the statistics views\
+        var formattedString = "";
+        if percentInstructionsCompleted == 100 {
+            formattedString = String.init(format: "%.0f%%", percentInstructionsCompleted);
+        } else {
+            formattedString = String.init(format: "%.1f%%", percentInstructionsCompleted);
+        }
+        instructionsCompletedLabel.text = formattedString;
+        if abs(percentErrorPerInstruction) < 1 {
+            formattedString = String.init(format: "%0.3f%%", percentErrorPerInstruction);
+        } else if abs(percentErrorPerInstruction) < 10 {
+            formattedString = String.init(format: "%1.2f%%", percentErrorPerInstruction);
+        } else if abs(percentErrorPerInstruction) < 100 {
+            formattedString = String.init(format: "%2.1f%%", percentErrorPerInstruction);
+        } else {
+            formattedString = String.init(format: "%.0f%%", percentErrorPerInstruction);
+        }
+        errorLabel.text = formattedString;
+        
+        instructionsCompletedContainer.backgroundColor = .clear;
+        instructionsCompletedContainer.layer.borderWidth = 3;
+        instructionsCompletedContainer.layer.cornerRadius = 8;
+        errorContainer.backgroundColor = .clear;
+        errorContainer.layer.borderWidth = 3;
+        errorContainer.layer.cornerRadius = 8; 
+        
         
     }
     
@@ -129,12 +201,12 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         titleLabel.text = title;
         titleLabel.textAlignment = .center;
         titleLabel.textColor = sectionTitleColor;
-        titleLabel.font = titleLabel.font.withSize(25);
+        titleLabel.font = titleLabel.font.withSize(20);
         scrollParentView.addSubview(titleLabel);
         
         // constrain the title
         let titleTopConstraint = NSLayoutConstraint(item: titleLabel, attribute: .top, relatedBy: .equal, toItem: sectionViews[section], attribute: .top, multiplier: 1.0, constant: 0);
-        let titleHeightConstraint = NSLayoutConstraint(item: titleLabel, attribute: .height, relatedBy: .equal, toItem: sectionViews[section], attribute: .height, multiplier: 0.4, constant: 0);
+        let titleHeightConstraint = NSLayoutConstraint(item: titleLabel, attribute: .height, relatedBy: .equal, toItem: sectionViews[section], attribute: .height, multiplier: 0.3, constant: 0);
         let titleWidthConstraint = NSLayoutConstraint(item: titleLabel, attribute: .width, relatedBy: .equal, toItem: scrollParentView, attribute: .width, multiplier: 1.0, constant: 0);
         let titleHorizontalConstraint = NSLayoutConstraint(item: titleLabel, attribute: .centerX, relatedBy: .equal, toItem: scrollParentView, attribute: .centerX, multiplier: 1.0, constant: 0);
         scrollParentView.addConstraints([titleTopConstraint, titleHorizontalConstraint, titleWidthConstraint, titleHeightConstraint]);
@@ -159,7 +231,12 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
             } else {
                 position = ActionPosition.middle;
             }
-            let view = actionResultView(action: action, baseDuration: baseDuration, position: position);
+            
+            var showTimestamps: Bool = false;
+            if section == 0 {
+                showTimestamps = true;
+            }
+            let view = actionResultView(action: action, baseDuration: baseDuration, position: position, showTimestamps: showTimestamps);
             sectionViews[section].addSubview(view);
             
             // constrain the view
