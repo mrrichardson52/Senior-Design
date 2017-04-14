@@ -102,9 +102,39 @@ class DataAnalyzingViewController: MRRViewController {
         // 2: hexoskinDataBase - hexoskin data that has not been adjusted
         // 3: ringDataBase - the ring data that should be accurate
         
+        
+        // print the hexoskin data
+        var counter = 1;
+        if analyzingHexoskin == true {
+            print("\nHexoskin breathing data before adjustment: ");
+            if hexoskinDataBase.count == 0 {
+                print("ERROR: Hexoskin data is empty.");
+            } else {
+                for action in hexoskinDataBase {
+                    print("\(counter). \(action.action) for \(action.duration) s start: \(action.start) end: \(action.end)");
+                    counter += 1;
+                }
+            }
+        }
+        
         // Now, we should try to line up all of the data
         if self.analyzingHexoskin == true {
             adjustHexoskinDataStartTimes();
+        }
+        
+        
+        // print the hexoskin data
+        counter = 1;
+        if analyzingHexoskin == true {
+            print("\nHexoskin breathing data after adjustment: ");
+            if hexoskinDataBase.count == 0 {
+                print("ERROR: Hexoskin data is empty.");
+            } else {
+                for action in hexoskinDataBase {
+                    print("\(counter). \(action.action) for \(action.duration) s start: \(action.start) end: \(action.end)");
+                    counter += 1;
+                }
+            }
         }
         
         // compare the hexoskin and ring data
@@ -132,7 +162,7 @@ class DataAnalyzingViewController: MRRViewController {
             hexoskinDataGroupings = groupHexoskinData();
             
             // Percent of instructions completed analysis
-            percentCompletedInstructionsHexoskin = calculatePercentageOfInstructionsCompleted(exerciseActions: exercise.actions, userActions: hexoskinDataBase, groupings: hexoskinDataGroupings);
+            percentCompletedInstructionsHexoskin = calculatePercentageOfInstructionsCompleted(exerciseActions: exercise.actions, userActions: hexoskinDataBase, groupings: hexoskinDataGroupings, markExercise: true);
             
             // Find the average error on all attempted instructions
             hexoskinErrorResult = self.calculateErrorInfo(userActions: hexoskinDataBase, exerciseActions: exercise.actions, groupings: hexoskinDataGroupings);
@@ -145,7 +175,11 @@ class DataAnalyzingViewController: MRRViewController {
             groupRingData();
             
             // Percent of instructions completed analysis
-            percentCompletedInstructionsRing = calculatePercentageOfInstructionsCompleted(exerciseActions: exercise.actions, userActions: ringDataBase, groupings: ringDataGroupings);
+            if analyzingHexoskin == true {
+                percentCompletedInstructionsRing = calculatePercentageOfInstructionsCompleted(exerciseActions: exercise.actions, userActions: ringDataBase, groupings: ringDataGroupings, markExercise: false);
+            } else {
+                percentCompletedInstructionsRing = calculatePercentageOfInstructionsCompleted(exerciseActions: exercise.actions, userActions: ringDataBase, groupings: ringDataGroupings, markExercise: true);
+            }
             
             // Find the average error on all attempted instructions
             ringErrorResult = self.calculateErrorInfo(userActions: ringDataBase, exerciseActions: exercise.actions, groupings: ringDataGroupings);
@@ -182,12 +216,12 @@ class DataAnalyzingViewController: MRRViewController {
             dataToBeViewed.append(("Ring Data", [("Instructions completed (%)", percentCompletedInstructionsRing),
                                                      ("Error per instruction (s)", ringErrorResult.averageError),
                                                      ("Error per instruction (%)", ringErrorResult.averagePercentError),
-                                                     ("Instructions undershot", hexoskinErrorResult.undershootInstructions),
-                                                     ("Instructions undershot (%)", hexoskinErrorResult.percentUndershootInstructions),
+                                                     ("Instructions undershot", ringErrorResult.undershootInstructions),
+                                                     ("Instructions undershot (%)", ringErrorResult.percentUndershootInstructions),
                                                      ("Average undershoot (s)", ringErrorResult.averageUndershootError),
                                                      ("Average undershoot (%)", ringErrorResult.averagePercentUndershootError),
-                                                     ("Instructions overshot", hexoskinErrorResult.overshootInstructions),
-                                                     ("Instructions overshot (%)", hexoskinErrorResult.percentOvershootInstructions),
+                                                     ("Instructions overshot", ringErrorResult.overshootInstructions),
+                                                     ("Instructions overshot (%)", ringErrorResult.percentOvershootInstructions),
                                                      ("Average overshoot (s)", ringErrorResult.averageOvershootError),
                                                      ("Average overshoot (%)", ringErrorResult.averagePercentOvershootError)]));
         }
@@ -478,7 +512,7 @@ class DataAnalyzingViewController: MRRViewController {
             if hexoskinDataBase.count == 0 {
                 print("ERROR: Hexoskin data is empty.");
             } else {
-                for action in hexoskinDataReport {
+                for action in hexoskinDataBase {
                     print("\(counter). \(action.action) for \(action.duration) s start: \(action.start) end: \(action.end)");
                     counter += 1;
                 }
@@ -492,7 +526,7 @@ class DataAnalyzingViewController: MRRViewController {
             if ringDataBase.count == 0 {
                 print("ERROR: Ring data is empty.");
             } else {
-                for action in ringDataReport {
+                for action in ringDataBase {
                     print("\(counter). \(action.action) for \(action.duration) s start: \(action.start) end: \(action.end)");
                     counter += 1;
                 }
@@ -678,7 +712,7 @@ class DataAnalyzingViewController: MRRViewController {
         
     }
     
-    func calculatePercentageOfInstructionsCompleted(exerciseActions: [breathingAction], userActions: [breathingAction], groupings: [(Int, [Int])]) -> Double {
+    func calculatePercentageOfInstructionsCompleted(exerciseActions: [breathingAction], userActions: [breathingAction], groupings: [(Int, [Int])], markExercise: Bool) -> Double {
         
         // variable that stores the number of completed actions
         var completed: Int = 0;
@@ -701,11 +735,15 @@ class DataAnalyzingViewController: MRRViewController {
                 // the action is satisfied - increment the completed counter
                 completed += 1;
                 
-                // mark the target action as completed
-                exercise.actions[index].status = Strings.completed;
+                if markExercise == true {
+                    // mark the target action as completed
+                    exercise.actions[index].status = Strings.completed;
+                }
             } else {
-                // the longest action does not satisfy the target action - mark target action as not completed
-                exercise.actions[index].status = Strings.notCompleted;
+                if markExercise == true {
+                    // the longest action does not satisfy the target action - mark target action as not completed
+                    exercise.actions[index].status = Strings.notCompleted;
+                }
             }
             
         }
