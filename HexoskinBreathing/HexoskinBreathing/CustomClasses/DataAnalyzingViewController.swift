@@ -291,9 +291,13 @@ class DataAnalyzingViewController: MRRViewController {
                     // this is the first valid action -- do not store anything in groupings
                     // but add this index to the tempGroup
                     tempGroup.append(index);
-                    lastValidActionIndex = 0;
                     
-                    if (isEven(number: groupNumber) && hexoskinDataBase[index].action == Strings.exhale) || (!isEven(number: groupNumber) && hexoskinDataBase[index].action == Strings.inhale) {
+                    if hexoskinDataBase[index].action != Strings.exhale {
+                        lastValidActionIndex = 0; 
+                    }
+                    
+                    if !isEven(number: groupNumber) && hexoskinDataBase[index].action == Strings.inhale {
+                        
                         // The current group is empty and the group number needs to be incremented
                         groupings.append((groupNumber, []));
                         groupNumber += 1;
@@ -311,12 +315,22 @@ class DataAnalyzingViewController: MRRViewController {
                 }
                 
             } else {
-                // not a valid action - add the next two (if there are two) to the temp group
-                // we add the next one too because
-                tempGroup.append(index);
-                if index + 1 < hexoskinDataBase.count {
-                    tempGroup.append(index+1);
-                    index += 1;
+                // not a valid action 
+                // if this is the first action, and is the opposite/wrong action, add 
+                // to the temp group and don't increment the group because we are just 
+                // skipping it. 
+                if lastValidActionIndex == -1 && hexoskinDataBase[index].action == Strings.exhale {
+                    tempGroup.append(index);
+                    
+                } else {
+                    // add the next two (if there are two) to the temp group
+                    // we add the next one too because we keep looking for the same instruction so 
+                    // we can definitely skip the next instruction which is the opposite
+                    tempGroup.append(index);
+                    if index + 1 < hexoskinDataBase.count {
+                        tempGroup.append(index+1);
+                        index += 1;
+                    }
                 }
             }
             
@@ -1121,12 +1135,12 @@ class DataAnalyzingViewController: MRRViewController {
         // alternate instruction
         if hexoskinData.count != 0 {
             let firstAction = hexoskinData[0];
-            if firstAction.start > 0 {
+            if firstAction.start > -2 {
                 // prepend the alternate instruction before it
                 if firstAction.action == Strings.inhale {
-                    hexoskinData.insert(breathingAction(action: Strings.exhale, duration: firstAction.start, start: 0, end: firstAction.start), at: 0)
+                    hexoskinData.insert(breathingAction(action: Strings.exhale, duration: firstAction.start+2, start: -2, end: firstAction.start), at: 0)
                 } else if firstAction.action == Strings.exhale {
-                    hexoskinData.insert(breathingAction(action: Strings.inhale, duration: firstAction.start, start: 0, end: firstAction.start), at: 0)
+                    hexoskinData.insert(breathingAction(action: Strings.inhale, duration: firstAction.start+2, start: -2, end: firstAction.start), at: 0)
                 }
             }
         }

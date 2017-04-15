@@ -15,6 +15,7 @@ class BreathingExercise: NSObject {
     var actions: [breathingAction]!
     var exerciseDuration: Double!
     var exerciseSets: [(Double, Int)]!;
+    var buffer: Bool!
     
     override init() {
         actions = []; 
@@ -40,10 +41,17 @@ class BreathingExercise: NSObject {
     }
     
     func addExerciseSets(exerciseSets: [(Double, Int)]) {
+        
+        // add a start buffer instruction
+//        actions.append(breathingAction(action: Strings.exhale, duration: 3, start: 0, end: 3, buffer: true));
+        
         for set in exerciseSets {
             addExerciseSet(duration: set.0, cycles: set.1);
         }
         actionCount = actions.count;
+        
+        // add an end buffer instruction
+//        actions.append(breathingAction(action: Strings.inhale, duration: 3, start: actions[actions.count-1].end, end: actions[actions.count-1].end + 3, buffer: true));
     }
     
     // add exercise set to the existing exercise

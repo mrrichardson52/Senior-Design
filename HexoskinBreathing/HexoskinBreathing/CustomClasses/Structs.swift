@@ -15,6 +15,7 @@ struct breathingAction {
     var end: Double = 0;
     var status: String = "";
     var metByInstruction: Int = -1;
+    var buffer: Bool = false;
     
     init(action: String, duration: Double, start: Double, end: Double) {
         self.action = action;
@@ -23,6 +24,16 @@ struct breathingAction {
         self.end = end;
         self.status = Strings.ignored;
         self.metByInstruction = -1;
+    }
+    
+    init(action: String, duration: Double, start: Double, end: Double, buffer: Bool) {
+        self.action = action;
+        self.duration = duration;
+        self.start = start;
+        self.end = end;
+        self.status = Strings.ignored;
+        self.metByInstruction = -1;
+        self.buffer = buffer;
     }
     
     init(action: String, duration: Double, start: Double, end: Double, status: String) {
@@ -73,7 +84,7 @@ struct ActionCheckingHelper {
         lastCandidateActionStart = 0.0;
         deviationStartTime = 0.0;
         deviationStartAngle = 0.0;
-        deviationThresholdAngle = 8;
+        deviationThresholdAngle = 25;
         firstActionIsExhale = false;
     }
     
