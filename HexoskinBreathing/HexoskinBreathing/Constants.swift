@@ -65,7 +65,7 @@ struct Constants {
     static let resultsViewDurationThreshold = 2.0;
     static let breathLengthAllowableError = 2.0;
     static let startBreathSearchWindow = 2.0;
-    static let exerciseStartTimeAdjustmentForRing = 1.0;
+    static let exerciseStartTimeAdjustmentForRing = 0.0;
 }
 
 struct Strings {

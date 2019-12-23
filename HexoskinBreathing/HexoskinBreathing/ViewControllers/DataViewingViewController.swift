@@ -8,8 +8,9 @@
 
 import UIKit
 
-class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
+class DataViewingViewController: MRRViewController, UIScrollViewDelegate, UITableViewDelegate, UITableViewDataSource {
     
+    @IBOutlet weak var tableView: UITableView!
     // colors for ui elements
     let sectionTitleColor: UIColor = .black; 
     
@@ -27,6 +28,18 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
     @IBOutlet weak var inhaleIndicator: UILabel!
     @IBOutlet weak var exhaleIndicator: UILabel!
     @IBOutlet weak var noDataIndicator: UILabel!
+    
+    // statistics views
+//    @IBOutlet weak var instructionsCompletedTitleLabel: UILabel!
+//    @IBOutlet weak var errorTitleLabel: UILabel!
+//    @IBOutlet weak var instructionsCompletedLabel: UILabel!
+//    @IBOutlet weak var errorLabel: UILabel!
+//    @IBOutlet weak var errorContainer: UIView!
+//    @IBOutlet weak var instructionsCompletedContainer: UIView!
+    
+    // stats
+    var percentInstructionsCompleted: Double!
+    var percentErrorPerInstruction: Double!
     
     var caratLabels: [UILabel]!
 
@@ -53,6 +66,9 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
     
     // original exercise duration
     var exerciseDuration: Double = 0;
+    
+    // data used to load up the tableview
+    var dataToBeViewed: [(String, [(String, Double)])] = []; 
     
     override func viewDidLoad() {
         super.viewDidLoad()        
@@ -82,6 +98,13 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         scrollParentView.backgroundColor = Constants.backgroundColor;
         scrollView.delegate = self;
         
+        // set up the tableview
+        tableView.layer.borderColor = UIColor.black.cgColor;
+        tableView.layer.borderWidth = 3;
+        tableView.layer.cornerRadius = 8;
+        tableView.dataSource = self;
+        tableView.delegate = self;
+        tableView.reloadData(); 
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -120,57 +143,6 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         scrollView.contentSize = CGSize(width: totalDisplayedPixels, height: Double(scrollParentView.frame.height));
         
     }
-    
-    func equalizeDataSources() {
-        
-        // verify that the ringData array is not empty
-        if displayRingData && ringData.count == 0 {
-            ringData.append(breathingAction(action: Strings.notAnAction, duration: 0.0, start: 0.0, end: 0.0));
-        }
-        
-        // verify that the hexData array is not empty
-        if displayHexData && hexoskinData.count == 0 {
-            hexoskinData.append(breathingAction(action: Strings.notAnAction, duration: 0.0, start: 0.0, end: 0.0));
-        }
-        
-        // grab the earliest start time and latest end time
-        let earliestStart: Double!
-        let latestEnding: Double!
-        if displayHexData && displayRingData {
-            earliestStart = min(exerciseData[0].start, hexoskinData[0].start, ringData[0].start);
-            latestEnding = max(exerciseData[exerciseData.count-1].end, hexoskinData[hexoskinData.count-1].end, ringData[ringData.count-1].end);
-        } else if displayRingData {
-            earliestStart = min(exerciseData[0].start, ringData[0].start);
-            latestEnding = max(exerciseData[exerciseData.count-1].end, ringData[ringData.count-1].end);
-        } else {
-            earliestStart = min(exerciseData[0].start, hexoskinData[0].start);
-            latestEnding = max(exerciseData[exerciseData.count-1].end, hexoskinData[hexoskinData.count-1].end);
-        }
-        
-        // check if the data source has a beginning equal to that of the earliest start.
-        // if not, add a "not an action" action to the beginning of it.
-        if exerciseData[0].start != earliestStart {
-            exerciseData.insert(breathingAction(action: Strings.notAnAction, duration: exerciseData[0].start - earliestStart, start: earliestStart, end: exerciseData[0].start), at: 0);
-        }
-        if displayHexData && hexoskinData[0].start != earliestStart {
-            hexoskinData.insert(breathingAction(action: Strings.notAnAction, duration: hexoskinData[0].start - earliestStart, start: earliestStart, end: hexoskinData[0].start), at: 0);
-        }
-        if displayRingData && ringData[0].start != earliestStart {
-            ringData.insert(breathingAction(action: Strings.notAnAction, duration: ringData[0].start - earliestStart, start: earliestStart, end: ringData[0].start), at: 0);
-        }
-        
-        // do the similar thing for the endings
-        if exerciseData[exerciseData.count-1].end != latestEnding {
-            exerciseData.append(breathingAction(action: Strings.notAnAction, duration: latestEnding - exerciseData[exerciseData.count-1].end, start: exerciseData[exerciseData.count-1].end, end: latestEnding));
-        }
-        if displayHexData && hexoskinData[hexoskinData.count-1].end != latestEnding {
-            hexoskinData.append(breathingAction(action: Strings.notAnAction, duration: latestEnding - hexoskinData[hexoskinData.count-1].end, start: hexoskinData[hexoskinData.count-1].end, end: latestEnding));
-        }
-        if displayRingData && ringData[ringData.count-1].end != latestEnding {
-            ringData.append(breathingAction(action: Strings.notAnAction, duration: latestEnding - ringData[ringData.count-1].end, start: ringData[ringData.count-1].end, end: latestEnding));
-        }
-        
-    }
 
     func addViewsForDataSource(actions: [breathingAction], section: Int, title: String) {
         
@@ -180,12 +152,12 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         titleLabel.text = title;
         titleLabel.textAlignment = .center;
         titleLabel.textColor = sectionTitleColor;
-        titleLabel.font = titleLabel.font.withSize(25);
+        titleLabel.font = titleLabel.font.withSize(20);
         scrollParentView.addSubview(titleLabel);
         
         // constrain the title
         let titleTopConstraint = NSLayoutConstraint(item: titleLabel, attribute: .top, relatedBy: .equal, toItem: sectionViews[section], attribute: .top, multiplier: 1.0, constant: 0);
-        let titleHeightConstraint = NSLayoutConstraint(item: titleLabel, attribute: .height, relatedBy: .equal, toItem: sectionViews[section], attribute: .height, multiplier: 0.4, constant: 0);
+        let titleHeightConstraint = NSLayoutConstraint(item: titleLabel, attribute: .height, relatedBy: .equal, toItem: sectionViews[section], attribute: .height, multiplier: 0.3, constant: 0);
         let titleWidthConstraint = NSLayoutConstraint(item: titleLabel, attribute: .width, relatedBy: .equal, toItem: scrollParentView, attribute: .width, multiplier: 1.0, constant: 0);
         let titleHorizontalConstraint = NSLayoutConstraint(item: titleLabel, attribute: .centerX, relatedBy: .equal, toItem: scrollParentView, attribute: .centerX, multiplier: 1.0, constant: 0);
         scrollParentView.addConstraints([titleTopConstraint, titleHorizontalConstraint, titleWidthConstraint, titleHeightConstraint]);
@@ -210,7 +182,12 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
             } else {
                 position = ActionPosition.middle;
             }
-            let view = actionResultView(action: action, baseDuration: baseDuration, position: position);
+            
+            var showTimestamps: Bool = false;
+            if section == 0 {
+                showTimestamps = true;
+            }
+            let view = actionResultView(action: action, baseDuration: baseDuration, position: position, showTimestamps: showTimestamps);
             sectionViews[section].addSubview(view);
             
             // constrain the view
@@ -332,4 +309,40 @@ class DataViewingViewController: MRRViewController, UIScrollViewDelegate {
         }
     }
     
+    // MARK: Table View Functions
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "dataViewingCell") as! DataViewingTableViewCell;
+        cell.contentView.backgroundColor = .white;
+        let sectionValues = dataToBeViewed[indexPath.section].1;
+        cell.descriptionLabel.text = sectionValues[indexPath.row].0;
+        
+        // format the value label
+        let value = sectionValues[indexPath.row].1;
+        var formattedString = "";
+        if abs(value) < 1 {
+            formattedString = String.init(format: "%.3f", value);
+        } else if abs(value) < 10 {
+            formattedString = String.init(format: "%.2f", value);
+        } else if abs(value) < 100 {
+            formattedString = String.init(format: "%.1f", value);
+        } else {
+            formattedString = String.init(format: "%.0f", value);
+        }
+        
+        cell.valueLabel.text = formattedString;
+        return cell;
+    }
+    
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return dataToBeViewed.count;
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return dataToBeViewed[section].1.count;
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return dataToBeViewed[section].0;
+    }
 }

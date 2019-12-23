@@ -21,7 +21,7 @@ class actionResultView: UIView {
     var minimumBreathPercentageForLabel: Double = 0.48;
     
     // customizing values
-    var fontSize: CGFloat! = 30;
+    var fontSize: CGFloat! = 25;
     var labelHeight: CGFloat! = 50;
     var indicatorViewBuffer: CGFloat! = 3;
     var indicatorViewHeight: CGFloat! = 5;
@@ -36,7 +36,7 @@ class actionResultView: UIView {
     var tickViewLabelOffset: CGFloat = 3;
     
 
-    init(action: breathingAction, baseDuration: Double, position: String) {
+    init(action: breathingAction, baseDuration: Double, position: String, showTimestamps: Bool) {
         super.init(frame: .zero);
         self.translatesAutoresizingMaskIntoConstraints = false;
         
@@ -115,16 +115,17 @@ class actionResultView: UIView {
         self.addConstraints(constraints);
         
         // add a timerstamp label here if this is the exercise data
-        if action.status != Strings.ignored {
-            // this action belongs to the exercise
-            // create a view and a label. 
-            // The view is a vertical tick that points to the spot in time
-            // The label displays the time
+        //        if action.status != Strings.ignored {
+        // this action belongs to the exercise
+        // create a view and a label.
+        // The view is a vertical tick that points to the spot in time
+        // The label displays the time
+        if showTimestamps == true {
             let tickView = UIView();
             tickView.translatesAutoresizingMaskIntoConstraints = false;
             tickView.backgroundColor = .black;
             self.addSubview(tickView);
-            var constraints: [NSLayoutConstraint] = [];
+            constraints = [];
             constraints.append(NSLayoutConstraint(item: tickView, attribute: .leading, relatedBy: .equal, toItem: self, attribute: .leading, multiplier: 1.0, constant: 0));
             constraints.append(NSLayoutConstraint(item: tickView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: tickWidth));
             constraints.append(NSLayoutConstraint(item: tickView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: tickHeight));
@@ -147,7 +148,7 @@ class actionResultView: UIView {
             }
             constraints.append(NSLayoutConstraint(item: timeLabel, attribute: .top, relatedBy: .equal, toItem: tickView, attribute: .bottom, multiplier: 1.0, constant: tickViewLabelOffset));
             
-            // if this is the last view, add another time label and tick for the end 
+            // if this is the last view, add another time label and tick for the end
             if position == ActionPosition.last {
                 let endTickView = UIView()
                 endTickView.translatesAutoresizingMaskIntoConstraints = false;
@@ -176,6 +177,7 @@ class actionResultView: UIView {
             self.addConstraints(constraints);
             
         }
+//        }
     }
     
     required init?(coder aDecoder: NSCoder) {

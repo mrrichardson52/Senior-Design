@@ -8,10 +8,21 @@
 
 import Foundation
 
-// CHANGE TO ENUM LATER WHEN YOU HAVE WIFI
 
-struct ActionPosition {
-    static let first: String = "actionPositionFirst";
-    static let middle: String = "actionPositionMiddle";
-    static let last: String = "actionPositionLast";
+enum ExerciseState {
+    case notStarted;
+    case starting;
+    case started;
+    case ended;
+}
+
+enum ActionCheckingState {
+    case none;
+    case checkingFirstAction;
+    case currentActionInhale;
+    case currentActionExhale;
+    case lastActionPause;
+    case deviatingAfterInhale;
+    case deviatingAfterExhale;
+    case deviatingAfterPause;
 }

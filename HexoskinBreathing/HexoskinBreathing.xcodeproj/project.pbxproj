@@ -55,6 +55,7 @@
 		34C2FC191E8B4C1B00CDFE7D /* whiteQuestionMark.png in Resources */ = {isa = PBXBuildFile; fileRef = 34C2FC161E8B4C1B00CDFE7D /* whiteQuestionMark.png */; };
 		34CD11C21E382C3400C838F5 /* JSONHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CD11C11E382C3400C838F5 /* JSONHelper.swift */; };
 		34CD11C41E3A6E8800C838F5 /* DataResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34CD11C31E3A6E8800C838F5 /* DataResponse.swift */; };
+		34D4A8C81EA007AC00E0FA7E /* DataViewingTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D4A8C71EA007AC00E0FA7E /* DataViewingTableViewCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -109,6 +110,7 @@
 		34C2FC161E8B4C1B00CDFE7D /* whiteQuestionMark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = whiteQuestionMark.png; sourceTree = "<group>"; };
 		34CD11C11E382C3400C838F5 /* JSONHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONHelper.swift; sourceTree = "<group>"; };
 		34CD11C31E3A6E8800C838F5 /* DataResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataResponse.swift; sourceTree = "<group>"; };
+		34D4A8C71EA007AC00E0FA7E /* DataViewingTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataViewingTableViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -231,6 +233,7 @@
 				3456CFB31E84946D0005B806 /* Enums.swift */,
 				34C2FC101E8A207200CDFE7D /* CustomHeaderCell.swift */,
 				34C0A4821E8DDFEB00A0F833 /* DataAnalyzingViewController.swift */,
+				34D4A8C71EA007AC00E0FA7E /* DataViewingTableViewCell.swift */,
 			);
 			path = CustomClasses;
 			sourceTree = "<group>";
@@ -346,6 +349,7 @@
 				3456CFAE1E836ECA0005B806 /* actionResultView.swift in Sources */,
 				3475021F1DCFFDB8002E6465 /* BreathingExercise.swift in Sources */,
 				34C2FC111E8A207200CDFE7D /* CustomHeaderCell.swift in Sources */,
+				34D4A8C81EA007AC00E0FA7E /* DataViewingTableViewCell.swift in Sources */,
 				3456CFB21E84943D0005B806 /* Structs.swift in Sources */,
 				3456CFAC1E8358030005B806 /* Extensions.swift in Sources */,
 				34BE1C1C1E803B3100878574 /* ExerciseDesignerViewController.swift in Sources */,
